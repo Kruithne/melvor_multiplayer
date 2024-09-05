@@ -1,7 +1,7 @@
 import { caution, serve, validate_req_json, HTTP_STATUS_CODE } from 'spooder';
 import { format } from 'node:util';
-import { db_execute, db_get_single } from './db';
-import { db_row_test_table } from './db/types/test_table';
+import { db_get_single, db_execute, db_insert } from './db';
+import { db_row_clients } from './db/types/clients';
 
 const server = serve(Number(process.env.SERVER_PORT));
 
@@ -16,11 +16,54 @@ function default_handler(status_code: number): Response {
 	return new Response(HTTP_STATUS_CODE[status_code] as string, { status: status_code });
 }
 
-// test route
-server.route('/test', async (req, url) => {
-	const row = await db_get_single('SELECT * FROM `test_table` LIMIT 1') as db_row_test_table;
-	return row;
-}, 'GET');
+function is_valid_uuid(uuid: string): boolean {
+	return uuid.length === 36 && /^[0-9a-f-]+$/.test(uuid);
+}
+
+async function generate_session_token(client_id: number): Promise<string> {
+	await db_execute('DELETE FROM `client_sessions` WHERE `client_id` = ?', [client_id]);
+
+	const session_token = crypto.randomUUID();
+	await db_execute('INSERT INTO `client_sessions` (`session_token`, `client_id`) VALUES(?, ?)', [session_token, client_id]);
+
+	return session_token;
+}
+
+server.route('/api/authenticate', validate_req_json(async (req, url, json) => {
+	const client_identifier = json.client_identifier;
+	const client_key = json.client_key;
+
+	if (typeof client_identifier !== 'string' || typeof client_key !== 'string')
+		return 400; // Bad Request
+
+	if (!is_valid_uuid(client_identifier) || !is_valid_uuid(client_key))
+		return 400; // Bad Request
+
+	const client_row = await db_get_single('SELECT `id`, `client_key` FROM `clients` WHERE `client_identifier` = ? LIMIT 1', [client_identifier]) as db_row_clients;
+	if (client_row === null || client_row.client_key !== client_key)
+		return 401; // Unauthorized
+
+	const session_token = await generate_session_token(client_row.id);
+	log('client', 'authorized client session for {%s}', client_identifier);
+
+	return { session_token };
+}), 'POST');
+
+server.route('/api/register', validate_req_json(async (req, url, json) => {
+	const client_key = json.client_key;
+
+	if (typeof client_key !== 'string' || !is_valid_uuid(client_key))
+		return 400; // Bad Request
+
+	const client_identifier = crypto.randomUUID();
+	const client_id = await db_insert('INSERT INTO `clients` (`client_identifier`, `client_key`) VALUES(?, ?)', [client_identifier, client_key]);
+
+	if (client_id === -1)
+		return 500;
+
+	const session_token = await generate_session_token(client_id);
+	return { session_token, client_identifier };
+}), 'POST');
 
 // caution on slow requests
 server.on_slow_request((req, request_time, url) => {

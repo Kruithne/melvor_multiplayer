@@ -36,3 +36,15 @@ export async function db_get_single(sql: string, values: any = []): Promise<RowD
 	const rows = await db_get_all(sql, values);
 	return rows[0] ?? null;
 }
+
+export async function db_insert(sql: string, values: any = []): Promise<number> {
+	try {
+		const [result] = await db_pool.query(sql, values);
+
+		// @ts-ignore result is ResultSetHeader, but ts doesn't like that
+		return result?.insertId ?? -1;
+	} catch (error) {
+		caution('sql: db_insert failed', { error });
+		return -1;
+	}
+};
