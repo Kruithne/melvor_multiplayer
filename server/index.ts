@@ -1,5 +1,7 @@
 import { caution, serve, HTTP_STATUS_CODE } from 'spooder';
 import { format } from 'node:util';
+import { db_execute, db_get_single } from './db';
+import { db_row_test_table } from './db/types/test_table';
 
 const server = serve(Number(process.env.SERVER_PORT));
 
@@ -15,8 +17,15 @@ function default_handler(status_code: number): Response {
 }
 
 // test route
-server.route('/test', (req, url) => {
+server.route('/test', async (req, url) => {
 	log('dev', 'test route is {working}!');
+
+	// db testing
+	await db_execute('INSERT INTO `test_table` (text) VALUES(?)', ['Hello, database!']);
+	
+	const row = await db_get_single('SELECT * FROM `test_table` LIMIT 1') as db_row_test_table;
+	console.log(row);
+
 	return 200;
 });
 
