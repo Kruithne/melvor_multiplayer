@@ -20,6 +20,7 @@
 		}
 	},
 	"dependencies": {
+		"mysql2": "^3.11.0",
 		"spooder": "^4.4.8"
 	},
 	"devDependencies": {
