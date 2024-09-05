@@ -1,0 +1,6 @@
+{
+  "dependencies": { "spooder": "^4.4.8" },
+  "devDependencies": {
+    "bun-types": "^1.1.26"
+  }
+}
