@@ -17,8 +17,11 @@ export async function setup(ctx) {
 	//ui.create({ $template: '#template-kru-archaeology-container', state	}, document.body);
 	//ui.create({ $template: '#template-kru-archaeology-bank-options', state }, document.body);
 
-	ctx.onCharacterLoaded(() => {
+	ctx.onCharacterLoaded(async () => {
 		console.log('melvor_multiplayer: onCharacterLoaded');
+
+		const test = await fetch('https://melvormultiplayer.net/test');
+		console.log(test);
 	});
 	
 	ctx.onInterfaceReady(() => {
