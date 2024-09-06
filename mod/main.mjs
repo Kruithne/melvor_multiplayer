@@ -59,15 +59,12 @@ async function patch_localization(ctx) {
 }
 
 async function api_get(endpoint) {
-	const url = SERVER_HOST + endpoint;
-	const res = await fetch(url, {
+	const res = await fetch(SERVER_HOST + endpoint, {
 		method: 'GET',
 		headers: {
 			'X-Session-Token': session_token ?? undefined
 		}
 	});
-
-	log('[%d] GET %s', res.status, url);
 
 	if (res.status === 200)
 		return res.json();
@@ -76,9 +73,7 @@ async function api_get(endpoint) {
 }
 
 async function api_post(endpoint, payload) {
-	const url = SERVER_HOST + endpoint;
-
-	const res = await fetch(url, {
+	const res = await fetch(SERVER_HOST + endpoint, {
 		method: 'POST',
 		body: JSON.stringify(payload),
 		headers: {
@@ -86,8 +81,6 @@ async function api_post(endpoint, payload) {
 			'X-Session-Token': session_token ?? undefined
 		}
 	});
-
-	log('[%d] POST %s', res.status, url);
 
 	if (res.status === 200)
 		return res.json();
