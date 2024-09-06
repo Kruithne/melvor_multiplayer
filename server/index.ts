@@ -20,8 +20,7 @@ type SessionRequestHandler = (req: Request, url: URL, client_id: number, json?: 
 const server = serve(Number(process.env.SERVER_PORT));
 
 // maximum cache life is X * 2, minimum is X.
-//const CACHE_SESSION_LIFETIME = 1000 * 60 * 60;
-const CACHE_SESSION_LIFETIME = 10000; // testing
+const CACHE_SESSION_LIFETIME = 1000 * 60 * 60;
 
 type CachedSession = { client_id: number, last_access: number };
 const client_session_cache = new Map<string, CachedSession>();
@@ -55,13 +54,10 @@ async function get_session_client_id(session_token: unknown): Promise<number> {
 		return -1;
 
 	const cached_session = client_session_cache.get(session_token);
-	if (cached_session !== undefined) {
-		log('dev', 'cache hit for %s', session_token);
+	if (cached_session !== undefined) {		
 		cached_session.last_access = Date.now();
 		return cached_session.client_id;
 	}
-
-	log('dev', 'cache miss for %s', session_token);
 
 	const session_row = await db_get_single('SELECT `client_id` FROM `client_sessions` WHERE `session_token` = ?', [session_token]) as db_row_client_sessions;
 	const client_id = session_row?.client_id ?? -1;
