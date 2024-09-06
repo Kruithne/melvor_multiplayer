@@ -153,10 +153,6 @@ export async function setup(ctx) {
 
 	ctx.onCharacterLoaded(() => {
 		start_mutliplayer_session(ctx);
-
-		setInterval(async () => {
-			console.log(await api_get('/api/test'));
-		}, 2500);
 	});
 	
 	ctx.onInterfaceReady(() => {
