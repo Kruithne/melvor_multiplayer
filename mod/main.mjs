@@ -87,7 +87,7 @@ function set_session_token(token) {
 	log('client session authenticated (%s)', token);
 }
 
-async function start_mutliplayer_session() {
+async function start_mutliplayer_session(ctx) {
 	const client_identifier = ctx.characterStorage.getItem('client_identifier');
 	const client_key = ctx.characterStorage.getItem('client_key');
 
@@ -131,8 +131,8 @@ export async function setup(ctx) {
 	//ui.create({ $template: '#template-kru-archaeology-container', state	}, document.body);
 	//ui.create({ $template: '#template-kru-archaeology-bank-options', state }, document.body);
 
-	ctx.onCharacterLoaded(async () => {
-		await start_mutliplayer_session(ctx);
+	ctx.onCharacterLoaded(() => {
+		start_mutliplayer_session(ctx);
 	});
 	
 	ctx.onInterfaceReady(() => {
