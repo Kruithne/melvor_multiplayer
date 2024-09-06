@@ -1,3 +1,8 @@
+const SERVER_HOST = 'https://melvormultiplayer.net';
+const LOG_PREFIX = '[multiplayer] ';
+
+let session_token = null;
+
 const ctx = mod.getContext(import.meta);
 const state = ui.createStore({
 	// todo
@@ -9,6 +14,14 @@ function notify_error(lang_id, icon) {
 
 function notify(lang_id, theme = 'danger', icon = 'assets/archaeology.svg') {
 	notifyPlayer({ media: ctx.getResourceUrl(icon) }, getLangString(lang_id), theme);
+}
+
+function log(message, ...params) {
+	console.log(LOG_PREFIX + message, ...params);
+}
+
+function error(message, ...params) {
+	console.error(LOG_PREFIX + message, ...params);
 }
 
 /** Patches the global fetchLanguageJSON() fn so we can load and inject our own
@@ -25,7 +38,7 @@ async function patch_localization(ctx) {
 			for (const [key, value] of Object.entries(patch_lang))
 				loadedLangJson[key] = value;
 		} catch (e) {
-			console.error('Failed to patch localization for %s (%s)', fetch_lang, e);
+			error('Failed to patch localization for %s (%s)', fetch_lang, e);
 		}
 	};
 
@@ -39,6 +52,74 @@ async function patch_localization(ctx) {
 		await fetch_mod_localization(setLang);
 }
 
+async function api_get(endpoint) {
+	const url = SERVER_HOST + endpoint;
+	const res = await fetch(url, { method: 'GET' });
+
+	log('[%d] GET %s', res.status, url);
+
+	if (res.status === 200)
+		return res.json();
+
+	return null;
+}
+
+async function api_post(endpoint, payload) {
+	const url = SERVER_HOST + endpoint;
+	const res = fetch(url, {
+		method: 'POST',
+		body: JSON.stringify(payload),
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	});
+
+	log('[%d] POST %s', res.status, url);
+
+	if (res.status === 200)
+		return res.json();
+
+	return null;
+}
+
+async function start_mutliplayer_session() {
+	const client_identifier = ctx.characterStorage.getItem('client_identifier');
+	const client_key = ctx.characterStorage.getItem('client_key');
+
+	if (client_identifier !== undefined && client_key !== undefined) {
+		log('existing client identity found, authenticating session...');
+		const auth_res = await api_post('/api/authenticate', {
+			client_identifier,
+			client_key
+		});
+
+		if (auth_res !== null) {
+			session_token = auth_res.session_token;
+			log('client session authenticated (%s)', session_token);
+		} else {
+			// todo: implement a fallback to allow players to reconnect
+			error('failed to authenticate client, multiplayer features not available');
+		}
+	} else {
+		log('missing client identity, registering new identity...');
+		const client_key = crypto.randomUUID();
+
+		const register_res = await api_post('/api/register', {
+			client_key
+		});
+
+		if (register_res !== null) {
+			session_token = register_res.session_token;
+
+			ctx.characterStorage.setItem('client_key', client_key);
+			ctx.characterStorage.setItem('client_identifier', register_res.client_identifier);
+		} else {
+			// todo: implement a fallback to allow players to reconnect
+			error('failed to register client, multiplayer features not available');
+		}
+	}
+}
+
 export async function setup(ctx) {
 	await patch_localization(ctx);
 	await ctx.loadTemplates('ui/templates.html');
@@ -47,10 +128,7 @@ export async function setup(ctx) {
 	//ui.create({ $template: '#template-kru-archaeology-bank-options', state }, document.body);
 
 	ctx.onCharacterLoaded(async () => {
-		console.log('melvor_multiplayer: onCharacterLoaded');
-
-		const test = await fetch('https://melvormultiplayer.net/test');
-		console.log(test);
+		await start_mutliplayer_session(ctx);
 	});
 	
 	ctx.onInterfaceReady(() => {
