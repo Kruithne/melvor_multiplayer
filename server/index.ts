@@ -148,7 +148,7 @@ server.default((req, status_code) => default_handler(status_code));
 // source control webhook
 if (typeof process.env.GH_WEBHOOK_SECRET === 'string') {
 	server.webhook(process.env.GH_WEBHOOK_SECRET, '/internal/webhook', () => {
-		setImmediate(() => server.stop(true));
+		setImmediate(() => server.stop(false));
 		return 200;
 	});
 } else {
