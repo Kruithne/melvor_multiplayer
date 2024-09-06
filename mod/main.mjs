@@ -1,6 +1,12 @@
 const SERVER_HOST = 'https://melvormultiplayer.net';
 const LOG_PREFIX = '[multiplayer] ';
 
+const IS_DEV_MODE = true;
+const DEV_CHARACTER_STORAGE = {
+	client_identifier: '8adeec2c-2cb6-444d-8acd-b06b45041be5',
+	client_key: '3796db67-a7da-4be8-9828-2483db800d5f'
+};
+
 let session_token = null;
 
 const ctx = mod.getContext(import.meta);
@@ -82,14 +88,28 @@ async function api_post(endpoint, payload) {
 	return null;
 }
 
+function get_character_storage_item(key) {
+	if (IS_DEV_MODE)
+		return DEV_CHARACTER_STORAGE[key];
+
+	return ctx.characterStorage.getItem(key);
+}
+
+function set_character_storage_item(key, value) {
+	if (IS_DEV_MODE)
+		DEV_CHARACTER_STORAGE[key] = value;
+	else
+		ctx.characterStorage.setItem(key, value);
+}
+
 function set_session_token(token) {
 	session_token = token;
 	log('client session authenticated (%s)', token);
 }
 
 async function start_mutliplayer_session(ctx) {
-	const client_identifier = ctx.characterStorage.getItem('client_identifier');
-	const client_key = ctx.characterStorage.getItem('client_key');
+	const client_identifier = get_character_storage_item('client_identifier');
+	const client_key = get_character_storage_item('client_key');
 
 	if (client_identifier !== undefined && client_key !== undefined) {
 		log('existing client identity found, authenticating session...');
@@ -113,8 +133,8 @@ async function start_mutliplayer_session(ctx) {
 		});
 
 		if (register_res !== null) {
-			ctx.characterStorage.setItem('client_key', client_key);
-			ctx.characterStorage.setItem('client_identifier', register_res.client_identifier);
+			set_character_storage_item('client_key', client_key);
+			set_character_storage_item('client_identifier', register_res.client_identifier);
 
 			set_session_token(register_res.session_token);
 		} else {
