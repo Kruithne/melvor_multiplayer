@@ -3,9 +3,9 @@ const LOG_PREFIX = '[multiplayer] ';
 
 const IS_DEV_MODE = true;
 const DEV_CHARACTER_STORAGE = {
-	client_identifier: '8adeec2c-2cb6-444d-8acd-b06b45041be5',
-	client_key: '3796db67-a7da-4be8-9828-2483db800d5f',
-	friend_code: ''
+	client_identifier: '04fcad4c-7df5-43c3-a70e-299cd618a0ab',
+	client_key: 'f88596d3-e2b2-4a50-9754-6b05f1a15bac',
+	friend_code: '689-388-847'
 };
 
 let session_token = null;
