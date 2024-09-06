@@ -82,6 +82,11 @@ async function api_post(endpoint, payload) {
 	return null;
 }
 
+function set_session_token(token) {
+	session_token = token;
+	log('client session authenticated (%s)', token);
+}
+
 async function start_mutliplayer_session() {
 	const client_identifier = ctx.characterStorage.getItem('client_identifier');
 	const client_key = ctx.characterStorage.getItem('client_key');
@@ -94,8 +99,7 @@ async function start_mutliplayer_session() {
 		});
 
 		if (auth_res !== null) {
-			session_token = auth_res.session_token;
-			log('client session authenticated (%s)', session_token);
+			set_session_token(auth_res.session_token);
 		} else {
 			// todo: implement a fallback to allow players to reconnect
 			error('failed to authenticate client, multiplayer features not available');
@@ -109,10 +113,10 @@ async function start_mutliplayer_session() {
 		});
 
 		if (register_res !== null) {
-			session_token = register_res.session_token;
-
 			ctx.characterStorage.setItem('client_key', client_key);
 			ctx.characterStorage.setItem('client_identifier', register_res.client_identifier);
+
+			set_session_token(register_res.session_token);
 		} else {
 			// todo: implement a fallback to allow players to reconnect
 			error('failed to register client, multiplayer features not available');

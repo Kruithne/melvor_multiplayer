@@ -61,6 +61,8 @@ server.route('/api/register', validate_req_json(async (req, url, json) => {
 	if (client_id === -1)
 		return 500;
 
+	log('client', 'registered new client {%d} [{%s}]', client_id, client_identifier);
+
 	const session_token = await generate_session_token(client_id);
 	return { session_token, client_identifier };
 }), 'POST');
