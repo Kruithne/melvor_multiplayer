@@ -89,7 +89,7 @@ function session_post_route(route: string, handler: SessionRequestHandler) {
 	server.route(route, validate_session_request(handler, true), 'POST');
 }
 
-session_get_route('/api/get/test', async (req, url, client_id) => {
+session_get_route('/api/test', async (req, url, client_id) => {
 	return { client_id };
 });
 
