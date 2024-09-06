@@ -66,7 +66,7 @@ async function api_get(endpoint) {
 
 async function api_post(endpoint, payload) {
 	const url = SERVER_HOST + endpoint;
-	const res = fetch(url, {
+	const res = await fetch(url, {
 		method: 'POST',
 		body: JSON.stringify(payload),
 		headers: {
