@@ -63,7 +63,7 @@ async function get_session_client_id(session_token: unknown): Promise<number> {
 
 	log('dev', 'cache miss for %s', session_token);
 
-	const session_row = await db_get_single('SELECT `client_id` FROM `client_sessions` WHERE `client_id` = ?', [session_token]) as db_row_client_sessions;
+	const session_row = await db_get_single('SELECT `client_id` FROM `client_sessions` WHERE `session_token` = ?', [session_token]) as db_row_client_sessions;
 	const client_id = session_row?.client_id ?? -1;
 
 	if (client_id > -1) {
