@@ -4,7 +4,8 @@ const LOG_PREFIX = '[multiplayer] ';
 const IS_DEV_MODE = true;
 const DEV_CHARACTER_STORAGE = {
 	client_identifier: '8adeec2c-2cb6-444d-8acd-b06b45041be5',
-	client_key: '3796db67-a7da-4be8-9828-2483db800d5f'
+	client_key: '3796db67-a7da-4be8-9828-2483db800d5f',
+	friend_code: ''
 };
 
 let session_token = null;
@@ -135,6 +136,7 @@ async function start_mutliplayer_session(ctx) {
 		if (register_res !== null) {
 			set_character_storage_item('client_key', client_key);
 			set_character_storage_item('client_identifier', register_res.client_identifier);
+			set_character_storage_item('friend_code', register_res.friend_code);
 
 			set_session_token(register_res.session_token);
 		} else {

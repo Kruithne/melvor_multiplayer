@@ -1,6 +1,6 @@
 import { caution, serve, validate_req_json, HTTP_STATUS_CODE } from 'spooder';
 import { format } from 'node:util';
-import { db_get_single, db_execute, db_insert } from './db';
+import { db_get_single, db_execute, db_insert, db_count, db_exists } from './db';
 import { db_row_clients } from './db/types/clients';
 import { db_row_client_sessions } from './db/types/client_sessions';
 import type { JsonPrimitive, JsonArray, JsonObject } from 'spooder';
@@ -38,6 +38,21 @@ function default_handler(status_code: number): Response {
 
 function is_valid_uuid(uuid: string): boolean {
 	return uuid.length === 36 && /^[0-9a-f-]+$/.test(uuid);
+}
+
+async function is_friend_code_taken(friend_code: string): Promise<boolean> {
+	return db_exists('SELECT 1 FROM `clients` WHERE `friend_code` = ? LIMIT 1', [friend_code]);
+}
+
+async function generate_friend_code(): Promise<string> {
+	const chunk = () => Math.floor(Math.random() * 900) + 100;
+	const code = () => chunk() + '-' + chunk() + '-' + chunk();
+
+	let generated_code = code();
+	while (await is_friend_code_taken(generated_code))
+		generated_code = code();
+
+	return generated_code;
 }
 
 async function generate_session_token(client_id: number): Promise<string> {
@@ -139,7 +154,7 @@ server.route('/api/authenticate', validate_req_json(async (req, url, json) => {
 	const session_token = await generate_session_token(client_row.id);
 	log('client', 'authorized client session for {%s}', client_identifier);
 
-	return { session_token };
+	return { session_token, friend_code: client_row.friend_code };
 }), 'POST');
 
 server.route('/api/register', validate_req_json(async (req, url, json) => {
@@ -148,8 +163,10 @@ server.route('/api/register', validate_req_json(async (req, url, json) => {
 	if (typeof client_key !== 'string' || !is_valid_uuid(client_key))
 		return 400; // Bad Request
 
+	const friend_code = await generate_friend_code();
+
 	const client_identifier = crypto.randomUUID();
-	const client_id = await db_insert('INSERT INTO `clients` (`client_identifier`, `client_key`) VALUES(?, ?)', [client_identifier, client_key]);
+	const client_id = await db_insert('INSERT INTO `clients` (`client_identifier`, `client_key`, `friend_code`) VALUES(?, ?, ?)', [client_identifier, client_key, friend_code]);
 
 	if (client_id === -1)
 		return 500;
@@ -157,7 +174,7 @@ server.route('/api/register', validate_req_json(async (req, url, json) => {
 	log('client', 'registered new client {%d} [{%s}]', client_id, client_identifier);
 
 	const session_token = await generate_session_token(client_id);
-	return { session_token, client_identifier };
+	return { session_token, client_identifier, friend_code };
 }), 'POST');
 
 // caution on slow requests

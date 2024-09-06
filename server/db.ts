@@ -37,6 +37,16 @@ export async function db_get_single(sql: string, values: any = []): Promise<RowD
 	return rows[0] ?? null;
 }
 
+export async function db_count(sql: string, values: any = []): Promise<number> {
+	const row = await db_get_single(sql, values);
+	return row?.count ?? 0;
+}
+
+export async function db_exists(sql: string, values: any = []): Promise<boolean> {
+	const row = await db_get_single(sql, values);
+	return row !== null;
+}
+
 export async function db_insert(sql: string, values: any = []): Promise<number> {
 	try {
 		const [result] = await db_pool.query(sql, values);
