@@ -60,7 +60,12 @@ async function patch_localization(ctx) {
 
 async function api_get(endpoint) {
 	const url = SERVER_HOST + endpoint;
-	const res = await fetch(url, { method: 'GET' });
+	const res = await fetch(url, {
+		method: 'GET',
+		headers: {
+			'X-Session-Token': session_token ?? undefined
+		}
+	});
 
 	log('[%d] GET %s', res.status, url);
 
@@ -72,11 +77,13 @@ async function api_get(endpoint) {
 
 async function api_post(endpoint, payload) {
 	const url = SERVER_HOST + endpoint;
+
 	const res = await fetch(url, {
 		method: 'POST',
 		body: JSON.stringify(payload),
 		headers: {
-			'Content-Type': 'application/json'
+			'Content-Type': 'application/json',
+			'X-Session-Token': session_token ?? undefined
 		}
 	});
 
@@ -153,6 +160,10 @@ export async function setup(ctx) {
 
 	ctx.onCharacterLoaded(() => {
 		start_mutliplayer_session(ctx);
+
+		setInterval(async () => {
+			console.log(await api_get('/api/test'));
+		}, 2500);
 	});
 	
 	ctx.onInterfaceReady(() => {

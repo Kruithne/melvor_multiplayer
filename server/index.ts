@@ -2,6 +2,20 @@ import { caution, serve, validate_req_json, HTTP_STATUS_CODE } from 'spooder';
 import { format } from 'node:util';
 import { db_get_single, db_execute, db_insert } from './db';
 import { db_row_clients } from './db/types/clients';
+import { db_row_client_sessions } from './db/types/client_sessions';
+import type { JsonPrimitive, JsonArray, JsonObject } from 'spooder';
+
+interface ToJson {
+	toJSON(): any;
+}
+
+type JsonSerializable = JsonPrimitive | JsonObject | JsonArray | ToJson;
+
+type Resolvable<T> = T | Promise<T>;
+type BunFile = ReturnType<typeof Bun.file>;
+type HandlerReturnType = Resolvable<string | number | BunFile | Response | JsonSerializable | Blob>;
+
+type SessionRequestHandler = (req: Request, url: URL, client_id: number, json?: JsonObject) => HandlerReturnType;
 
 const server = serve(Number(process.env.SERVER_PORT));
 
@@ -28,6 +42,56 @@ async function generate_session_token(client_id: number): Promise<string> {
 
 	return session_token;
 }
+
+async function get_session_client_id(session_token: unknown): Promise<number> {
+	if (typeof session_token !== 'string')
+		return -1;
+
+	// todo: hot cache
+
+	const session_row = await db_get_single('SELECT `client_id` FROM `client_sessions` WHERE `client_id` = ?', [session_token]) as db_row_client_sessions;
+	const client_id = session_row?.client_id ?? -1;
+
+	return client_id;
+}
+
+function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
+	return async (req: Request, url: URL) => {
+		let json = null;
+
+		if (json_body) {
+			// validate content type header
+			if (req.headers.get('Content-Type') !== 'application/json')
+				return 400; // Bad Request
+
+			json = await req.json();
+
+			// validate json is a plain object
+			if (json === null || typeof json !== 'object' || Array.isArray(json))
+				return 400; // Bad Request
+		}
+
+		const x_session_token = req.headers.get('X-Session-Token');
+		const client_id = await get_session_client_id(x_session_token);
+
+		if (client_id === -1)
+			return 401; // Unauthorized
+
+		return handler(req, url, client_id, json as JsonObject);
+	};
+}
+
+function session_get_route(route: string, handler: SessionRequestHandler) {
+	server.route(route, validate_session_request(handler), 'GET');
+}
+
+function session_post_route(route: string, handler: SessionRequestHandler) {
+	server.route(route, validate_session_request(handler, true), 'POST');
+}
+
+session_get_route('/api/get/test', async (req, url, client_id) => {
+	return { client_id };
+});
 
 server.route('/api/authenticate', validate_req_json(async (req, url, json) => {
 	const client_identifier = json.client_identifier;
