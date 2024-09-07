@@ -152,7 +152,7 @@ async function start_mutliplayer_session() {
 		if (auth_res !== null) {
 			set_session_token(auth_res.session_token);
 		} else {
-			// todo: implement a fallback to allow players to reconnect
+			notify_error('MOD_KMM_MULTIPLAYER_CONNECTION_ERR');
 			error('failed to authenticate client, multiplayer features not available');
 		}
 	} else {
@@ -170,7 +170,7 @@ async function start_mutliplayer_session() {
 
 			set_session_token(register_res.session_token);
 		} else {
-			// todo: implement a fallback to allow players to reconnect
+			notify_error('MOD_KMM_MULTIPLAYER_CONNECTION_ERR');
 			error('failed to register client, multiplayer features not available');
 		}
 	}
@@ -183,7 +183,7 @@ export async function setup(ctx) {
 	await ctx.loadTemplates('ui/templates.html');
 
 	ctx.onCharacterLoaded(() => {
-		start_mutliplayer_session();
+		//start_mutliplayer_session();
 	});
 	
 	ctx.onInterfaceReady(() => {
