@@ -3,6 +3,14 @@
 	left: unset;
 }
 
+#kru-mm-online-dropdown.connected .disconnected-menu {
+	display: none;
+}
+
+#kru-mm-online-dropdown:not(.connected) .connected-menu {
+	display: none;
+}
+
 #kru-mm-online-button-container {
 	position: relative;
 }

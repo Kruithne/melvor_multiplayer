@@ -9,6 +9,7 @@ const DEV_CHARACTER_STORAGE = {
 };
 
 let session_token = null;
+let is_connecting = false;
 
 const ctx = mod.getContext(import.meta);
 const state = ui.createStore({
@@ -18,6 +19,20 @@ const state = ui.createStore({
 
 	get_svg_url(id) {
 		return 'url(' + this.get_svg(id) + ')';
+	},
+
+	toggle_online_dropdown() {
+		const class_list = state.$dropdown_menu.classList;
+		class_list.toggle('show');
+		class_list.toggle('connected', session_token !== null);
+	},
+
+	hide_online_dropdown() {
+		state.$dropdown_menu.classList.remove('show');
+	},
+
+	reconnect() {
+		start_mutliplayer_session();
 	}
 });
 
@@ -118,7 +133,12 @@ function set_session_token(token) {
 	log('client session authenticated (%s)', token);
 }
 
-async function start_mutliplayer_session(ctx) {
+async function start_mutliplayer_session() {
+	if (is_connecting)
+		return;
+
+	is_connecting = true;
+
 	const client_identifier = get_character_storage_item('client_identifier');
 	const client_key = get_character_storage_item('client_key');
 
@@ -154,17 +174,16 @@ async function start_mutliplayer_session(ctx) {
 			error('failed to register client, multiplayer features not available');
 		}
 	}
+
+	is_connecting = false;
 }
 
 export async function setup(ctx) {
 	await patch_localization(ctx);
 	await ctx.loadTemplates('ui/templates.html');
-	
-	//ui.create({ $template: '#template-kru-archaeology-container', state	}, document.body);
-	//ui.create({ $template: '#template-kru-archaeology-bank-options', state }, document.body);
 
 	ctx.onCharacterLoaded(() => {
-		start_mutliplayer_session(ctx);
+		start_mutliplayer_session();
 	});
 	
 	ctx.onInterfaceReady(() => {
@@ -172,9 +191,6 @@ export async function setup(ctx) {
 		ui.create({ $template: '#template-kru-multiplayer-online-button', state }, $button_tray);
 		ui.create({ $template: '#template-kru-multiplayer-dropdown', state }, $('kru-mm-online-button-container'));
 
-		const $dropdown_menu = $('kru-mm-online-dropdown');
-		$('kru-mm-online-button').addEventListener('click', () => {
-			$dropdown_menu.classList.toggle('show');
-		});
+		state.$dropdown_menu = $('kru-mm-online-dropdown');
 	});
 }
