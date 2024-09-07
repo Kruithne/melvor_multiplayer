@@ -1,0 +1,17 @@
+<template id="template-kru-multiplayer-online-button">
+	<div class="d-inline-block ml-1" id="kru-mm-online-button-container">
+		<button class="btn btn-sm btn-dual text-combat-smoke" id="kru-mm-online-button">
+			<img class="skill-icon-xxs" :src="state.get_svg('multiplayer')"/>
+		</button>
+	</div>
+</template>
+<template id="template-kru-multiplayer-dropdown">
+	<div class="dropdown-menu dropdown-menu-right p-0 border-0 font-size-sm" id="kru-mm-online-dropdown">
+		<div class="p-2">
+			<h5 class="dropdown-header text-warning">Multiplayer</h5>
+			<a class="dropdown-item">View Friends</a>
+			<a class="dropdown-item">Add Friend</a>
+			<a class="dropdown-item">Copy Friend Code</a>
+		</div>
+	</div>
+</template>

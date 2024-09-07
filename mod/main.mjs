@@ -12,8 +12,18 @@ let session_token = null;
 
 const ctx = mod.getContext(import.meta);
 const state = ui.createStore({
-	// todo
+	get_svg(id) {
+		return ctx.getResourceUrl('assets/' + id + '.svg');
+	},
+
+	get_svg_url(id) {
+		return 'url(' + this.get_svg(id) + ')';
+	}
 });
+
+function $(id) {
+	return document.getElementById(id);
+}
 
 function notify_error(lang_id, icon) {
 	notify(lang_id, 'danger', icon);
@@ -158,7 +168,13 @@ export async function setup(ctx) {
 	});
 	
 	ctx.onInterfaceReady(() => {
-		console.log('melvor_multiplayer: onInterfaceReady');
-		// player logged in
+		const $button_tray = document.getElementById('header-theme').querySelector('.align-items-right');
+		ui.create({ $template: '#template-kru-multiplayer-online-button', state }, $button_tray);
+		ui.create({ $template: '#template-kru-multiplayer-dropdown', state }, $('kru-mm-online-button-container'));
+
+		const $dropdown_menu = $('kru-mm-online-dropdown');
+		$('kru-mm-online-button').addEventListener('click', () => {
+			$dropdown_menu.classList.toggle('show');
+		});
 	});
 }
