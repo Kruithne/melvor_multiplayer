@@ -1,3 +1,4 @@
 {
-	"MOD_KMM_MULTIPLAYER_CONNECTION_ERR": "Unable to connect to multiplayer."
+	"MOD_KMM_MULTIPLAYER_CONNECTION_ERR": "Unable to connect to multiplayer.",
+	"MOD_KMM_FRIEND_CODE_COPIED": "Friend code copied to clipboard."
 }

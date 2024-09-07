@@ -33,6 +33,13 @@ const state = ui.createStore({
 
 	reconnect() {
 		start_mutliplayer_session();
+	},
+
+	copy_friend_code_clipboard() {
+		const friend_code = get_character_storage_item('friend_code');
+		navigator.clipboard.writeText(friend_code);
+
+		notify('MOD_KMM_FRIEND_CODE_COPIED');
 	}
 });
 
