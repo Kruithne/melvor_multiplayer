@@ -138,6 +138,9 @@ session_get_route('/api/test', async (req, url, client_id) => {
 });
 
 server.route('/api/authenticate', validate_req_json(async (req, url, json) => {
+	server.allow_slow_request(req);
+	await Bun.sleep(1000);
+
 	const client_identifier = json.client_identifier;
 	const client_key = json.client_key;
 
@@ -158,6 +161,9 @@ server.route('/api/authenticate', validate_req_json(async (req, url, json) => {
 }), 'POST');
 
 server.route('/api/register', validate_req_json(async (req, url, json) => {
+	server.allow_slow_request(req);
+	await Bun.sleep(1000);
+	
 	const client_key = json.client_key;
 
 	if (typeof client_key !== 'string' || !is_valid_uuid(client_key))
