@@ -44,7 +44,7 @@ function notify_error(lang_id, icon) {
 	notify(lang_id, 'danger', icon);
 }
 
-function notify(lang_id, theme = 'danger', icon = 'assets/archaeology.svg') {
+function notify(lang_id, theme = 'danger', icon = 'assets/multiplayer.svg') {
 	notifyPlayer({ media: ctx.getResourceUrl(icon) }, getLangString(lang_id), theme);
 }
 
