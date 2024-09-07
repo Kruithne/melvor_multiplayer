@@ -37,18 +37,21 @@ const state = ui.createStore({
 
 	show_friend_code() {
 		const friend_code = get_character_storage_item('friend_code');
-		
-		addModalToQueue({
-			title: getLangString('MOD_KMM_TITLE_FRIEND_CODE'),
-			html: `<input class="kru-mm-input-text text-center" type="text" value="${friend_code}"/>`,
-			imageUrl: ctx.getResourceUrl('assets/multiplayer.svg'),
-			imageWidth: 64,
-			imageHeight: 64,
-			allowOutsideClick: true,
-			backdrop: true
-		});
+		show_modal('MOD_KMM_TITLE_FRIEND_CODE', `<input class="kru-mm-input-text text-center" type="text" value="${friend_code}"/>`, true);
 	}
 });
+
+function show_modal(title_lang, html, allow_outside_click = false, icon = 'assets/multiplayer.svg') {
+	addModalToQueue({
+		title: getLangString(title_lang),
+		html: html,
+		imageUrl: ctx.getResourceUrl(icon),
+		imageWidth: 64,
+		imageHeight: 64,
+		allowOutsideClick: allow_outside_click,
+		backdrop: allow_outside_click
+	});
+}
 
 function $(id) {
 	return document.getElementById(id);
