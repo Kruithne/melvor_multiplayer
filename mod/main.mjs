@@ -37,9 +37,38 @@ const state = ui.createStore({
 
 	show_friend_code() {
 		const friend_code = get_character_storage_item('friend_code');
-		show_modal('MOD_KMM_TITLE_FRIEND_CODE', `<input class="kru-mm-input-text text-center" type="text" value="${friend_code}"/>`, true);
+		show_template_modal('MOD_KMM_TITLE_FRIEND_CODE', 'friend-code-modal', { friend_code }, true);
 	}
 });
+
+function show_template_modal(title_lang, template_id, subs = {}, allow_outside_click = false, icon = undefined) {
+	const template = make_template(template_id);
+	const template_html = template_to_string(template, subs);
+	show_modal(title_lang, template_html, allow_outside_click, icon);
+}
+
+function template_to_string(template, subs = {}) {
+	// this function is an absolute bloody sin
+	const container = document.createElement('div');
+	container.appendChild(template);
+
+	let html = container.innerHTML;
+
+	for (const [key, value] of Object.entries(subs)) {
+		const regex = new RegExp('%' + key + '%', 'g');
+		html = html.replace(regex, value);
+	}
+
+	return html;
+}
+
+function make_template(id, parent = null) {
+	const template = document.getElementById('template-kru-mutliplayer-' + id);
+	const node = template.content.cloneNode(true);
+
+	parent?.appendChild(node);
+	return node;
+}
 
 function show_modal(title_lang, html, allow_outside_click = false, icon = 'assets/multiplayer.svg') {
 	addModalToQueue({
