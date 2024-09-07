@@ -15,7 +15,7 @@
 		</div>
 		<div class="p-2 disconnected-menu">
 			<h5 class="dropdown-header text-warning">Multiplayer</h5>
-			<a class="dropdown-item" @click="state.reconnect(); state.hide_online_dropdown()">Reconnect to Multiplayer</a>
+			<a class="dropdown-item" @click.stop="state.reconnect(); state.hide_online_dropdown()">Reconnect to Multiplayer</a>
 		</div>
 	</div>
 </template>
