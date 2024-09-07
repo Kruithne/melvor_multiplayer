@@ -1,7 +1,7 @@
 <template id="template-kru-multiplayer-online-button">
-	<div class="d-inline-block ml-1" id="kru-mm-online-button-container">
+	<div class="d-inline-block ml-1" id="kru-mm-online-button-container" @click="state.toggle_online_dropdown()">
 		<button class="btn btn-sm btn-dual text-combat-smoke" id="kru-mm-online-button">
-			<img class="skill-icon-xxs" :src="state.get_svg('multiplayer')" @click="state.toggle_online_dropdown()"/>
+			<img class="skill-icon-xxs" :src="state.get_svg('multiplayer')"/>
 		</button>
 	</div>
 </template>
