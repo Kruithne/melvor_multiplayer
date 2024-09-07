@@ -35,11 +35,18 @@ const state = ui.createStore({
 		start_mutliplayer_session();
 	},
 
-	copy_friend_code_clipboard() {
+	show_friend_code() {
 		const friend_code = get_character_storage_item('friend_code');
-		navigator.clipboard.writeText(friend_code);
-
-		notify('MOD_KMM_FRIEND_CODE_COPIED');
+		
+		addModalToQueue({
+			title: getLangString('MOD_KMM_TITLE_FRIEND_CODE'),
+			html: `<input class="kru-mm-input-text text-center" type="text" value="${friend_code}"/>`,
+			imageUrl: ctx.getResourceUrl('assets/multiplayer.svg'),
+			imageWidth: 64,
+			imageHeight: 64,
+			allowOutsideClick: true,
+			backdrop: true
+		});
 	}
 });
 

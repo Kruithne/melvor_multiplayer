@@ -11,7 +11,7 @@
 			<h5 class="dropdown-header text-warning">Multiplayer</h5>
 			<a class="dropdown-item">View Friends</a>
 			<a class="dropdown-item">Add Friend</a>
-			<a class="dropdown-item" @click.stop="state.copy_friend_code_clipboard()">Copy Friend Code</a>
+			<a class="dropdown-item" @click.stop="state.show_friend_code(); state.hide_online_dropdown()">Copy Friend Code</a>
 		</div>
 		<div class="p-2 disconnected-menu">
 			<h5 class="dropdown-header text-warning">Multiplayer</h5>

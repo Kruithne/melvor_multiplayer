@@ -14,3 +14,15 @@
 #kru-mm-online-button-container {
 	position: relative;
 }
+
+.kru-mm-input-text {
+	background: rgba(0, 0, 0, 0.161);
+	border: 1px solid white;
+	border-radius: 5px;
+	padding: 10px;
+	color: white;
+}
+
+.kru-mm-input-text:focus {
+	outline: 0;
+}
