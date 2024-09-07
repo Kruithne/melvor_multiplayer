@@ -183,7 +183,7 @@ export async function setup(ctx) {
 	await ctx.loadTemplates('ui/templates.html');
 
 	ctx.onCharacterLoaded(() => {
-		//start_mutliplayer_session();
+		start_mutliplayer_session();
 	});
 	
 	ctx.onInterfaceReady(() => {
