@@ -327,7 +327,7 @@ class KMMAddFriendModal extends HTMLElement {
 				return false;
 			}
 
-			notify('Friend request sent!');
+			notify('MOD_KMM_NOTIF_FRIEND_REQ_SENT');
 
 			return true;
 		}, true);
