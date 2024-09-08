@@ -69,11 +69,11 @@ const state = ui.createStore({
 function show_modal_error(text) {
 	const $modal_error = $('kmm-modal-error');
 	$modal_error.textContent = text;
-	$modal_error.classList.remove('kmm-hidden');
+	$modal_error.classList.remove('d-none');
 }
 
 function hide_modal_error() {
-	$('kmm-modal-error').classList.add('kmm-hidden');
+	$('kmm-modal-error').classList.add('d-none');
 }
 
 function hook_modal_cancel() {
