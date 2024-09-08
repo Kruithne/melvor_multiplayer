@@ -224,12 +224,14 @@ async function start_multiplayer_session() {
 
 	const client_identifier = get_character_storage_item('client_identifier');
 	const client_key = get_character_storage_item('client_key');
+	const display_name = game.characterName;
 
 	if (client_identifier !== undefined && client_key !== undefined) {
 		log('existing client identity found, authenticating session...');
 		const auth_res = await api_post('/api/authenticate', {
 			client_identifier,
-			client_key
+			client_key,
+			display_name
 		});
 
 		if (auth_res !== null) {
@@ -243,7 +245,8 @@ async function start_multiplayer_session() {
 		const client_key = crypto.randomUUID();
 
 		const register_res = await api_post('/api/register', {
-			client_key
+			client_key,
+			display_name
 		});
 
 		if (register_res !== null) {

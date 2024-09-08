@@ -48,6 +48,15 @@ function is_valid_friend_code(friend_code: string): boolean {
 	return /^[0-9]{3}-[0-9]{3}-[0-9]{3}$/.test(friend_code);
 }
 
+function validate_display_name(display_name: unknown): string {
+	if (typeof display_name === 'string') {
+		const trimmed = display_name.trim();
+		if (trimmed.length > 0 && trimmed.length <= 20)
+			return trimmed;
+	}
+	return 'Unknown Idler';
+}
+
 async function generate_friend_code(): Promise<string> {
 	const chunk = () => Math.floor(Math.random() * 900) + 100;
 	const code = () => chunk() + '-' + chunk() + '-' + chunk();
@@ -170,7 +179,7 @@ server.route('/api/authenticate', validate_req_json(async (req, url, json) => {
 	const client_identifier = json.client_identifier;
 	const client_key = json.client_key;
 
-	if (typeof client_identifier !== 'string' || typeof client_key !== 'string')
+	if (typeof client_identifier !== 'string' || typeof client_key !== 'string' || typeof display_name !== 'string')
 		return 400; // Bad Request
 
 	if (!is_valid_uuid(client_identifier) || !is_valid_uuid(client_key))
@@ -179,6 +188,9 @@ server.route('/api/authenticate', validate_req_json(async (req, url, json) => {
 	const client_row = await db_get_single('SELECT `id`, `client_key` FROM `clients` WHERE `client_identifier` = ? LIMIT 1', [client_identifier]) as db_row_clients;
 	if (client_row === null || client_row.client_key !== client_key)
 		return 401; // Unauthorized
+
+	const display_name = validate_display_name(json.display_name);
+	await db_execute('UPDATE `clients` SET `display_name` = ? WHERE `id` = ?', [display_name, client_row.id]);
 
 	const session_token = await generate_session_token(client_row.id);
 	log('client', 'authorized client session for {%s}', client_identifier);
@@ -196,9 +208,10 @@ server.route('/api/register', validate_req_json(async (req, url, json) => {
 		return 400; // Bad Request
 
 	const friend_code = await generate_friend_code();
+	const display_name = validate_display_name(json.display_name);
 
 	const client_identifier = crypto.randomUUID();
-	const client_id = await db_insert('INSERT INTO `clients` (`client_identifier`, `client_key`, `friend_code`) VALUES(?, ?, ?)', [client_identifier, client_key, friend_code]);
+	const client_id = await db_insert('INSERT INTO `clients` (`client_identifier`, `client_key`, `friend_code`, `display_name`) VALUES(?, ?, ?, ?)', [client_identifier, client_key, friend_code, display_name]);
 
 	if (client_id === -1)
 		return 500;

@@ -9,3 +9,6 @@ CREATE TABLE `clients` (
 -- [2] add friend code column
 ALTER TABLE `clients` ADD COLUMN `friend_code` VARCHAR(11) NOT NULL;
 CREATE INDEX `idx_friend_code` ON `clients` (`friend_code`);
+
+-- [3] add display_name column
+ALTER TABLE `clients` ADD COLUMN `display_name` VARCHAR(20) NOT NULL;
