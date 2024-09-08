@@ -76,15 +76,35 @@ function hide_modal_error() {
 	$('kmm-modal-error').classList.add('d-none');
 }
 
-function hook_modal_cancel() {
-	$('kmm-modal-cancel-btn').addEventListener('click', () => Swal.close());
+function hook_modal_cancel(id) {
+	$(id).addEventListener('click', () => Swal.close());
 }
 
-function hook_modal_confirm(callback) {
-	$('kmm-modal-confirm-btn').addEventListener('click', async () => {
-		if (await callback())
+function hook_modal_confirm(id, callback, spinner) {
+	$(id).addEventListener('click', async () => {
+		if (spinner)
+			show_button_spinner(id);
+
+		const res = await callback();
+
+		if (spinner)
+			hide_button_spinner(id);
+
+		if (res)
 			Swal.close();
 	});
+}
+
+function show_button_spinner(id) {
+	const $element = $(id);
+	const $spinner = $element.querySelector('.spinner-border');
+	$spinner.classList.remove('d-none');
+}
+
+function hide_button_spinner(id) {
+	const $element = $(id);
+	const $spinner = $element.querySelector('.spinner-border');
+	$spinner.classList.add('d-none');
 }
 
 function custom_element_tag(tag) {
@@ -278,7 +298,9 @@ class KMMAddFriendModal extends HTMLElement {
 
 		make_template('add-friend-modal', this);
 
-		hook_modal_confirm(async () => {
+		const CONFIRM_BTN_ID = 'kmm-modal-confirm-btn';
+
+		hook_modal_confirm(CONFIRM_BTN_ID, async () => {
 			hide_modal_error();
 
 			const friend_code = $('kmm-add-friend-modal-field').value.trim();
@@ -293,9 +315,9 @@ class KMMAddFriendModal extends HTMLElement {
 			// todo: validate friend code on server.
 
 			return true;
-		});
+		}, true);
 
-		hook_modal_cancel();
+		hook_modal_cancel('kmm-modal-cancel-btn');
 	}
 }
 
