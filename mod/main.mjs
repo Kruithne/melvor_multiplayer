@@ -316,7 +316,7 @@ class KMMAddFriendModal extends HTMLElement {
 				return false;
 			}
 
-			const res = await api_post('/api/friend/add', { friend_code });
+			const res = await api_post('/api/friends/add', { friend_code });
 			if (res === null) {
 				show_modal_error(getLangString('MOD_KMM_GENERIC_ERR'));
 				return false;
