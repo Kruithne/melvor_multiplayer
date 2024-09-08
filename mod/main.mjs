@@ -233,6 +233,9 @@ class KMMFriendCodeModal extends HTMLElement {
 
 		const $input = this.querySelector('.kru-mm-input-text');
 		$input.value = get_character_storage_item('friend_code');
+
+		$input.focus();
+		$input.select();
 	}
 }
 
