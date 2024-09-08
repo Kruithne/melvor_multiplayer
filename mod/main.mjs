@@ -48,6 +48,23 @@ const state = ui.createStore({
 			allowOutsideClick: true,
 			backdrop: true
 		});
+	},
+
+	show_add_friend_modal() {
+		state.hide_online_dropdown();
+
+		addModalToQueue({
+			title: getLangString('MOD_KMM_TITLE_ADD_FRIEND'),
+			html: custom_element_tag('kmm-add-friend-modal'),
+			imageUrl: ctx.getResourceUrl('assets/multiplayer.svg'),
+			imageWidth: 64,
+			imageHeight: 64,
+			allowOutsideClick: true,
+			backdrop: true,
+			confirmButtonText: getLangString('MOD_KMM_BUTTON_ADD_FRIEND'),
+			cancelButtonText: getLangString('MOD_KMM_BUTTON_CANCEL'),
+			showCancelButton: true
+		})
 	}
 });
 
@@ -236,4 +253,19 @@ class KMMFriendCodeModal extends HTMLElement {
 	}
 }
 
+class KMMAddFriendModal extends HTMLElement {
+	constructor() {
+		super();
+
+		make_template('add-friend-modal', this);
+
+		const $input = this.querySelector('.kru-mm-input-text');
+
+		Swal.getConfirmButton().addEventListener('click', () => {
+			console.log('Confirm button has been pressed!');
+		});
+	}
+}
+
 window.customElements.define('kmm-friend-code-modal', KMMFriendCodeModal);
+window.customElements.define('kmm-add-friend-modal', KMMAddFriendModal);
