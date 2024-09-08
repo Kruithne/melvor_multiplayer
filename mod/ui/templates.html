@@ -8,32 +8,46 @@
 <template id="template-kru-multiplayer-dropdown">
 	<div class="dropdown-menu dropdown-menu-right p-0 border-0 font-size-sm" id="kru-mm-online-dropdown">
 		<div class="p-2 connected-menu">
-			<h5 class="dropdown-header text-warning">Multiplayer</h5>
+			<h5 class="dropdown-header text-warning">
+				<lang-string lang-id="MOD_KMM_MENU_HEADER"></lang-string>
+			</h5>
 			<a class="dropdown-item">View Friends</a>
-			<a class="dropdown-item" @click.stop="state.show_add_friend_modal()">Add Friend</a>
-			<a class="dropdown-item" @click.stop="state.show_friend_code_modal()">Copy Friend Code</a>
+			<a class="dropdown-item" @click.stop="state.show_add_friend_modal()">
+				<lang-string lang-id="MOD_KMM_MENU_ADD_FRIEND"></lang-string>
+			</a>
+			<a class="dropdown-item" @click.stop="state.show_friend_code_modal()">
+				<lang-string lang-id="MOD_KMM_MENU_SHOW_FRIEND_CODE"></lang-string>
+			</a>
 		</div>
 		<div class="p-2 disconnected-menu">
-			<h5 class="dropdown-header text-warning">Multiplayer</h5>
-			<a class="dropdown-item" @click.stop="state.reconnect()">Reconnect to Multiplayer</a>
+			<h5 class="dropdown-header text-warning">
+				<lang-string lang-id="MOD_KMM_MENU_HEADER"></lang-string>
+			</h5>
+			<a class="dropdown-item" @click.stop="state.reconnect()">
+				<lang-string lang-id="MOD_KMM_MENU_RECONNECT"></lang-string>
+			</a>
 		</div>
 	</div>
 </template>
 <template id="template-kru-multiplayer-friend-code-modal">
-	<p>Let people add you by sharing the code below.</p>
+	<div class="kmm-modal-text">
+		<lang-string lang-id="MOD_KMM_MODAL_DESC_CODE"></lang-string>
+	</div>
 	<input class="kru-mm-input-text text-center" type="text"/>
 </template>
 <template id="template-kru-multiplayer-add-friend-modal">
 	<div class="kmm-modal-text">
-		<span>Enter a friend code to add another player.</span>
-		<span id="kmm-modal-error" class="d-none text-danger">This will be some error text.</span>
+		<lang-string lang-id="MOD_KMM_MODAL_DESC_ADD_FRIEND"></lang-string>
+		<span id="kmm-modal-error" class="d-none text-danger"></span>
 	</div>
 	<input class="kru-mm-input-text text-center" type="text" id="kmm-add-friend-modal-field" maxlength="11"/>
 	<div class="kmm-modal-tray">
 		<button type="button" class="btn btn-primary" id="kmm-modal-confirm-btn">
 			<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
-			Add Friend
+			<lang-string lang-id="MOD_KMM_BUTTON_ADD_FRIEND"></lang-string>
 		</button>
-		<button type="button" class="btn btn-danger" id="kmm-modal-cancel-btn">Cancel</button>
+		<button type="button" class="btn btn-danger" id="kmm-modal-cancel-btn">
+			<lang-string lang-id="MOD_KMM_BUTTON_CANCEL"></lang-string>
+		</button>
 	</div>
 </template>
