@@ -35,31 +35,13 @@ const state = ui.createStore({
 		start_mutliplayer_session();
 	},
 
-	show_friend_code() {
-		const friend_code = get_character_storage_item('friend_code');
-		show_template_modal('MOD_KMM_TITLE_FRIEND_CODE', 'friend-code-modal', { friend_code }, true);
+	show_friend_code_modal() {
+		show_modal('MOD_KMM_TITLE_FRIEND_CODE', 'kmm-friend-code-modal', true);
 	}
 });
 
-function show_template_modal(title_lang, template_id, subs = {}, allow_outside_click = false, icon = undefined) {
-	const template = make_template(template_id);
-	const template_html = template_to_string(template, subs);
-	show_modal(title_lang, template_html, allow_outside_click, icon);
-}
-
-function template_to_string(template, subs = {}) {
-	// this function is an absolute bloody sin
-	const container = document.createElement('div');
-	container.appendChild(template);
-
-	let html = container.innerHTML;
-
-	for (const [key, value] of Object.entries(subs)) {
-		const regex = new RegExp('%' + key + '%', 'g');
-		html = html.replace(regex, value);
-	}
-
-	return html;
+function custom_element_tag(tag) {
+	return `<${tag}></${tag}>`;
 }
 
 function make_template(id, parent = null) {
@@ -70,10 +52,10 @@ function make_template(id, parent = null) {
 	return node;
 }
 
-function show_modal(title_lang, html, allow_outside_click = false, icon = 'assets/multiplayer.svg') {
+function show_modal(title_lang, tag, allow_outside_click = false, icon = 'assets/multiplayer.svg') {
 	addModalToQueue({
 		title: getLangString(title_lang),
-		html: html,
+		html: custom_element_tag(tag),
 		imageUrl: ctx.getResourceUrl(icon),
 		imageWidth: 64,
 		imageHeight: 64,
@@ -240,3 +222,16 @@ export async function setup(ctx) {
 		state.$dropdown_menu = $('kru-mm-online-dropdown');
 	});
 }
+
+class KMMFriendCodeModal extends HTMLElement {
+	constructor() {
+		super();
+
+		make_template('friend-code-modal', this);
+
+		const $input = this.querySelector('.kru-mm-input-text');
+		$input.value = get_character_storage_item('friend_code');
+	}
+}
+
+window.customElements.define('kmm-friend-code-modal', KMMFriendCodeModal);
