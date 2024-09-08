@@ -316,9 +316,18 @@ class KMMAddFriendModal extends HTMLElement {
 				return false;
 			}
 
-			await new Promise(res => setTimeout(res, 2000)); // testing
+			const res = await api_post('/api/friend/add', { friend_code });
+			if (res === null) {
+				show_modal_error(getLangString('MOD_KMM_GENERIC_ERR'));
+				return false;
+			}
 
-			// todo: validate friend code on server.
+			if (res.error_lang) {
+				show_modal_error(getLangString(res.error_lang));
+				return false;
+			}
+
+			notify('Friend request sent!');
 
 			return true;
 		}, true);

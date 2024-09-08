@@ -15,7 +15,7 @@ type Resolvable<T> = T | Promise<T>;
 type BunFile = ReturnType<typeof Bun.file>;
 type HandlerReturnType = Resolvable<string | number | BunFile | Response | JsonSerializable | Blob>;
 
-type SessionRequestHandler = (req: Request, url: URL, client_id: number, json?: JsonObject) => HandlerReturnType;
+type SessionRequestHandler = (req: Request, url: URL, client_id: number, json: JsonObject) => HandlerReturnType;
 
 const server = serve(Number(process.env.SERVER_PORT));
 
@@ -44,6 +44,10 @@ async function is_friend_code_taken(friend_code: string): Promise<boolean> {
 	return db_exists('SELECT 1 FROM `clients` WHERE `friend_code` = ? LIMIT 1', [friend_code]);
 }
 
+function is_valid_friend_code(friend_code: string): boolean {
+	return /^[0-9]{3}-[0-9]{3}-[0-9]{3}$/.test(friend_code);
+}
+
 async function generate_friend_code(): Promise<string> {
 	const chunk = () => Math.floor(Math.random() * 900) + 100;
 	const code = () => chunk() + '-' + chunk() + '-' + chunk();
@@ -62,6 +66,11 @@ async function generate_session_token(client_id: number): Promise<string> {
 	await db_execute('INSERT INTO `client_sessions` (`session_token`, `client_id`) VALUES(?, ?)', [session_token, client_id]);
 
 	return session_token;
+}
+
+async function get_user_id_from_friend_code(friend_code: string): Promise<number> {
+	const user_row = await db_get_single('SELECT `id` FROM `clients` WHERE `friend_code` = ?', [friend_code]) as db_row_clients;
+	return user_row?.id ?? -1;
 }
 
 async function get_session_client_id(session_token: unknown): Promise<number> {
@@ -132,6 +141,26 @@ function session_get_route(route: string, handler: SessionRequestHandler) {
 function session_post_route(route: string, handler: SessionRequestHandler) {
 	server.route(route, validate_session_request(handler, true), 'POST');
 }
+
+session_post_route('/api/friends/add', async (req, url, client_id, json) => {
+	const friend_code = json.friend_code;
+	if (typeof friend_code !== 'string')
+		return 400; // Bad Request
+
+	if (!is_valid_friend_code(friend_code))
+		return { error_lang: 'MOD_KMM_INVALID_FRIEND_CODE_ERR' };
+
+	const friend_user_id = await get_user_id_from_friend_code(friend_code);
+	if (friend_user_id === -1)
+		return { error_lang: 'MOD_KMM_UNKNOWN_FRIEND_CODE_ERR' };
+
+	if (friend_user_id === client_id)
+		return { error_lang: 'MOD_KMM_NO_SELF_LOVE_ERR' };
+
+	// todo: map friendship
+
+	return { success: true } as JsonSerializable;
+});
 
 server.route('/api/authenticate', validate_req_json(async (req, url, json) => {
 	server.allow_slow_request(req);
