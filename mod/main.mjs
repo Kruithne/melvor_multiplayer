@@ -310,6 +310,12 @@ class KMMAddFriendModal extends HTMLElement {
 				return false;
 			}
 
+			const client_friend_code = get_character_storage_item('friend_code');
+			if (friend_code === client_friend_code) {
+				show_modal_error(getLangString('MOD_KMM_NO_SELF_LOVE_ERR'));
+				return false;
+			}
+
 			await new Promise(res => setTimeout(res, 2000)); // testing
 
 			// todo: validate friend code on server.
