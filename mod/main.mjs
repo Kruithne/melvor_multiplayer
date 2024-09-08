@@ -71,6 +71,17 @@ function show_modal_error(text) {
 	$modal_error.textContent = text;
 }
 
+function hook_modal_cancel() {
+	$('kmm-modal-cancel-btn').addEventListener('click', () => Swal.close());
+}
+
+function hook_modal_confirm(callback) {
+	$('kmm-modal-confirm-btn').addEventListener('click', async () => {
+		if (await callback())
+			Swal.close();
+	});
+}
+
 function custom_element_tag(tag) {
 	return `<${tag}></${tag}>`;
 }
@@ -262,20 +273,22 @@ class KMMAddFriendModal extends HTMLElement {
 
 		make_template('add-friend-modal', this);
 
-		$('kmm-modal-confirm-btn').addEventListener('click', async () => {
+		hook_modal_confirm(async () => {
 			const friend_code = $('kmm-add-friend-modal-field').value.trim();
 
-			if (!/^\d{3}-\d{3}-\d{3}$/.test(friend_code))
-				return show_modal_error(getLangString('MOD_KMM_INVALID_FRIEND_CODE_ERR'));
+			if (!/^\d{3}-\d{3}-\d{3}$/.test(friend_code)) {
+				show_modal_error(getLangString('MOD_KMM_INVALID_FRIEND_CODE_ERR'));
+				return false;
+			}
 
 			await new Promise(res => setTimeout(res, 2000)); // testing
 
 			// todo: validate friend code on server.
 
-			Swal.close();
+			return true;
 		});
 
-		$('kmm-modal-cancel-btn').addEventListener('click', () => Swal.close());
+		hook_modal_cancel();
 	}
 }
 
