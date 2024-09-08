@@ -33,7 +33,7 @@ const state = ui.createStore({
 
 	reconnect() {
 		state.hide_online_dropdown();
-		start_mutliplayer_session();
+		start_multiplayer_session();
 	},
 
 	show_friend_code_modal() {
@@ -73,7 +73,7 @@ function custom_element_tag(tag) {
 }
 
 function make_template(id, parent = null) {
-	const template = document.getElementById('template-kru-mutliplayer-' + id);
+	const template = document.getElementById('template-kru-multiplayer-' + id);
 	const node = template.content.cloneNode(true);
 
 	parent?.appendChild(node);
@@ -177,7 +177,7 @@ function set_session_token(token) {
 	log('client session authenticated (%s)', token);
 }
 
-async function start_mutliplayer_session() {
+async function start_multiplayer_session() {
 	if (is_connecting)
 		return;
 
@@ -227,7 +227,7 @@ export async function setup(ctx) {
 	await ctx.loadTemplates('ui/templates.html');
 
 	ctx.onCharacterLoaded(() => {
-		start_mutliplayer_session();
+		start_multiplayer_session();
 	});
 	
 	ctx.onInterfaceReady(() => {
