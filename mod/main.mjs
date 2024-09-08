@@ -69,11 +69,11 @@ const state = ui.createStore({
 function show_modal_error(text) {
 	const $modal_error = $('kmm-modal-error');
 	$modal_error.textContent = text;
-	$modal_error.classList.remove('hidden');
+	$modal_error.classList.remove('kmm-hidden');
 }
 
 function hide_modal_error() {
-	$('kmm-modal-error').classList.add('hidden');
+	$('kmm-modal-error').classList.add('kmm-hidden');
 }
 
 function hook_modal_cancel() {
@@ -280,7 +280,7 @@ class KMMAddFriendModal extends HTMLElement {
 
 		hook_modal_confirm(async () => {
 			hide_modal_error();
-			
+
 			const friend_code = $('kmm-add-friend-modal-field').value.trim();
 
 			if (!/^\d{3}-\d{3}-\d{3}$/.test(friend_code)) {
