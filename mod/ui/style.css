@@ -26,3 +26,17 @@
 .kru-mm-input-text:focus {
 	outline: 0;
 }
+
+.kmm-modal-tray {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+	margin-top: 20px;
+}
+
+.kmm-modal-text {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	margin-bottom: 20px;
+}

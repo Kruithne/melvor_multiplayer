@@ -61,12 +61,15 @@ const state = ui.createStore({
 			imageHeight: 64,
 			allowOutsideClick: true,
 			backdrop: true,
-			confirmButtonText: getLangString('MOD_KMM_BUTTON_ADD_FRIEND'),
-			cancelButtonText: getLangString('MOD_KMM_BUTTON_CANCEL'),
-			showCancelButton: true
+			showConfirmButton: false
 		})
 	}
 });
+
+function show_modal_error(text) {
+	const $modal_error = $('kmm-modal-error');
+	$modal_error.textContent = text;
+}
 
 function custom_element_tag(tag) {
 	return `<${tag}></${tag}>`;
@@ -259,11 +262,20 @@ class KMMAddFriendModal extends HTMLElement {
 
 		make_template('add-friend-modal', this);
 
-		const $input = this.querySelector('.kru-mm-input-text');
+		$('kmm-modal-confirm-btn').addEventListener('click', async () => {
+			const friend_code = $('kmm-add-friend-modal-field').value.trim();
 
-		Swal.getConfirmButton().addEventListener('click', () => {
-			console.log('Confirm button has been pressed!');
+			if (!/^\d{3}-\d{3}-\d{3}$/.test(friend_code))
+				return show_modal_error(getLangString('MOD_KMM_INVALID_FRIEND_CODE_ERR'));
+
+			await new Promise(res => setTimeout(res, 2000)); // testing
+
+			// todo: validate friend code on server.
+
+			Swal.close();
 		});
+
+		$('kmm-modal-cancel-btn').addEventListener('click', () => Swal.close());
 	}
 }
 

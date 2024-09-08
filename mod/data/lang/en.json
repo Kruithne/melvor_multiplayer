@@ -1,5 +1,6 @@
 {
 	"MOD_KMM_MULTIPLAYER_CONNECTION_ERR": "Unable to connect to multiplayer.",
+	"MOD_KMM_INVALID_FRIEND_CODE_ERR": "Invalid friend code.",
 
 	"MOD_KMM_TITLE_FRIEND_CODE": "Your Friend Code",
 	"MOD_KMM_TITLE_ADD_FRIEND": "Add Friend",
