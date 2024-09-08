@@ -32,10 +32,12 @@ const state = ui.createStore({
 	},
 
 	reconnect() {
+		state.hide_online_dropdown();
 		start_mutliplayer_session();
 	},
 
 	show_friend_code_modal() {
+		state.hide_online_dropdown();
 		show_modal('MOD_KMM_TITLE_FRIEND_CODE', 'kmm-friend-code-modal', true);
 	}
 });
