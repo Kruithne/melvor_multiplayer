@@ -157,7 +157,8 @@ session_post_route('/api/friends/add', async (req, url, client_id, json) => {
 	if (friend_user_id === client_id)
 		return { error_lang: 'MOD_KMM_NO_SELF_LOVE_ERR' };
 
-	// todo: map friendship
+	if (!(await db_exists('SELECT 1 FROM `friend_requests` WHERE `client_id` = ? AND `friend_id` = ? LIMIT 1', [client_id, friend_user_id])))
+		await db_insert('INSERT INTO `friend_requests` (`client_id`, `friend_id`) VALUES(?, ?)', [client_id, friend_user_id]);
 
 	return { success: true } as JsonSerializable;
 });
