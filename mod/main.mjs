@@ -211,6 +211,14 @@ function set_character_storage_item(key, value) {
 		ctx.characterStorage.setItem(key, value);
 }
 
+function connect_event_pipe() {
+	const event_source = new EventSource('/pipe/events');
+	event_source.addEventListener('test_message', event => {
+		const data = JSON.parse(event.data);
+		console.log(data);
+	});
+}
+
 function set_session_token(token) {
 	session_token = token;
 	log('client session authenticated (%s)', token);
@@ -260,6 +268,8 @@ async function start_multiplayer_session() {
 			error('failed to register client, multiplayer features not available');
 		}
 	}
+
+	connect_event_pipe();
 
 	is_connecting = false;
 }

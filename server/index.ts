@@ -3,7 +3,7 @@ import { format } from 'node:util';
 import { db_get_single, db_execute, db_insert, db_count, db_exists } from './db';
 import { db_row_clients } from './db/types/clients';
 import { db_row_client_sessions } from './db/types/client_sessions';
-import type { JsonPrimitive, JsonArray, JsonObject } from 'spooder';
+import type { JsonPrimitive, JsonArray, JsonObject, ServerSentEventClient } from 'spooder';
 
 interface ToJson {
 	toJSON(): any;
@@ -18,6 +18,7 @@ type HandlerReturnType = Resolvable<string | number | BunFile | Response | JsonS
 type SessionRequestHandler = (req: Request, url: URL, client_id: number, json: JsonObject) => HandlerReturnType;
 
 const server = serve(Number(process.env.SERVER_PORT));
+const pipe_clients = new Set<ServerSentEventClient>();
 
 // maximum cache life is X * 2, minimum is X.
 const CACHE_SESSION_LIFETIME = 1000 * 60 * 60;
@@ -104,6 +105,16 @@ async function get_session_client_id(session_token: unknown): Promise<number> {
 
 	return client_id;
 }
+
+function send_pipe_event(event_name: string, event_data: JsonSerializable) {
+	const json_event_data = JSON.stringify(event_data);
+	for (const client of pipe_clients)
+		client.event(event_name, json_event_data);
+}
+
+setInterval(() => {
+	send_pipe_event('test_event', { random: Math.random() });
+}, 1000);
 
 function sweep_client_session_cache() {
 	const current_time = Date.now();
@@ -221,6 +232,11 @@ server.route('/api/register', validate_req_json(async (req, url, json) => {
 	const session_token = await generate_session_token(client_id);
 	return { session_token, client_identifier, friend_code };
 }), 'POST');
+
+server.sse('/pipe/events', (req, url, client) => {
+	pipe_clients.add(client);
+	client.closed.then(() => pipe_clients.delete(client));
+});
 
 // caution on slow requests
 server.on_slow_request((req, request_time, url) => {
