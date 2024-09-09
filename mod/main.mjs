@@ -212,7 +212,7 @@ function set_character_storage_item(key, value) {
 }
 
 function connect_event_pipe() {
-	const event_source = new EventSource('/pipe/events');
+	const event_source = new EventSource(SERVER_HOST + '/pipe/events');
 	event_source.addEventListener('test_message', event => {
 		const data = JSON.parse(event.data);
 		console.log(data);
