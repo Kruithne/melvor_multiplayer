@@ -179,7 +179,7 @@ server.route('/api/authenticate', validate_req_json(async (req, url, json) => {
 	const client_identifier = json.client_identifier;
 	const client_key = json.client_key;
 
-	if (typeof client_identifier !== 'string' || typeof client_key !== 'string' || typeof display_name !== 'string')
+	if (typeof client_identifier !== 'string' || typeof client_key !== 'string')
 		return 400; // Bad Request
 
 	if (!is_valid_uuid(client_identifier) || !is_valid_uuid(client_key))
