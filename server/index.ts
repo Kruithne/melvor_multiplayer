@@ -18,7 +18,7 @@ type HandlerReturnType = Resolvable<string | number | BunFile | Response | JsonS
 type SessionRequestHandler = (req: Request, url: URL, client_id: number, json: JsonObject) => HandlerReturnType;
 
 const server = serve(Number(process.env.SERVER_PORT));
-const pipe_clients = new Set<ServerSentEventClient>();
+const pipe_clients = new Set<WebSocket>();
 
 // maximum cache life is X * 2, minimum is X.
 const CACHE_SESSION_LIFETIME = 1000 * 60 * 60;
@@ -109,7 +109,7 @@ async function get_session_client_id(session_token: unknown): Promise<number> {
 function send_pipe_event(event_name: string, event_data: JsonSerializable) {
 	const json_event_data = JSON.stringify(event_data);
 	for (const client of pipe_clients)
-		client.event(event_name, json_event_data);
+		client.send(json_event_data);
 }
 
 setInterval(() => {
@@ -233,9 +233,19 @@ server.route('/api/register', validate_req_json(async (req, url, json) => {
 	return { session_token, client_identifier, friend_code };
 }), 'POST');
 
-server.sse('/pipe/events', (req, url, client) => {
-	pipe_clients.add(client);
-	client.closed.then(() => pipe_clients.delete(client));
+server.websocket('/pipe/events', {
+	accept: (req) => {
+		// todo: authenticate
+		return true;
+	},
+
+	open: (ws) => {
+		pipe_clients.add(ws);
+	},
+
+	close: (ws, code, reason) => {
+		pipe_clients.delete(ws);
+	}
 });
 
 // caution on slow requests

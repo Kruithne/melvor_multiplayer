@@ -212,11 +212,25 @@ function set_character_storage_item(key, value) {
 }
 
 function connect_event_pipe() {
-	const event_source = new EventSource(SERVER_HOST + '/pipe/events');
-	event_source.addEventListener('test_message', event => {
+	const ws = new WebSocket(SERVER_HOST.replace('https:', 'wss:') + '/pipe/events', session_token);
+
+	ws.onopen = () => {
+		log('event pipe connected');
+	};
+
+	ws.onmessage = (event) => {
 		const data = JSON.parse(event.data);
-		console.log(data);
-	});
+		log('received event: %o', data);
+	}
+
+	ws.onclose = (event) => {
+		error('event pipe disconnected (%s)', event.reason);
+		setTimeout(() => connect_event_pipe(), 5000);
+	}
+
+	ws.onerror = (event) => {
+		error('event pipe error (%s)', event.message);
+	}
 }
 
 function set_session_token(token) {
