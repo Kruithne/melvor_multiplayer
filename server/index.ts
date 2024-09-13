@@ -21,7 +21,7 @@ type SessionRequestHandler = (req: Request, url: URL, client_id: number, json: J
 const server = serve(Number(process.env.SERVER_PORT));
 
 // maximum cache life is X * 2, minimum is X.
-const CACHE_SESSION_LIFETIME = 1000 * 60 * 60;
+const CACHE_SESSION_LIFETIME = 1000 * 60 * 60; // 1 hour
 
 type CachedSession = { client_id: number, last_access: number };
 const client_session_cache = new Map<string, CachedSession>();
