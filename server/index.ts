@@ -145,7 +145,7 @@ async function get_friend_requests(client_id: number): Promise<FriendRequest[]> 
 	if (cached_entries)
 		return cached_entries;
 
-	const result = await db_get_all('SELECT `request_id` FROM `friend_requests` WHERE `client_id` = ?', [client_id]) as db_row_friend_requests[];
+	const result = await db_get_all('SELECT `request_id`, `friend_id` FROM `friend_requests` WHERE `client_id` = ?', [client_id]) as db_row_friend_requests[];
 	const requests = [];
 
 	for (const row of result) {
