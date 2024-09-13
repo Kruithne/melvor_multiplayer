@@ -1,9 +1,10 @@
 import { caution, serve, validate_req_json, HTTP_STATUS_CODE } from 'spooder';
 import { format } from 'node:util';
-import { db_get_single, db_execute, db_insert, db_count, db_exists } from './db';
+import { db_get_single, db_execute, db_insert, db_count, db_exists, db_get_all } from './db';
 import { db_row_clients } from './db/types/clients';
 import { db_row_client_sessions } from './db/types/client_sessions';
 import type { JsonPrimitive, JsonArray, JsonObject, ServerSentEventClient } from 'spooder';
+import { db_row_friend_requests } from './db/types/friend_requests';
 
 interface ToJson {
 	toJSON(): any;
@@ -117,6 +118,14 @@ function sweep_client_session_cache() {
 
 setTimeout(sweep_client_session_cache, CACHE_SESSION_LIFETIME);
 
+async function get_friend_requests(client_id: number) {
+	const requests = await db_get_all('SELECT `request_id`, `friend_id` FROM `friend_requests` WHERE `client_id` = ?', [client_id]) as db_row_friend_requests[];
+
+	// todo: memory caching.
+
+	return requests;
+}
+
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
 	return async (req: Request, url: URL) => {
 		let json = null;
@@ -152,11 +161,8 @@ function session_post_route(route: string, handler: SessionRequestHandler) {
 }
 
 session_get_route('/api/events', async (req, url, client_id) => {
-	// placeholder
 	return {
-		test: [
-			{ id: 1, display: 'Captain Placeholder' }
-		]
+		friend_requests: await get_friend_requests(client_id)
 	};
 });
 
@@ -175,8 +181,10 @@ session_post_route('/api/friends/add', async (req, url, client_id, json) => {
 	if (friend_user_id === client_id)
 		return { error_lang: 'MOD_KMM_NO_SELF_LOVE_ERR' };
 
-	if (!(await db_exists('SELECT 1 FROM `friend_requests` WHERE `client_id` = ? AND `friend_id` = ? LIMIT 1', [client_id, friend_user_id])))
-		await db_insert('INSERT INTO `friend_requests` (`client_id`, `friend_id`) VALUES(?, ?)', [client_id, friend_user_id]);
+	// note: client_id and friend_id are swapped when inserting, as it makes logical sense to look up
+	// client_id for requests, then add the friend_id, rather than looking up friend_id.
+	if (!(await db_exists('SELECT 1 FROM `friend_requests` WHERE `client_id` = ? AND `friend_id` = ? LIMIT 1', [friend_user_id, client_id])))
+		await db_insert('INSERT INTO `friend_requests` (`client_id`, `friend_id`) VALUES(?, ?)', [friend_user_id, client_id]);
 
 	return { success: true } as JsonSerializable;
 });
