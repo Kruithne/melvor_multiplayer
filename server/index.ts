@@ -241,20 +241,24 @@ server.websocket('/pipe/events', {
 		if (client_id === -1)
 			return false;
 
+		log('pipe', 'establishing event pipe for {%d} [session {%s}]', client_id, x_session_token);
 		return { client_id };
 	},
 
 	open: (ws) => {
 		// @ts-ignore
 		const client_id = ws.data.client_id as number;
-		pipe_clients.add(ws);
 
+		pipe_clients.add(ws);
 		log('pipe', 'client {%d} connected [{%d} active]', client_id, pipe_clients.size);
 	},
 
 	close: (ws, code, reason) => {
+		// @ts-ignore
+		const client_id = ws.data.client_id as number;
+
 		pipe_clients.delete(ws);
-		log('pipe', 'client disconnected [{%d} active]', pipe_clients.size);
+		log('pipe', 'client {%d} disconnected ({%s %s}) [{%d} active]', client_id, code, reason, pipe_clients.size);
 	}
 });
 
