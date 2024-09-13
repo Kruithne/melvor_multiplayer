@@ -26,7 +26,13 @@ const CACHE_SESSION_LIFETIME = 1000 * 60 * 60; // 1 hour
 type CachedSession = { client_id: number, last_access: number };
 const client_session_cache = new Map<string, CachedSession>();
 
-const friend_request_cache = new Map<number, db_row_friend_requests[]>();
+const friend_request_cache = new Map<number, FriendRequest[]>();
+const display_name_cache = new Map<number, string>();
+
+type FriendRequest = {
+	display_name: string;
+	request_id: number;
+}
 
 function log(prefix: string, message: string, ...args: unknown[]): void {
 	let formatted_message = format('[{' + prefix + '}] ' + message, ...args);
@@ -120,39 +126,51 @@ function sweep_client_session_cache() {
 
 setTimeout(sweep_client_session_cache, CACHE_SESSION_LIFETIME);
 
-async function get_friend_requests(client_id: number): Promise<db_row_friend_requests[]> {
+async function get_client_display_name(client_id: number): Promise<string> {
+	const cached = display_name_cache.get(client_id);
+	if (cached !== undefined)
+		return cached;
+
+	const client = await db_get_single('SELECT `display_name` FROM `clients` WHERE `id` = ?', [client_id]) as db_row_clients;
+	if (client !== null) {
+		display_name_cache.set(client_id, client.display_name);
+		return client.display_name;
+	}
+
+	return 'Unknown Idler';
+}
+
+async function get_friend_requests(client_id: number): Promise<FriendRequest[]> {
 	const cached_entries = friend_request_cache.get(client_id);
 	if (cached_entries)
 		return cached_entries;
 
-	const requests = await db_get_all('SELECT `request_id`, `friend_id` FROM `friend_requests` WHERE `client_id` = ?', [client_id]) as db_row_friend_requests[];
+	const result = await db_get_all('SELECT `request_id` FROM `friend_requests` WHERE `client_id` = ?', [client_id]) as db_row_friend_requests[];
+	const requests = [];
+
+	for (const row of result) {
+		requests.push({
+			display_name: await get_client_display_name(row?.friend_id as number),
+			request_id: row?.request_id ?? -1
+		});
+	}
+
 	friend_request_cache.set(client_id, requests);
 
 	return requests;
 }
 
 async function friend_request_exists(client_id: number, friend_id: number): Promise<boolean> {
-	const requests = await get_friend_requests(client_id);
-
-	for (const request of requests) {
-		if (request?.friend_id === friend_id)
-			return true;
-	}
-
-	return false;
+	return await db_exists('SELECT 1 FROM `friend_requests` WHERE `client_id` = ? AND `friend_id` = ?', [client_id, friend_id]);
 }
 
 async function create_friend_request(client_id: number, friend_id: number) {
 	const request_id = await db_insert('INSERT INTO `friend_requests` (`client_id`, `friend_id`) VALUES(?, ?)', [client_id, friend_id]);
-	const requests = friend_request_cache.get(client_id);
 
-	if (requests) {
-		requests.push({
-			request_id,
-			client_id,
-			friend_id
-		});
-	}
+	friend_request_cache.get(client_id)?.push({
+		display_name: await get_client_display_name(friend_id),
+		request_id,
+	});
 }
 
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
