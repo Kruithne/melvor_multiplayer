@@ -235,17 +235,13 @@ server.route('/api/register', validate_req_json(async (req, url, json) => {
 
 server.websocket('/pipe/events', {
 	accept: async (req) => {
-		const x_session_token = req.headers.get('X-Session-Token');
+		const x_session_token = req.headers.get('sec-websocket-protocol');
 		const client_id = await get_session_client_id(x_session_token);
 
 		console.log({
 			x_session_token,
 			client_id
 		});
-
-		console.log(req);
-
-		return true;
 
 		if (client_id === -1)
 			return false;
@@ -256,7 +252,6 @@ server.websocket('/pipe/events', {
 	open: (ws) => {
 		pipe_clients.add(ws);
 		console.log(ws.data);
-		console.log(ws);
 	},
 
 	close: (ws, code, reason) => {
