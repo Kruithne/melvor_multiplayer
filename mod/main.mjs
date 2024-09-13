@@ -258,6 +258,7 @@ async function start_multiplayer_session() {
 
 		if (auth_res !== null) {
 			set_session_token(auth_res.session_token);
+			connect_event_pipe();
 		} else {
 			notify_error('MOD_KMM_MULTIPLAYER_CONNECTION_ERR');
 			error('failed to authenticate client, multiplayer features not available');
@@ -277,13 +278,12 @@ async function start_multiplayer_session() {
 			set_character_storage_item('friend_code', register_res.friend_code);
 
 			set_session_token(register_res.session_token);
+			connect_event_pipe();
 		} else {
 			notify_error('MOD_KMM_MULTIPLAYER_CONNECTION_ERR');
 			error('failed to register client, multiplayer features not available');
 		}
 	}
-
-	connect_event_pipe();
 
 	is_connecting = false;
 }
