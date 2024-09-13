@@ -238,11 +238,15 @@ server.websocket('/pipe/events', {
 		const x_session_token = req.headers.get('X-Session-Token');
 		const client_id = await get_session_client_id(x_session_token);
 
-		return client_id !== -1;
+		if (client_id === -1)
+			return false;
+
+		return { client_id };
 	},
 
 	open: (ws) => {
 		pipe_clients.add(ws);
+		console.log(ws.data);
 	},
 
 	close: (ws, code, reason) => {
