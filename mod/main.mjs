@@ -11,8 +11,6 @@ const DEV_CHARACTER_STORAGE = {
 let session_token = null;
 let is_connecting = false;
 
-let event_pipe_ws = null;
-
 const ctx = mod.getContext(import.meta);
 const state = ui.createStore({
 	get_svg(id) {
@@ -213,32 +211,18 @@ function set_character_storage_item(key, value) {
 		ctx.characterStorage.setItem(key, value);
 }
 
-function connect_event_pipe() {
-	event_pipe_ws?.close();
-	event_pipe_ws = new WebSocket(SERVER_HOST.replace('https:', 'wss:') + '/pipe/events', session_token);
-
-	event_pipe_ws.onopen = () => {
-		log('event pipe connected');
-	};
-
-	event_pipe_ws.onmessage = (event) => {
-		const data = JSON.parse(event.data);
-		//log('received event: %o', data);
-	};
-
-	event_pipe_ws.onclose = (event) => {
-		error('event pipe disconnected (%d)', event.code);
-		setTimeout(() => connect_event_pipe(), 5000);
-	};
-
-	event_pipe_ws.onerror = (event) => {
-		error('event pipe error (%s)', event.message);
-	};
-}
-
 function set_session_token(token) {
 	session_token = token;
 	log('client session authenticated (%s)', token);
+}
+
+async function get_client_events() {
+	const res = await api_get('/api/events');
+	if (res !== null) {
+		console.log(res);
+	}
+
+	setTimeout(get_client_events, 300000); // schedule for 5 minutes
 }
 
 async function start_multiplayer_session() {
@@ -261,7 +245,7 @@ async function start_multiplayer_session() {
 
 		if (auth_res !== null) {
 			set_session_token(auth_res.session_token);
-			connect_event_pipe();
+			get_client_events();
 		} else {
 			notify_error('MOD_KMM_MULTIPLAYER_CONNECTION_ERR');
 			error('failed to authenticate client, multiplayer features not available');
@@ -281,7 +265,7 @@ async function start_multiplayer_session() {
 			set_character_storage_item('friend_code', register_res.friend_code);
 
 			set_session_token(register_res.session_token);
-			connect_event_pipe();
+			get_client_events();
 		} else {
 			notify_error('MOD_KMM_MULTIPLAYER_CONNECTION_ERR');
 			error('failed to register client, multiplayer features not available');

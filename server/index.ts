@@ -18,7 +18,6 @@ type HandlerReturnType = Resolvable<string | number | BunFile | Response | JsonS
 type SessionRequestHandler = (req: Request, url: URL, client_id: number, json: JsonObject) => HandlerReturnType;
 
 const server = serve(Number(process.env.SERVER_PORT));
-const pipe_clients = new Map<number, WebSocket>();
 
 // maximum cache life is X * 2, minimum is X.
 const CACHE_SESSION_LIFETIME = 1000 * 60 * 60;
@@ -106,12 +105,6 @@ async function get_session_client_id(session_token: unknown): Promise<number> {
 	return client_id;
 }
 
-function send_pipe_event(event_name: string, event_data: JsonSerializable) {
-	const json_event_data = JSON.stringify(event_data);
-	for (const client of pipe_clients.values())
-		client.send(json_event_data);
-}
-
 function sweep_client_session_cache() {
 	const current_time = Date.now();
 
@@ -157,6 +150,15 @@ function session_get_route(route: string, handler: SessionRequestHandler) {
 function session_post_route(route: string, handler: SessionRequestHandler) {
 	server.route(route, validate_session_request(handler, true), 'POST');
 }
+
+session_get_route('/api/events', async (req, url, client_id) => {
+	// placeholder
+	return {
+		test: [
+			{ id: 1, display: 'Captain Placeholder' }
+		]
+	};
+});
 
 session_post_route('/api/friends/add', async (req, url, client_id, json) => {
 	const friend_code = json.friend_code;
@@ -228,40 +230,6 @@ server.route('/api/register', validate_req_json(async (req, url, json) => {
 	const session_token = await generate_session_token(client_id);
 	return { session_token, client_identifier, friend_code };
 }), 'POST');
-
-server.websocket('/pipe/events', {
-	accept: async (req) => {
-		const x_session_token = req.headers.get('sec-websocket-protocol');
-		const client_id = await get_session_client_id(x_session_token);
-
-		if (client_id === -1)
-			return false;
-
-		log('pipe', 'establishing event pipe for {%d} [session {%s}]', client_id, x_session_token);
-		return { client_id };
-	},
-
-	open: (ws) => {
-		// @ts-ignore
-		const client_id = ws.data.client_id as number;
-
-		pipe_clients.get(client_id)?.close();
-		pipe_clients.set(client_id, ws);
-		
-		log('pipe', 'client {%d} connected [{%d} active]', client_id, pipe_clients.size);
-	},
-
-	close: (ws, code, reason) => {
-		// @ts-ignore
-		const client_id = ws.data.client_id as number;
-
-		const socket = pipe_clients.get(client_id);
-		if (socket === ws)
-			pipe_clients.delete(client_id);
-
-		log('pipe', 'client {%d} disconnected ({%s %s}) [{%d} active]', client_id, code, reason, pipe_clients.size);
-	}
-});
 
 // caution on slow requests
 server.on_slow_request((req, request_time, url) => {
