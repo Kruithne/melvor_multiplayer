@@ -238,14 +238,9 @@ server.websocket('/pipe/events', {
 	accept: async (req) => {
 		if (is_closing)
 			return false;
-		
+
 		const x_session_token = req.headers.get('sec-websocket-protocol');
 		const client_id = await get_session_client_id(x_session_token);
-
-		console.log({
-			x_session_token,
-			client_id
-		});
 
 		if (client_id === -1)
 			return false;
@@ -254,8 +249,9 @@ server.websocket('/pipe/events', {
 	},
 
 	open: (ws) => {
+		// @ts-ignore
+		const client_id = ws.data.client_id as number;
 		pipe_clients.add(ws);
-		console.log(ws.data);
 	},
 
 	close: (ws, code, reason) => {
