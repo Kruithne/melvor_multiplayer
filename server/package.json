@@ -21,7 +21,7 @@
 	},
 	"dependencies": {
 		"mysql2": "^3.11.0",
-		"spooder": "^4.5.0"
+		"spooder": "^4.5.1"
 	},
 	"devDependencies": {
 		"bun-types": "^1.0.14"
