@@ -17,6 +17,7 @@ type HandlerReturnType = Resolvable<string | number | BunFile | Response | JsonS
 
 type SessionRequestHandler = (req: Request, url: URL, client_id: number, json: JsonObject) => HandlerReturnType;
 
+let is_closing = false;
 const server = serve(Number(process.env.SERVER_PORT));
 const pipe_clients = new Set<WebSocket>();
 
@@ -235,6 +236,9 @@ server.route('/api/register', validate_req_json(async (req, url, json) => {
 
 server.websocket('/pipe/events', {
 	accept: async (req) => {
+		if (is_closing)
+			return false;
+		
 		const x_session_token = req.headers.get('sec-websocket-protocol');
 		const client_id = await get_session_client_id(x_session_token);
 
@@ -277,6 +281,12 @@ server.default((req, status_code) => default_handler(status_code));
 if (typeof process.env.GH_WEBHOOK_SECRET === 'string') {
 	server.webhook(process.env.GH_WEBHOOK_SECRET, '/internal/webhook', () => {
 		setImmediate(async () => {
+			is_closing = true;
+
+			// close all websockets
+			for (const client of pipe_clients)
+				client.close(1012); // Service Restart
+
 			await server.stop(false);
 			process.exit(0);
 		});
