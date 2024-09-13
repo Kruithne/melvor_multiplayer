@@ -112,10 +112,6 @@ function send_pipe_event(event_name: string, event_data: JsonSerializable) {
 		client.send(json_event_data);
 }
 
-setInterval(() => {
-	send_pipe_event('test_event', { random: Math.random() });
-}, 1000);
-
 function sweep_client_session_cache() {
 	const current_time = Date.now();
 

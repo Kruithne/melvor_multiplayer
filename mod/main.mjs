@@ -223,11 +223,11 @@ function connect_event_pipe() {
 
 	event_pipe_ws.onmessage = (event) => {
 		const data = JSON.parse(event.data);
-		log('received event: %o', data);
+		//log('received event: %o', data);
 	};
 
 	event_pipe_ws.onclose = (event) => {
-		error('event pipe disconnected (%s)', event.reason);
+		error('event pipe disconnected (%d)', event.code);
 		setTimeout(() => connect_event_pipe(), 5000);
 	};
 
