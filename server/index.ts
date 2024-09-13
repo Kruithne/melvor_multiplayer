@@ -248,10 +248,13 @@ server.websocket('/pipe/events', {
 		// @ts-ignore
 		const client_id = ws.data.client_id as number;
 		pipe_clients.add(ws);
+
+		log('pipe', 'client {%d} connected [{%d} active]', client_id, pipe_clients.size);
 	},
 
 	close: (ws, code, reason) => {
 		pipe_clients.delete(ws);
+		log('pipe', 'client disconnected [{%d} active]', pipe_clients.size);
 	}
 });
 
