@@ -234,9 +234,11 @@ server.route('/api/register', validate_req_json(async (req, url, json) => {
 }), 'POST');
 
 server.websocket('/pipe/events', {
-	accept: (req) => {
-		// todo: authenticate
-		return true;
+	accept: async (req) => {
+		const x_session_token = req.headers.get('X-Session-Token');
+		const client_id = await get_session_client_id(x_session_token);
+
+		return client_id !== -1;
 	},
 
 	open: (ws) => {
