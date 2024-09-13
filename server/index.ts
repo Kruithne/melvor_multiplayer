@@ -18,7 +18,7 @@ type HandlerReturnType = Resolvable<string | number | BunFile | Response | JsonS
 type SessionRequestHandler = (req: Request, url: URL, client_id: number, json: JsonObject) => HandlerReturnType;
 
 const server = serve(Number(process.env.SERVER_PORT));
-const pipe_clients = new Set<WebSocket>();
+const pipe_clients = new Map<number, WebSocket>();
 
 // maximum cache life is X * 2, minimum is X.
 const CACHE_SESSION_LIFETIME = 1000 * 60 * 60;
@@ -108,7 +108,7 @@ async function get_session_client_id(session_token: unknown): Promise<number> {
 
 function send_pipe_event(event_name: string, event_data: JsonSerializable) {
 	const json_event_data = JSON.stringify(event_data);
-	for (const client of pipe_clients)
+	for (const client of pipe_clients.values())
 		client.send(json_event_data);
 }
 
@@ -245,7 +245,9 @@ server.websocket('/pipe/events', {
 		// @ts-ignore
 		const client_id = ws.data.client_id as number;
 
-		pipe_clients.add(ws);
+		pipe_clients.get(client_id)?.close();
+		pipe_clients.set(client_id, ws);
+		
 		log('pipe', 'client {%d} connected [{%d} active]', client_id, pipe_clients.size);
 	},
 
@@ -253,7 +255,10 @@ server.websocket('/pipe/events', {
 		// @ts-ignore
 		const client_id = ws.data.client_id as number;
 
-		pipe_clients.delete(ws);
+		const socket = pipe_clients.get(client_id);
+		if (socket === ws)
+			pipe_clients.delete(client_id);
+
 		log('pipe', 'client {%d} disconnected ({%s %s}) [{%d} active]', client_id, code, reason, pipe_clients.size);
 	}
 });
