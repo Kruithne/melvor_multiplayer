@@ -222,7 +222,7 @@ async function get_client_events() {
 		console.log(res);
 	}
 
-	setTimeout(get_client_events, 300000); // schedule for 5 minutes
+	setTimeout(get_client_events, 60000);
 }
 
 async function start_multiplayer_session() {
