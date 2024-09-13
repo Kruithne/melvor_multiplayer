@@ -11,6 +11,8 @@ const DEV_CHARACTER_STORAGE = {
 let session_token = null;
 let is_connecting = false;
 
+let event_pipe_ws = null;
+
 const ctx = mod.getContext(import.meta);
 const state = ui.createStore({
 	get_svg(id) {
@@ -212,25 +214,26 @@ function set_character_storage_item(key, value) {
 }
 
 function connect_event_pipe() {
-	const ws = new WebSocket(SERVER_HOST.replace('https:', 'wss:') + '/pipe/events', session_token);
+	event_pipe_ws?.close();
+	event_pipe_ws = new WebSocket(SERVER_HOST.replace('https:', 'wss:') + '/pipe/events', session_token);
 
-	ws.onopen = () => {
+	event_pipe_ws.onopen = () => {
 		log('event pipe connected');
 	};
 
-	ws.onmessage = (event) => {
+	event_pipe_ws.onmessage = (event) => {
 		const data = JSON.parse(event.data);
 		log('received event: %o', data);
-	}
+	};
 
-	ws.onclose = (event) => {
+	event_pipe_ws.onclose = (event) => {
 		error('event pipe disconnected (%s)', event.reason);
 		setTimeout(() => connect_event_pipe(), 5000);
-	}
+	};
 
-	ws.onerror = (event) => {
+	event_pipe_ws.onerror = (event) => {
 		error('event pipe error (%s)', event.message);
-	}
+	};
 }
 
 function set_session_token(token) {
