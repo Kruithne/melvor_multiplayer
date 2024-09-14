@@ -92,6 +92,8 @@ const state = ui.createStore({
 	async remove_friend_prompt(friend) {
 		this.close_modal();
 
+		state.removingFriend = friend;
+
 		addModalToQueue({
 			title: getLangString('MOD_KMM_TITLE_REMOVE_FRIEND_CONFIRM'),
 			html: custom_element_tag('kmm-remove-friend-modal'),
