@@ -101,7 +101,8 @@ const state = ui.createStore({
 			imageWidth: 64,
 			imageHeight: 64,
 			allowOutsideClick: true,
-			backdrop: true
+			backdrop: true,
+			showConfirmButton: false
 		});
 	},
 
