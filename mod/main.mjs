@@ -492,8 +492,54 @@ class KMMAddFriendModal extends HTMLElement {
 	}
 }
 
+class LangStringFormattedElement extends HTMLElement {
+	constructor() {
+		super();
+	}
+
+	connectedCallback() {
+		this.updateTranslation();
+	}
+
+	updateTranslation() {
+		const lang_id = this.getAttribute('lang-id');
+		
+		if (lang_id === null) {
+			this.textContent = 'Language ID Undefined';
+			return;
+		}
+
+		let translated_string = getLangString(`${lang_id}`);
+		
+		const format_args = [];
+		let i = 1;
+		while (this.hasAttribute(`lang-arg-${i}`)) {
+			format_args.push(this.getAttribute(`lang-arg-${i}`));
+			i++;
+		}
+
+		if (format_args.length > 0)
+			translated_string = this.formatString(translated_string, format_args);
+		
+		this.textContent = translated_string;
+	}
+
+	formatString(str, args) {
+		return str.replace(/%s/g, () => args.shift() || '');
+	}
+
+	attributeChangedCallback(name, oldValue, newValue) {
+		this.updateTranslation();
+	}
+
+	static get observedAttributes() {
+		return ['lang-id', ...Array.from({length: 10}, (_, i) => `lang-arg-${i+1}`)];
+	}
+}
+
 window.customElements.define('kmm-friend-code-modal', KMMFriendCodeModal);
 window.customElements.define('kmm-add-friend-modal', KMMAddFriendModal);
 window.customElements.define('kmm-friend-request-modal', KMMFriendRequestModal);
 window.customElements.define('kmm-friends-modal', KMMFriendsModal);
 window.customElements.define('kmm-remove-friend-modal', KMMRemoveFriendModal);
+window.customElements.define('lang-string-f', LangStringFormattedElement);

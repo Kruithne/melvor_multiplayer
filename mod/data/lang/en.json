@@ -27,8 +27,7 @@
 
 	"MOD_KMM_MODAL_DESC_CODE": "Let people add you by sharing the code below.",
 	"MOD_KMM_MODAL_DESC_ADD_FRIEND": "Enter a friend code to add another player.",
-	"MOD_KMM_MODAL_DESC_REMOVE_FRIEND_A": "Are you sure you want to remove ",
-	"MOD_KMM_MODAL_DESC_REMOVE_FRIEND_B": " as a friend?",
+	"MOD_KMM_MODAL_DESC_REMOVE_FRIEND": "Are you sure you want to remove %s as a friend?",
 
 	"MOD_KMM_MODAL_NO_FRIEND_REQUESTS": "You have no pending friend requests.",
 	"MOD_KMM_MODAL_NO_FRIENDS": "You have no friends yet!",
