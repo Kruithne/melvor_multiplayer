@@ -175,11 +175,21 @@ async function create_friend_request(client_id: number, friend_id: number) {
 }
 
 async function get_friend_request(request_id: number): Promise<db_row_friend_requests> {
-	return await db_get_single('SELECT `client_id`, `friend_id` FROM `friend_requests` WHERE `request_id` = ?', [request_id]) as db_row_friend_requests;
+	return await db_get_single('SELECT `request_id`, `client_id`, `friend_id` FROM `friend_requests` WHERE `request_id` = ?', [request_id]) as db_row_friend_requests;
 }
 
-async function delete_friend_request(request_id: number) {
-	await db_execute('DELETE FROM `friend_requests` WHERE `request_id` = ?', [request_id]);
+async function delete_friend_request(request: db_row_friend_requests) {
+	if (request === null)
+		return;
+
+	const cached = friend_request_cache.get(request.client_id);
+	if (cached !== undefined) {
+		const index = cached.findIndex(entry => entry.request_id === request.request_id);
+		if (index !== -1)
+			cached.splice(index, 1);
+	}
+
+	await db_execute('DELETE FROM `friend_requests` WHERE `request_id` = ?', [request.request_id]);
 }
 
 async function create_friendship(client_id_a: number, client_id_b: number) {
@@ -251,7 +261,7 @@ session_post_route('/api/friends/accept', async (req, url, client_id, json) => {
 	const request = await get_friend_request(request_id);
 	if (request !== null && request.client_id === client_id) {
 		await create_friendship(request.client_id, request.friend_id);
-		await delete_friend_request(request_id);
+		await delete_friend_request(request);
 
 		return {
 			success: true,
@@ -272,7 +282,7 @@ session_post_route('/api/friends/ignore', async (req, url, client_id, json) => {
 
 	const request = await get_friend_request(request_id);
 	if (request !== null && request.client_id === client_id)
-		await delete_friend_request(request_id);
+		await delete_friend_request(request);
 	
 	return { success: true };
 });
