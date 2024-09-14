@@ -143,15 +143,19 @@ function hook_modal_confirm(id, callback, spinner) {
 	});
 }
 
-function show_button_spinner(id) {
-	const $element = $(id);
-	const $spinner = $element.querySelector('[role="status"]');
+function show_button_spinner(element) {
+	if (typeof element === 'string')
+		element = $(element);
+
+	const $spinner = element.querySelector('[role="status"]');
 	$spinner.classList.remove('d-none');
 }
 
-function hide_button_spinner(id) {
-	const $element = $(id);
-	const $spinner = $element.querySelector('[role="status"]');
+function hide_button_spinner(element) {
+	if (typeof element === 'string')
+		element = $(element);
+
+	const $spinner = element.querySelector('[role="status"]');
 	$spinner.classList.add('d-none');
 }
 
