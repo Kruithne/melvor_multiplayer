@@ -13,6 +13,8 @@ let is_connecting = false;
 
 const ctx = mod.getContext(import.meta);
 const state = ui.createStore({
+	removingFriend: null,
+
 	events: {
 		friend_requests: []
 	},
@@ -33,6 +35,10 @@ const state = ui.createStore({
 
 	get_svg_url(id) {
 		return 'url(' + this.get_svg(id) + ')';
+	},
+
+	close_modal() {
+		Swal.close();
 	},
 
 	toggle_online_dropdown() {
@@ -81,6 +87,34 @@ const state = ui.createStore({
 			hide_button_spinner(event.currentTarget);
 			notify_error('MOD_KMM_GENERIC_ERR');
 		}
+	},
+
+	async remove_friend_prompt(friend) {
+		this.close_modal();
+
+		addModalToQueue({
+			title: getLangString('MOD_KMM_TITLE_REMOVE_FRIEND_CONFIRM'),
+			html: custom_element_tag('kmm-remove-friend-modal'),
+			imageUrl: ctx.getResourceUrl('assets/remove_friend.svg'),
+			imageWidth: 64,
+			imageHeight: 64,
+			allowOutsideClick: true,
+			backdrop: true
+		});
+	},
+
+	async remove_friend($event) {
+		show_button_spinner($event.currentTarget);
+		const friend_id = state.removingFriend.friend_id;
+
+		const res = await api_post('/api/friends/remove', { friend_id });
+
+		if (res?.success) {
+			state.friends = state.friends.filter(f => f.friend_id !== friend_id);
+			notify('MOD_KMM_NOTIF_FRIEND_REMOVED');
+		}
+
+		state.close_modal();
 	},
 
 	show_friends_modal() {
@@ -388,6 +422,14 @@ class KMMFriendCodeModal extends HTMLElement {
 	}
 }
 
+class KMMRemoveFriendModal extends HTMLElement {
+	constructor() {
+		super();
+
+		make_template('remove-friend-modal', this);
+	}
+}
+
 class KMMFriendRequestModal extends HTMLElement {
 	constructor() {
 		super();
@@ -451,3 +493,4 @@ window.customElements.define('kmm-friend-code-modal', KMMFriendCodeModal);
 window.customElements.define('kmm-add-friend-modal', KMMAddFriendModal);
 window.customElements.define('kmm-friend-request-modal', KMMFriendRequestModal);
 window.customElements.define('kmm-friends-modal', KMMFriendsModal);
+window.customElements.define('kmm-remove-friend-modal', KMMRemoveFriendModal);

@@ -81,10 +81,27 @@
 <template id="template-kru-multiplayer-friends-modal">
 	<div class="kmm-friends" v-if="state.friends.length > 0">
 		<div v-for="friend in state.friends">
-			{{ friend.display_name }}
+			<span>{{ friend.display_name }}</span>
+			<button type="button" class="btn btn-danger" @click="state.remove_friend_prompt(friend)"></button>
+				<lang-string lang-id="MOD_KMM_BUTTON_REMOVE_FRIEND"></lang-string>
+			</button>
 		</div>
 	</div>
 	<div class="kmm-modal-text" v-else>
 		<lang-string lang-id="MOD_KMM_MODAL_NO_FRIENDS"></lang-string>
 	</div>
+</template>
+<template id="template-kru-multiplayer-remove-friend-modal">
+	<div class="kmm-modal-text"></div>
+		<lang-string lang-id="MOD_KMM_MODAL_DESC_REMOVE_FRIEND_A"></lang-string>
+		<span class="kmm-remove-friend-name">{{ state.removingFriend.display_name }}</span>
+		<lang-string lang-id="MOD_KMM_MODAL_DESC_REMOVE_FRIEND_B"></lang-string>
+	</div>
+	<button type="button" class="btn btn-success" @click="state.remove_friend($event)">
+		<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+		<lang-string lang-id="MOD_KMM_BUTTON_REMOVE_FRIEND_CONFIRM"></lang-string>
+	</button>
+	<button type="button" class="btn btn-danger" @click="state.close_modal()">
+		<lang-string lang-id="MOD_KMM_BUTTON_CANCEL"></lang-string>
+	</button>
 </template>

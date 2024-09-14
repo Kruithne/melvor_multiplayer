@@ -247,6 +247,10 @@ session_get_route('/api/events', async (req, url, client_id) => {
 	};
 });
 
+session_get_route('/api/friends/remove', async (req, url, client_id, json) => {
+	return { success: true };
+});
+
 session_get_route('/api/friends/get', async (req, url, client_id, json) => {
 	return {
 		friends: await get_friends(client_id)
