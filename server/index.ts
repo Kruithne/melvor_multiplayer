@@ -207,6 +207,10 @@ async function get_friends(client_id: number) {
 	return rows;
 }
 
+async function delete_friend(client_id: number, friend_id: number) {
+	await db_execute('DELETE FROM `friends` WHERE (`client_id_a` = ? AND `client_id_b` = ?) OR (`client_id_a` = ? AND `client_id_b` = ?)', [client_id, friend_id, friend_id, client_id]);
+}
+
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
 	return async (req: Request, url: URL) => {
 		let json = null;
@@ -248,6 +252,12 @@ session_get_route('/api/events', async (req, url, client_id) => {
 });
 
 session_post_route('/api/friends/remove', async (req, url, client_id, json) => {
+	const friend_id = json.friend_id;
+	if (typeof friend_id !== 'number')
+		return 400; // Bad Request
+
+	await delete_friend(client_id, friend_id);
+
 	return { success: true };
 });
 
