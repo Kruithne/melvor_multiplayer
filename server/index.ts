@@ -181,6 +181,10 @@ async function delete_friend_request(request_id: number) {
 	await db_execute('DELETE FROM `friend_requests` WHERE `request_id` = ?', [request_id]);
 }
 
+async function create_friendship(client_a_id: number, client_b_id: number) {
+	await db_execute('INSERT INTO `friends` (`client_a_id`, `client_b_id`) VALUES(?, ?)', [client_a_id, client_b_id]);
+}
+
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
 	return async (req: Request, url: URL) => {
 		let json = null;
@@ -228,8 +232,8 @@ session_post_route('/api/friends/accept', async (req, url, client_id, json) => {
 
 	const request = await get_friend_request(request_id);
 	if (request !== null && request.client_id === client_id) {
-		// todo: delete the request
-		//await delete_friend_request(request.request_id);
+		await create_friendship(request.client_id, request.friend_id);
+		await delete_friend_request(request.request_id);
 	}
 
 	return { success: true };
