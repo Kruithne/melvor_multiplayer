@@ -173,6 +173,14 @@ async function create_friend_request(client_id: number, friend_id: number) {
 	});
 }
 
+async function get_friend_request(request_id: number): Promise<db_row_friend_requests> {
+	return await db_get_single('SELECT `client_id`, `friend_id` FROM `friend_requests` WHERE `request_id` = ?', [request_id]) as db_row_friend_requests;
+}
+
+async function delete_friend_request(request_id: number) {
+	await db_execute('DELETE FROM `friend_requests` WHERE `request_id` = ?', [request_id]);
+}
+
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
 	return async (req: Request, url: URL) => {
 		let json = null;
@@ -211,6 +219,32 @@ session_get_route('/api/events', async (req, url, client_id) => {
 	return {
 		friend_requests: await get_friend_requests(client_id)
 	};
+});
+
+session_post_route('/api/friends/accept', async (req, url, client_id, json) => {
+	const request_id = json.request_id;
+	if (typeof request_id !== 'number')
+		return 400; // Bad Request;
+
+	const request = await get_friend_request(request_id);
+	if (request !== null && request.client_id === client_id) {
+		// todo: delete the request
+		//await delete_friend_request(request.request_id);
+	}
+
+	return { success: true };
+});
+
+session_post_route('/api/friends/ignore', async (req, url, client_id, json) => {
+	const request_id = json.request_id;
+	if (typeof request_id !== 'number')
+		return 400; // Bad Request
+
+	const request = await get_friend_request(request_id);
+	if (request !== null && request.client_id === client_id)
+		await delete_friend_request(request.request_id);
+	
+	return { success: true };
 });
 
 session_post_route('/api/friends/add', async (req, url, client_id, json) => {

@@ -12,6 +12,9 @@
 				<lang-string lang-id="MOD_KMM_MENU_HEADER"></lang-string>
 			</h5>
 			<a class="dropdown-item">View Friends</a>
+			<a class="dropdown-item" @click.stop="state.show_friend_request_modal()">
+				<lang-string lang-id="MOD_KMM_MENU_SHOW_FRIEND_REQUESTS"></lang-string>
+			</a>
 			<a class="dropdown-item" @click.stop="state.show_add_friend_modal()">
 				<lang-string lang-id="MOD_KMM_MENU_ADD_FRIEND"></lang-string>
 			</a>
@@ -49,5 +52,22 @@
 		<button type="button" class="btn btn-danger" id="kmm-modal-cancel-btn">
 			<lang-string lang-id="MOD_KMM_BUTTON_CANCEL"></lang-string>
 		</button>
+	</div>
+</template>
+<template id="template-kru-multiplayer-friend-request-modal">
+	<div class="kmm-friend-requests" v-if="state.events.friend_requests.length > 0">
+		<div v-for="request in state.events.friend_requests" class="kmm-friend-request-bubble">
+			<span>{{ request.display_name }}</span>
+			<button type="button" class="btn btn-success" @click="state.accept_friend_request($event, request)">
+				<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+				<lang-string lang-id="MOD_KMM_BUTTON_ACCEPT_FRIEND"></lang-string>
+			</button>
+			<button type="button" class="btn btn-danger" @click="state.ignore_friend_request($event, request)">
+				<lang-string lang-id="MOD_KMM_BUTTON_IGNORE_FRIEND"></lang-string>
+			</button>
+		</div>
+	</div>
+	<div class="kmm-modal-text" v-else>
+		<lang-string lang-id="MOD_KMM_MODAL_NO_FRIEND_REQUESTS"></lang-string>
 	</div>
 </template>

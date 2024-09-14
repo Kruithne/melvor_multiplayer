@@ -40,3 +40,14 @@
 	gap: 5px;
 	margin-bottom: 20px;
 }
+
+#kmm-friend-requests {
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: row;
+	gap: 10px;
+}
+
+.kmm-friend-request-bubble {
+	padding: 5px;
+}

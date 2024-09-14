@@ -13,6 +13,10 @@ let is_connecting = false;
 
 const ctx = mod.getContext(import.meta);
 const state = ui.createStore({
+	events: {
+		friend_requests: []
+	},
+
 	get_svg(id) {
 		return ctx.getResourceUrl('assets/' + id + '.svg');
 	},
@@ -34,6 +38,50 @@ const state = ui.createStore({
 	reconnect() {
 		state.hide_online_dropdown();
 		start_multiplayer_session();
+	},
+
+	async accept_friend_request(event, request) {
+		show_button_spinner(event.currentTarget);
+
+		const res = await api_post('/api/friends/accept', {
+			request_id: request.request_id
+		});
+
+		if (res?.success === true) {
+			state.events.friend_requests.splice(state.events.friend_requests.indexOf(request), 1);
+		} else {
+			hide_button_spinner(event.currentTarget);
+			notify_error('MOD_KMM_GENERIC_ERR');
+		}
+	},
+
+	async ignore_friend_request(event, request) {
+		show_button_spinner(event.currentTarget);
+
+		const res = await api_post('/api/friends/ignore', {
+			request_id: request.request_id
+		});
+
+		if (res?.success === true) {
+			state.events.friend_requests.splice(state.events.friend_requests.indexOf(request), 1);
+		} else {
+			hide_button_spinner(event.currentTarget);
+			notify_error('MOD_KMM_GENERIC_ERR');
+		}
+	},
+
+	show_friend_request_modal() {
+		state.hide_online_dropdown();
+
+		addModalToQueue({
+			title: getLangString('MOD_KMM_TITLE_FRIEND_REQUESTS'),
+			html: custom_element_tag('kmm-friend-request-modal'),
+			imageUrl: ctx.getResourceUrl('assets/multiplayer.svg'),
+			imageWidth: 64,
+			imageHeight: 64,
+			allowOutsideClick: true,
+			backdrop: true
+		});
 	},
 
 	show_friend_code_modal() {
@@ -97,13 +145,13 @@ function hook_modal_confirm(id, callback, spinner) {
 
 function show_button_spinner(id) {
 	const $element = $(id);
-	const $spinner = $element.querySelector('.spinner-border');
+	const $spinner = $element.querySelector('[role="status"]');
 	$spinner.classList.remove('d-none');
 }
 
 function hide_button_spinner(id) {
 	const $element = $(id);
-	const $spinner = $element.querySelector('.spinner-border');
+	const $spinner = $element.querySelector('[role="status"]');
 	$spinner.classList.add('d-none');
 }
 
@@ -112,11 +160,7 @@ function custom_element_tag(tag) {
 }
 
 function make_template(id, parent = null) {
-	const template = document.getElementById('template-kru-multiplayer-' + id);
-	const node = template.content.cloneNode(true);
-
-	parent?.appendChild(node);
-	return node;
+	return ui.create({ $template: '#template-kru-multiplayer-' + id, state }, parent ?? document);
 }
 
 function $(id) {
@@ -218,9 +262,11 @@ function set_session_token(token) {
 
 async function get_client_events() {
 	const res = await api_get('/api/events');
-	if (res !== null) {
-		console.log(res);
-	}
+	if (res !== null)
+		state.events = res;
+
+	// debugging
+	state.events.friend_requests = Array(10).fill(state.events.friend_requests[0]);
 
 	setTimeout(get_client_events, 60000);
 }
@@ -306,6 +352,14 @@ class KMMFriendCodeModal extends HTMLElement {
 	}
 }
 
+class KMMFriendRequestModal extends HTMLElement {
+	constructor() {
+		super();
+
+		make_template('friend-request-modal', this);
+	}
+}
+
 class KMMAddFriendModal extends HTMLElement {
 	constructor() {
 		super();
@@ -352,3 +406,4 @@ class KMMAddFriendModal extends HTMLElement {
 
 window.customElements.define('kmm-friend-code-modal', KMMFriendCodeModal);
 window.customElements.define('kmm-add-friend-modal', KMMAddFriendModal);
+window.customElements.define('kmm-friend-request-modal', KMMFriendRequestModal);
