@@ -272,7 +272,7 @@ session_post_route('/api/friends/ignore', async (req, url, client_id, json) => {
 
 	const request = await get_friend_request(request_id);
 	if (request !== null && request.client_id === client_id)
-		await delete_friend_request(request.request_id);
+		await delete_friend_request(request_id);
 	
 	return { success: true };
 });
