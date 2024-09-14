@@ -82,7 +82,7 @@
 	<div class="kmm-friends" v-if="state.friends.length > 0">
 		<div v-for="friend in state.friends">
 			<span>{{ friend.display_name }}</span>
-			<button type="button" class="btn btn-danger" @click="state.remove_friend_prompt(friend)"></button>
+			<button type="button" class="btn btn-danger" @click="state.remove_friend_prompt(friend)">
 				<lang-string lang-id="MOD_KMM_BUTTON_REMOVE_FRIEND"></lang-string>
 			</button>
 		</div>
