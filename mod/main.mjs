@@ -17,6 +17,10 @@ const state = ui.createStore({
 		friend_requests: []
 	},
 
+	get num_friend_requests() {
+		return this.events.friend_requests.length;
+	},
+
 	get_svg(id) {
 		return ctx.getResourceUrl('assets/' + id + '.svg');
 	},
