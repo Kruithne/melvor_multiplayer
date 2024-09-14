@@ -269,9 +269,6 @@ async function get_client_events() {
 	if (res !== null)
 		state.events = res;
 
-	// debugging
-	state.events.friend_requests = Array(10).fill(state.events.friend_requests[0]);
-
 	setTimeout(get_client_events, 60000);
 }
 
