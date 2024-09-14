@@ -140,24 +140,31 @@ const state = ui.createStore({
 	},
 
 	async add_friend(event) {
+		const $button = event.currentTarget;
+
 		hide_modal_error();
-		show_button_spinner(event.currentTarget);
+		show_button_spinner($button);
 
 		const friend_code = $('kmm-add-friend-modal-field').value.trim();
 
-		if (!/^\d{3}-\d{3}-\d{3}$/.test(friend_code))
-			return show_modal_error(getLangString('MOD_KMM_INVALID_FRIEND_CODE_ERR'));
+		try {
+			if (!/^\d{3}-\d{3}-\d{3}$/.test(friend_code))
+				throw new Error('MOD_KMM_INVALID_FRIEND_CODE_ERR');
 
-		const client_friend_code = get_character_storage_item('friend_code');
-		if (friend_code === client_friend_code)
-			return show_modal_error(getLangString('MOD_KMM_NO_SELF_LOVE_ERR'));
+			const client_friend_code = get_character_storage_item('friend_code');
+			if (friend_code === client_friend_code)
+				throw new Error('MOD_KMM_NO_SELF_LOVE_ERR');
 
-		const res = await api_post('/api/friends/add', { friend_code });
-		if (res === null)
-			return show_modal_error(getLangString('MOD_KMM_GENERIC_ERR'));
+			const res = await api_post('/api/friends/add', { friend_code });
+			if (res === null)
+				throw new Error('MOD_KMM_GENERIC_ERR');
 
-		if (res.error_lang)
-			return show_modal_error(getLangString(res.error_lang));
+			if (res.error_lang)
+				throw new Error(res.error_lang);
+		} catch (e) {
+			hide_button_spinner($button);
+			return show_modal_error(getLangString(e.message));
+		}
 
 		notify('MOD_KMM_NOTIF_FRIEND_REQ_SENT');
 		state.close_modal();
