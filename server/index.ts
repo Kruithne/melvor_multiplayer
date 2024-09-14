@@ -1,9 +1,9 @@
 import { caution, serve, validate_req_json, HTTP_STATUS_CODE } from 'spooder';
 import { format } from 'node:util';
-import { db_get_single, db_execute, db_insert, db_count, db_exists, db_get_all } from './db';
+import { db_get_single, db_execute, db_insert, db_exists, db_get_all } from './db';
 import { db_row_clients } from './db/types/clients';
 import { db_row_client_sessions } from './db/types/client_sessions';
-import type { JsonPrimitive, JsonArray, JsonObject, ServerSentEventClient } from 'spooder';
+import type { JsonPrimitive, JsonArray, JsonObject } from 'spooder';
 import { db_row_friend_requests } from './db/types/friend_requests';
 
 interface ToJson {
