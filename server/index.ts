@@ -247,7 +247,7 @@ session_get_route('/api/events', async (req, url, client_id) => {
 	};
 });
 
-session_get_route('/api/friends/remove', async (req, url, client_id, json) => {
+session_post_route('/api/friends/remove', async (req, url, client_id, json) => {
 	return { success: true };
 });
 
