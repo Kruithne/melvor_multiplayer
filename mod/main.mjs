@@ -14,6 +14,7 @@ let is_connecting = false;
 const ctx = mod.getContext(import.meta);
 const state = ui.createStore({
 	removingFriend: null,
+	friend_code: '',
 
 	events: {
 		friend_requests: []
@@ -94,14 +95,7 @@ const state = ui.createStore({
 
 		state.removingFriend = friend;
 
-		addModalToQueue({
-			title: getLangString('MOD_KMM_TITLE_REMOVE_FRIEND_CONFIRM'),
-			html: custom_element_tag('kmm-remove-friend-modal'),
-			imageUrl: ctx.getResourceUrl('assets/remove_friend.svg'),
-			imageWidth: 64,
-			imageHeight: 64,
-			allowOutsideClick: true,
-			backdrop: true,
+		queue_modal('MOD_KMM_TITLE_REMOVE_FRIEND_CONFIRM', 'remove-friend-modal', 'assets/remove_friend.svg', {
 			showConfirmButton: false
 		});
 	},
@@ -122,61 +116,65 @@ const state = ui.createStore({
 
 	show_friends_modal() {
 		state.hide_online_dropdown();
-
-		addModalToQueue({
-			title: getLangString('MOD_KMM_TITLE_FRIENDS'),
-			html: custom_element_tag('kmm-friends-modal'),
-			imageUrl: ctx.getResourceUrl('assets/multiplayer.svg'),
-			imageWidth: 64,
-			imageHeight: 64,
-			allowOutsideClick: true,
-			backdrop: true
-		});
+		queue_modal('MOD_KMM_TITLE_FRIENDS', 'friends-modal');
 	},
 
 	show_friend_request_modal() {
 		state.hide_online_dropdown();
-
-		addModalToQueue({
-			title: getLangString('MOD_KMM_TITLE_FRIEND_REQUESTS'),
-			html: custom_element_tag('kmm-friend-request-modal'),
-			imageUrl: ctx.getResourceUrl('assets/multiplayer.svg'),
-			imageWidth: 64,
-			imageHeight: 64,
-			allowOutsideClick: true,
-			backdrop: true
-		});
+		queue_modal('MOD_KMM_TITLE_FRIEND_REQUESTS', 'friend-request-modal');
 	},
 
 	show_friend_code_modal() {
 		state.hide_online_dropdown();
+		state.friend_code = get_character_storage_item('friend_code');
 
-		addModalToQueue({
-			title: getLangString('MOD_KMM_TITLE_FRIEND_CODE'),
-			html: custom_element_tag('kmm-friend-code-modal'),
-			imageUrl: ctx.getResourceUrl('assets/multiplayer.svg'),
-			imageWidth: 64,
-			imageHeight: 64,
-			allowOutsideClick: true,
-			backdrop: true
-		});
+		queue_modal('MOD_KMM_TITLE_FRIEND_CODE', 'friend-code-modal');
 	},
 
 	show_add_friend_modal() {
 		state.hide_online_dropdown();
 
-		addModalToQueue({
-			title: getLangString('MOD_KMM_TITLE_ADD_FRIEND'),
-			html: custom_element_tag('kmm-add-friend-modal'),
-			imageUrl: ctx.getResourceUrl('assets/add_user.svg'),
-			imageWidth: 64,
-			imageHeight: 64,
-			allowOutsideClick: true,
-			backdrop: true,
+		queue_modal('MOD_KMM_TITLE_ADD_FRIEND', 'add-friend-modal', 'assets/add_user.svg', {
 			showConfirmButton: false
-		})
+		});
+	},
+
+	async add_friend(event) {
+		hide_modal_error();
+		show_button_spinner(event.currentTarget);
+
+		const friend_code = $('kmm-add-friend-modal-field').value.trim();
+
+		if (!/^\d{3}-\d{3}-\d{3}$/.test(friend_code))
+			return show_modal_error(getLangString('MOD_KMM_INVALID_FRIEND_CODE_ERR'));
+
+		const client_friend_code = get_character_storage_item('friend_code');
+		if (friend_code === client_friend_code)
+			return show_modal_error(getLangString('MOD_KMM_NO_SELF_LOVE_ERR'));
+
+		const res = await api_post('/api/friends/add', { friend_code });
+		if (res === null)
+			return show_modal_error(getLangString('MOD_KMM_GENERIC_ERR'));
+
+		if (res.error_lang)
+			return show_modal_error(getLangString(res.error_lang));
+
+		notify('MOD_KMM_NOTIF_FRIEND_REQ_SENT');
+		state.close_modal();
 	}
 });
+
+function queue_modal(title_lang, template_id, image_url = 'assets/multiplayer.svg', data = {}) {
+	addModalToQueue(Object.assign({
+		title: getLangString(title_lang),
+		html: modal_component(template_id),
+		imageUrl: ctx.getResourceUrl(image_url),
+		imageWidth: 64,
+		imageHeight: 64,
+		allowOutsideClick: true,
+		backdrop: true
+	}, data));
+}
 
 function show_modal_error(text) {
 	const $modal_error = $('kmm-modal-error');
@@ -186,25 +184,6 @@ function show_modal_error(text) {
 
 function hide_modal_error() {
 	$('kmm-modal-error').classList.add('d-none');
-}
-
-function hook_modal_cancel(id) {
-	$(id).addEventListener('click', () => Swal.close());
-}
-
-function hook_modal_confirm(id, callback, spinner) {
-	$(id).addEventListener('click', async () => {
-		if (spinner)
-			show_button_spinner(id);
-
-		const res = await callback();
-
-		if (spinner)
-			hide_button_spinner(id);
-
-		if (res)
-			Swal.close();
-	});
 }
 
 function show_button_spinner(element) {
@@ -223,8 +202,8 @@ function hide_button_spinner(element) {
 	$spinner.classList.add('d-none');
 }
 
-function custom_element_tag(tag) {
-	return `<${tag}></${tag}>`;
+function modal_component(template_id) {
+	return `<kmm-modal-component data-template-id="${template_id}"></kmm-modal-component>`;
 }
 
 function make_template(id, parent = null) {
@@ -411,84 +390,12 @@ export async function setup(ctx) {
 	});
 }
 
-class KMMFriendCodeModal extends HTMLElement {
+class KMMModalComponent extends HTMLElement {
 	constructor() {
 		super();
 
-		make_template('friend-code-modal', this);
-
-		const $input = this.querySelector('.kru-mm-input-text');
-		$input.value = get_character_storage_item('friend_code');
-
-		$input.focus();
-		$input.select();
-	}
-}
-
-class KMMRemoveFriendModal extends HTMLElement {
-	constructor() {
-		super();
-
-		make_template('remove-friend-modal', this);
-	}
-}
-
-class KMMFriendRequestModal extends HTMLElement {
-	constructor() {
-		super();
-
-		make_template('friend-request-modal', this);
-	}
-}
-
-class KMMFriendsModal extends HTMLElement {
-	constructor() {
-		super();
-		make_template('friends-modal', this);
-	}
-}
-
-class KMMAddFriendModal extends HTMLElement {
-	constructor() {
-		super();
-
-		make_template('add-friend-modal', this);
-
-		const CONFIRM_BTN_ID = 'kmm-modal-confirm-btn';
-
-		hook_modal_confirm(CONFIRM_BTN_ID, async () => {
-			hide_modal_error();
-
-			const friend_code = $('kmm-add-friend-modal-field').value.trim();
-
-			if (!/^\d{3}-\d{3}-\d{3}$/.test(friend_code)) {
-				show_modal_error(getLangString('MOD_KMM_INVALID_FRIEND_CODE_ERR'));
-				return false;
-			}
-
-			const client_friend_code = get_character_storage_item('friend_code');
-			if (friend_code === client_friend_code) {
-				show_modal_error(getLangString('MOD_KMM_NO_SELF_LOVE_ERR'));
-				return false;
-			}
-
-			const res = await api_post('/api/friends/add', { friend_code });
-			if (res === null) {
-				show_modal_error(getLangString('MOD_KMM_GENERIC_ERR'));
-				return false;
-			}
-
-			if (res.error_lang) {
-				show_modal_error(getLangString(res.error_lang));
-				return false;
-			}
-
-			notify('MOD_KMM_NOTIF_FRIEND_REQ_SENT');
-
-			return true;
-		}, true);
-
-		hook_modal_cancel('kmm-modal-cancel-btn');
+		const template_id = this.getAttribute('data-template-id');
+		make_template(template_id, this);
 	}
 }
 
@@ -537,9 +444,5 @@ class LangStringFormattedElement extends HTMLElement {
 	}
 }
 
-window.customElements.define('kmm-friend-code-modal', KMMFriendCodeModal);
-window.customElements.define('kmm-add-friend-modal', KMMAddFriendModal);
-window.customElements.define('kmm-friend-request-modal', KMMFriendRequestModal);
-window.customElements.define('kmm-friends-modal', KMMFriendsModal);
-window.customElements.define('kmm-remove-friend-modal', KMMRemoveFriendModal);
 window.customElements.define('lang-string-f', LangStringFormattedElement);
+window.customElements.define('kmm-modal-component', KMMModalComponent);

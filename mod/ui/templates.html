@@ -42,7 +42,7 @@
 	<div class="kmm-modal-text">
 		<lang-string lang-id="MOD_KMM_MODAL_DESC_CODE"></lang-string>
 	</div>
-	<input class="kru-mm-input-text text-center" type="text"/>
+	<input class="kru-mm-input-text text-center" :value="state.friend_code" type="text"/>
 </template>
 <template id="template-kru-multiplayer-add-friend-modal">
 	<div class="kmm-modal-text">
@@ -51,11 +51,11 @@
 	</div>
 	<input class="kru-mm-input-text text-center" type="text" id="kmm-add-friend-modal-field" maxlength="11"/>
 	<div class="kmm-modal-tray">
-		<button type="button" class="btn btn-primary" id="kmm-modal-confirm-btn">
+		<button type="button" class="btn btn-primary" @click="state.add_friend($event)">
 			<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 			<lang-string lang-id="MOD_KMM_BUTTON_ADD_FRIEND"></lang-string>
 		</button>
-		<button type="button" class="btn btn-danger" id="kmm-modal-cancel-btn">
+		<button type="button" class="btn btn-danger" @click="state.close_modal()">
 			<lang-string lang-id="MOD_KMM_BUTTON_CANCEL"></lang-string>
 		</button>
 	</div>
