@@ -5,6 +5,7 @@ import { db_row_clients } from './db/types/clients';
 import { db_row_client_sessions } from './db/types/client_sessions';
 import type { JsonPrimitive, JsonArray, JsonObject } from 'spooder';
 import { db_row_friend_requests } from './db/types/friend_requests';
+import { db_row_friends } from './db/types/friends';
 
 interface ToJson {
 	toJSON(): any;
@@ -181,8 +182,19 @@ async function delete_friend_request(request_id: number) {
 	await db_execute('DELETE FROM `friend_requests` WHERE `request_id` = ?', [request_id]);
 }
 
-async function create_friendship(client_a_id: number, client_b_id: number) {
-	await db_execute('INSERT INTO `friends` (`client_a_id`, `client_b_id`) VALUES(?, ?)', [client_a_id, client_b_id]);
+async function create_friendship(client_id_a: number, client_id_b: number) {
+	await db_execute('INSERT INTO `friends` (`client_id_a`, `client_id_b`) VALUES(?, ?)', [client_id_a, client_id_b]);
+}
+
+async function get_friends(client_id: number) {
+	const rows = await db_get_all('SELECT CASE WHEN `client_a_id` = ? THEN `client_b_id` ELSE `client_a_id` END AS `friend_id` FROM `friends` WHERE `client_a_id` = ? OR `client_b_id` = ?', [client_id]);
+	for (const row of rows) {
+		// this could potentially be improved with a JOIN, but realistically most display
+		// names will already be in memory cache and database hits will be minimal
+		row.display_name = await get_client_display_name(row.friend_id);
+	}
+
+	return rows;
 }
 
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
@@ -225,6 +237,12 @@ session_get_route('/api/events', async (req, url, client_id) => {
 	};
 });
 
+session_get_route('/api/friends/get', async (req, url, client_id, json) => {
+	return {
+		friends: await get_friends(client_id)
+	}
+});
+
 session_post_route('/api/friends/accept', async (req, url, client_id, json) => {
 	const request_id = json.request_id;
 	if (typeof request_id !== 'number')
@@ -234,9 +252,17 @@ session_post_route('/api/friends/accept', async (req, url, client_id, json) => {
 	if (request !== null && request.client_id === client_id) {
 		await create_friendship(request.client_id, request.friend_id);
 		await delete_friend_request(request.request_id);
+
+		return {
+			success: true,
+			friend: {
+				friend_id: request.friend_id,
+				display_name: await get_client_display_name(request.friend_id)
+			}
+		};
 	}
 
-	return { success: true };
+	return { success: false } as JsonSerializable;
 });
 
 session_post_route('/api/friends/ignore', async (req, url, client_id, json) => {

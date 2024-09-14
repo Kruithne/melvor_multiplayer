@@ -17,6 +17,8 @@ const state = ui.createStore({
 		friend_requests: []
 	},
 
+	friends: [],
+
 	get num_notifications() {
 		return this.num_friend_requests;
 	},
@@ -57,6 +59,9 @@ const state = ui.createStore({
 
 		if (res?.success === true) {
 			state.events.friend_requests.splice(state.events.friend_requests.indexOf(request), 1);
+
+			if (res.friend)
+				this.state.friends.push(res.friend);
 		} else {
 			hide_button_spinner(event.currentTarget);
 			notify_error('MOD_KMM_GENERIC_ERR');
@@ -76,6 +81,20 @@ const state = ui.createStore({
 			hide_button_spinner(event.currentTarget);
 			notify_error('MOD_KMM_GENERIC_ERR');
 		}
+	},
+
+	show_friends_modal() {
+		state.hide_online_dropdown();
+
+		addModalToQueue({
+			title: getLangString('MOD_KMM_TITLE_FRIENDS'),
+			html: custom_element_tag('kmm-friends-modal'),
+			imageUrl: ctx.getResourceUrl('assets/multiplayer.svg'),
+			imageWidth: 64,
+			imageHeight: 64,
+			allowOutsideClick: true,
+			backdrop: true
+		});
 	},
 
 	show_friend_request_modal() {
@@ -272,6 +291,12 @@ function set_session_token(token) {
 	log('client session authenticated (%s)', token);
 }
 
+async function get_friends() {
+	const res = await api_get('/api/friends/get');
+	if (res !== null)
+		state.friends = res.friends;
+}
+
 async function get_client_events() {
 	const res = await api_get('/api/events');
 	if (res !== null)
@@ -301,6 +326,7 @@ async function start_multiplayer_session() {
 		if (auth_res !== null) {
 			set_session_token(auth_res.session_token);
 			get_client_events();
+			get_friends();
 		} else {
 			notify_error('MOD_KMM_MULTIPLAYER_CONNECTION_ERR');
 			error('failed to authenticate client, multiplayer features not available');
@@ -321,6 +347,7 @@ async function start_multiplayer_session() {
 
 			set_session_token(register_res.session_token);
 			get_client_events();
+			get_friends();
 		} else {
 			notify_error('MOD_KMM_MULTIPLAYER_CONNECTION_ERR');
 			error('failed to register client, multiplayer features not available');
@@ -366,6 +393,13 @@ class KMMFriendRequestModal extends HTMLElement {
 		super();
 
 		make_template('friend-request-modal', this);
+	}
+}
+
+class KMMFriendsModal extends HTMLElement {
+	constructor() {
+		super();
+		make_template('friends-modal', this);
 	}
 }
 
@@ -416,3 +450,4 @@ class KMMAddFriendModal extends HTMLElement {
 window.customElements.define('kmm-friend-code-modal', KMMFriendCodeModal);
 window.customElements.define('kmm-add-friend-modal', KMMAddFriendModal);
 window.customElements.define('kmm-friend-request-modal', KMMFriendRequestModal);
+window.customElements.define('kmm-friends-modal', KMMFriendsModal);

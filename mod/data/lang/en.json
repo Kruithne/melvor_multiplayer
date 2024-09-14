@@ -8,6 +8,7 @@
 	"MOD_KMM_TITLE_FRIEND_CODE": "Your Friend Code",
 	"MOD_KMM_TITLE_ADD_FRIEND": "Add Friend",
 	"MOD_KMM_TITLE_FRIEND_REQUESTS": "Friend Requests",
+	"MOD_KMM_TITLE_FRIENDS": "Friends",
 
 	"MOD_KMM_BUTTON_ACCEPT_FRIEND": "Accept",
 	"MOD_KMM_BUTTON_IGNORE_FRIEND": "Ignore",
@@ -20,10 +21,13 @@
 	"MOD_KMM_MENU_SHOW_FRIEND_CODE": "Show Friend Code",
 	"MOD_KMM_MENU_RECONNECT": "Reconnect to Multiplayer",
 	"MOD_KMM_MENU_SHOW_FRIEND_REQUESTS": "Friend Requests",
+	"MOD_KMM_MENU_VIEW_FRIENDS": "View Friends",
 
 	"MOD_KMM_MODAL_DESC_CODE": "Let people add you by sharing the code below.",
 	"MOD_KMM_MODAL_DESC_ADD_FRIEND": "Enter a friend code to add another player.",
 	"MOD_KMM_MODAL_NO_FRIEND_REQUESTS": "You have no pending friend requests.",
+
+	"MOD_KMM_MODAL_NO_FRIENDS": "You have no friends yet!",
 
 	"MOD_KMM_NOTIF_FRIEND_REQ_SENT": "Friend request sent!"
 }
