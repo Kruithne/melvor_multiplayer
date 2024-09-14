@@ -112,7 +112,7 @@ const state = ui.createStore({
 		addModalToQueue({
 			title: getLangString('MOD_KMM_TITLE_ADD_FRIEND'),
 			html: custom_element_tag('kmm-add-friend-modal'),
-			imageUrl: ctx.getResourceUrl('assets/multiplayer.svg'),
+			imageUrl: ctx.getResourceUrl('assets/add_user.svg'),
 			imageWidth: 64,
 			imageHeight: 64,
 			allowOutsideClick: true,
