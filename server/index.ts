@@ -192,6 +192,10 @@ async function delete_friend_request(request: db_row_friend_requests) {
 	await db_execute('DELETE FROM `friend_requests` WHERE `request_id` = ?', [request.request_id]);
 }
 
+async function friendship_exists(client_id_a: number, client_id_b: number): Promise<boolean> {
+	return await db_exists('SELECT 1 FROM `friends` WHERE (`client_id_a` = ? AND `client_id_b` = ?) OR (`client_id_a` = ? AND `client_id_b` = ?)', [client_id_a, client_id_b, client_id_b, client_id_a]);
+}
+
 async function create_friendship(client_id_a: number, client_id_b: number) {
 	await db_execute('INSERT INTO `friends` (`client_id_a`, `client_id_b`) VALUES(?, ?)', [client_id_a, client_id_b]);
 }
@@ -315,6 +319,9 @@ session_post_route('/api/friends/add', async (req, url, client_id, json) => {
 
 	if (friend_user_id === client_id)
 		return { error_lang: 'MOD_KMM_NO_SELF_LOVE_ERR' };
+
+	if (await friendship_exists(client_id, friend_user_id))
+		return { error_lang: 'MOD_KMM_FRIENDSHIP_EXISTS' };
 
 	// note: client_id and friend_id are swapped when inserting, as it makes logical sense to look up
 	// client_id for requests, then add the friend_id, rather than looking up friend_id.
