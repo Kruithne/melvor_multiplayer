@@ -187,7 +187,7 @@ async function create_friendship(client_id_a: number, client_id_b: number) {
 }
 
 async function get_friends(client_id: number) {
-	const rows = await db_get_all('SELECT CASE WHEN `client_a_id` = ? THEN `client_b_id` ELSE `client_a_id` END AS `friend_id` FROM `friends` WHERE `client_a_id` = ? OR `client_b_id` = ?', [client_id]);
+	const rows = await db_get_all('SELECT CASE WHEN `client_a_id` = ? THEN `client_b_id` ELSE `client_a_id` END AS `friend_id` FROM `friends` WHERE `client_a_id` = ? OR `client_b_id` = ?', [client_id, client_id, client_id]);
 	for (const row of rows) {
 		// this could potentially be improved with a JOIN, but realistically most display
 		// names will already be in memory cache and database hits will be minimal
