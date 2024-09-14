@@ -51,3 +51,10 @@
 .kmm-friend-request-bubble {
 	padding: 5px;
 }
+
+.kmm-notif-number {
+	background-color: #ff4545;
+	padding: 2px 7px;
+	border-radius: 10px;
+	margin-left: 4px;
+}
