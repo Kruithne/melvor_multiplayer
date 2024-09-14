@@ -61,7 +61,7 @@ const state = ui.createStore({
 			state.events.friend_requests.splice(state.events.friend_requests.indexOf(request), 1);
 
 			if (res.friend)
-				this.state.friends.push(res.friend);
+				state.friends.push(res.friend);
 		} else {
 			hide_button_spinner(event.currentTarget);
 			notify_error('MOD_KMM_GENERIC_ERR');
