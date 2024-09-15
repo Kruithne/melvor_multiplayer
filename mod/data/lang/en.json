@@ -35,6 +35,7 @@
 
 	"MOD_KMM_MODAL_NO_FRIEND_REQUESTS": "You have no pending friend requests.",
 	"MOD_KMM_MODAL_NO_FRIENDS": "You have no friends yet!",
+	"MOD_KMM_MODAL_NO_ICONS": "No matches found",
 
 	"MOD_KMM_NOTIF_FRIEND_REQ_SENT": "Friend request sent!",
 	"MOD_KMM_NOTIF_FRIEND_REMOVED": "Friend removed"

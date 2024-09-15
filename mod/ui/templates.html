@@ -113,10 +113,13 @@
 </template>
 <template id="template-kru-multiplayer-change-icon-modal">
 	<input class="form-control" type="text" v-model="state.icon_search" placeholder="Search for an icon..."/>
-	<div class="kmm-icon-selector">
+	<div class="kmm-icon-selector" v-if="state.filtered_icons.length > 0">
 		<div class="bank-item no-bg btn-light pointer-enabled m-1 resize-48" :class="{ 'kmm-icon-picked': icon.id == state.picked_icon }" v-for="icon in state.filtered_icons" @click="state.pick_icon(icon)">
 			<img class="p-2 resize-48" :src="icon.media">
 		</div>
+	</div>
+	<div class="kmm-modal-text" v-else>
+		<lang-string lang-id="MOD_KMM_MODAL_NO_ICONS"></lang-string>
 	</div>
 	<button type="button" class="btn btn-success" @click="state.confirm_icon_pick($event)">
 		<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
