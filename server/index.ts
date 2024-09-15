@@ -350,7 +350,6 @@ session_post_route('/api/client/set_icon', async (req, url, client_id, json) => 
 });
 
 server.route('/api/authenticate', validate_req_json(async (req, url, json) => {
-	server.allow_slow_request(req);
 	await Bun.sleep(1000);
 
 	const client_identifier = json.client_identifier;
@@ -376,7 +375,6 @@ server.route('/api/authenticate', validate_req_json(async (req, url, json) => {
 }), 'POST');
 
 server.route('/api/register', validate_req_json(async (req, url, json) => {
-	server.allow_slow_request(req);
 	await Bun.sleep(1000);
 
 	const client_key = json.client_key;
@@ -398,11 +396,6 @@ server.route('/api/register', validate_req_json(async (req, url, json) => {
 	const session_token = await generate_session_token(client_id);
 	return { session_token, client_identifier, friend_code, icon_id: DEFAULT_USER_ICON_ID };
 }), 'POST');
-
-// caution on slow requests
-server.on_slow_request((req, request_time, url) => {
-	caution(`Slow request: ${req.method} ${url.pathname}`, { request_time });
-}, 500);
 
 // unhandled exceptions and rejections
 server.error((err: Error) => {
