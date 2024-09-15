@@ -129,3 +129,46 @@
 		<lang-string lang-id="MOD_KMM_BUTTON_CANCEL"></lang-string>
 	</button>
 </template>
+<template id="template-kru-multiplayer-bank-container">
+	<div class="col-12">
+		<div class="block block-rounded-double bg-combat-inner-dark">
+		<div class="block-header block-header-default bg-dark-bank-block-header px-3 py-1">
+			<h5 class="font-size-sm font-w600 mb-0">
+				<img class="skill-icon-xs mr-1" :src="state.get_svg('multiplayer')">
+				<lang-string lang-id="MOD_KMM_TITLE_TRANSFER_ITEM"></lang-string>
+			</h5>
+		</div>
+		<div class="col-12 pt-2">
+			<div class="form-group">
+				<input type="text" id="kmm-transfer-slider">
+			</div>
+			<div class="row no-gutters p-2">
+				<div class="col-12 col-xl-5">
+					<input type="number" min="0" class="form-control m-1" id="kmm-transfer-amount" placeholder="Transfer X">
+				</div>
+				<div class="col-12 col-xl-7 text-right">
+					<button role="button" class="btn btn-info m-1" id="kmm-transfer-all-but-1">
+						<lang-string lang-id="BANK_STRING_21"></lang-string>
+					</button>
+					<button role="button" class="btn btn-info m-1" id="kmm-transfer-all">
+						<lang-string lang-id="BANK_STRING_20"></lang-string>
+					</button>
+				</div>
+				<div class="col-12">
+					<div class="dropdown-divider"></div>
+				</div>
+				<div class="col-12 text-center">
+					<button role="button" class="btn btn-danger m-1 w-75">
+						<lang-string lang-id="MOD_KMM_BUTTON_TRANSFER_ITEM"></lang-string>
+					</button><br>
+				</div>
+			</div>
+		</div>
+		<div class="block-header block-header-default bg-dark-bank-block-header px-3 py-1 text-center">
+			<h5 class="font-w600 font-size-sm text-combat-smoke m-1 w-100">
+				<img class="skill-icon-xxs ml-1 mr-1" src="assets/media/main/coins.svg">
+				<span id="kmm-transfer-value">140 GP</span>
+			</h5>
+		</div>
+	</div>
+</template>
