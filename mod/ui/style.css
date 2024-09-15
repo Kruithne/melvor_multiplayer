@@ -85,6 +85,13 @@
 	border: 1px solid green;
 }
 
+.kmm-friend {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+}
+
 .swal2-title {
 	padding: 0;
 }
