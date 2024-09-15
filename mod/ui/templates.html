@@ -88,6 +88,7 @@
 <template id="template-kru-multiplayer-friends-modal">
 	<div class="kmm-friends" v-if="state.friends.length > 0">
 		<div v-for="friend in state.friends">
+			<img class="skill-icon-xs" :src="state.get_item_icon(friend.icon_id)"/>
 			<span>{{ friend.display_name }}</span>
 			<button type="button" class="btn btn-danger" @click="state.remove_friend_prompt(friend)">
 				<lang-string lang-id="MOD_KMM_BUTTON_REMOVE_FRIEND"></lang-string>
