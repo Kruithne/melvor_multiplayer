@@ -15,12 +15,22 @@ const ctx = mod.getContext(import.meta);
 const state = ui.createStore({
 	removingFriend: null,
 	friend_code: '',
+	icon_search: '',
+	picked_icon: '',
+	profile_icon: 'melvorF:Fire_Acolyte_Wizard_Hat',
 
 	events: {
 		friend_requests: []
 	},
 
+	available_icons: [],
+
 	friends: [],
+
+	get filtered_icons() {
+		const icon_search_lower = this.icon_search.toLowerCase();
+		return this.available_icons.filter(icon => icon.search_name.includes(icon_search_lower)).slice(0, 32);
+	},
 
 	get num_notifications() {
 		return this.num_friend_requests;
@@ -38,8 +48,31 @@ const state = ui.createStore({
 		return 'url(' + this.get_svg(id) + ')';
 	},
 
+	get_item_icon(id) {
+		return game.items.getObjectByID(id).media;
+	},
+
 	close_modal() {
 		Swal.close();
+	},
+
+	pick_icon(icon) {
+		this.picked_icon = icon.id;
+
+		const $image = document.querySelector('.swal2-image');
+
+		if ($image)
+			$image.src = icon.media;
+	},
+
+	async confirm_icon_pick(event) {
+		show_button_spinner(event.currentTarget);
+
+		const res = await api_post('/api/client/set_icon', { icon_id: this.picked_icon });
+		if (res?.success)
+			this.profile_icon = this.picked_icon;
+
+		this.close_modal();
 	},
 
 	toggle_online_dropdown() {
@@ -55,6 +88,17 @@ const state = ui.createStore({
 	reconnect() {
 		state.hide_online_dropdown();
 		start_multiplayer_session();
+	},
+
+	show_icon_modal() {
+		this.hide_online_dropdown();
+		setup_icons();
+
+		state.picked_icon = '';
+
+		queue_modal(game.characterName, 'change-icon-modal', game.items.getObjectByID(state.profile_icon).media, {
+			showConfirmButton: false
+		}, false, false);
 	},
 
 	async accept_friend_request(event, request) {
@@ -171,11 +215,21 @@ const state = ui.createStore({
 	}
 });
 
-function queue_modal(title_lang, template_id, image_url = 'assets/multiplayer.svg', data = {}) {
+function setup_icons() {
+	if (state.available_icons.length === 0) {
+		const namespace_maps = game.items.namespaceMaps;
+		state.available_icons = [...namespace_maps.get('melvorF'), ...namespace_maps.get('melvorD')].map(e => {
+			const item = e[1];
+			return {id: item.id, search_name: item.name.toLowerCase(), media: item.media };
+		});
+	}
+}
+
+function queue_modal(title_lang, template_id, image_url = 'assets/multiplayer.svg', data = {}, localize_title = true, get_image = true) {
 	addModalToQueue(Object.assign({
-		title: getLangString(title_lang),
+		title: localize_title ? getLangString(title_lang) : title_lang,
 		html: modal_component(template_id),
-		imageUrl: ctx.getResourceUrl(image_url),
+		imageUrl: get_image ? ctx.getResourceUrl(image_url) : image_url,
 		imageWidth: 64,
 		imageHeight: 64,
 		allowOutsideClick: true,
@@ -348,6 +402,8 @@ async function start_multiplayer_session() {
 
 		if (auth_res !== null) {
 			set_session_token(auth_res.session_token);
+			state.profile_icon = auth_res.icon_id;
+
 			get_client_events();
 			get_friends();
 		} else {
@@ -367,6 +423,8 @@ async function start_multiplayer_session() {
 			set_character_storage_item('client_key', client_key);
 			set_character_storage_item('client_identifier', register_res.client_identifier);
 			set_character_storage_item('friend_code', register_res.friend_code);
+
+			state.profile_icon = register_res.icon_id;
 
 			set_session_token(register_res.session_token);
 			get_client_events();

@@ -73,3 +73,18 @@
 	align-items: center;
 	justify-content: center;
 }
+
+.kmm-icon-selector {
+	display: flex;
+	flex-wrap: wrap;
+	margin-top: 10px;
+	margin-bottom: 20px;
+}
+
+.kmm-icon-picked {
+	border: 1px solid green;
+}
+
+.swal2-title {
+	padding: 0;
+}

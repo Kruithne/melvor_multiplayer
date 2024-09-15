@@ -14,6 +14,13 @@
 			<h5 class="dropdown-header text-warning">
 				<lang-string lang-id="MOD_KMM_MENU_HEADER"></lang-string>
 			</h5>
+			<a class="dropdown-item" @click.stop="state.show_icon_modal()">
+				<img class="skill-icon-xxs" :src="state.get_item_icon(state.profile_icon)"/>
+				<lang-string lang-id="MOD_KMM_MENU_CHANGE_ICON"></lang-string>
+			</a>
+			<h5 class="dropdown-header text-warning">
+				<lang-string lang-id="MOD_KMM_MENU_HEADER_FRIENDS"></lang-string>
+			</h5>
 			<a class="dropdown-item" @click.stop="state.show_friends_modal()">
 				<lang-string lang-id="MOD_KMM_MENU_VIEW_FRIENDS"></lang-string>
 			</a>
@@ -98,6 +105,21 @@
 	<button type="button" class="btn btn-success" @click="state.remove_friend($event)">
 		<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 		<lang-string lang-id="MOD_KMM_BUTTON_REMOVE_FRIEND_CONFIRM"></lang-string>
+	</button>
+	<button type="button" class="btn btn-danger" @click="state.close_modal()">
+		<lang-string lang-id="MOD_KMM_BUTTON_CANCEL"></lang-string>
+	</button>
+</template>
+<template id="template-kru-multiplayer-change-icon-modal">
+	<input class="form-control" type="text" v-model="state.icon_search" placeholder="Search for an icon..."/>
+	<div class="kmm-icon-selector">
+		<div class="bank-item no-bg btn-light pointer-enabled m-1 resize-48" :class="{ 'kmm-icon-picked': icon.id == state.picked_icon }" v-for="icon in state.filtered_icons" @click="state.pick_icon(icon)">
+			<img class="p-2 resize-48" :src="icon.media">
+		</div>
+	</div>
+	<button type="button" class="btn btn-success" @click="state.confirm_icon_pick($event)">
+		<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+		<lang-string lang-id="MOD_KMM_BUTTON_USE_ICON"></lang-string>
 	</button>
 	<button type="button" class="btn btn-danger" @click="state.close_modal()">
 		<lang-string lang-id="MOD_KMM_BUTTON_CANCEL"></lang-string>

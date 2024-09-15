@@ -5,7 +5,6 @@ import { db_row_clients } from './db/types/clients';
 import { db_row_client_sessions } from './db/types/client_sessions';
 import type { JsonPrimitive, JsonArray, JsonObject } from 'spooder';
 import { db_row_friend_requests } from './db/types/friend_requests';
-import { db_row_friends } from './db/types/friends';
 
 interface ToJson {
 	toJSON(): any;
@@ -20,6 +19,8 @@ type HandlerReturnType = Resolvable<string | number | BunFile | Response | JsonS
 type SessionRequestHandler = (req: Request, url: URL, client_id: number, json: JsonObject) => HandlerReturnType;
 
 const server = serve(Number(process.env.SERVER_PORT));
+
+const DEFAULT_USER_ICON_ID = 'melvorF:Fire_Acolyte_Wizard_Hat';
 
 // maximum cache life is X * 2, minimum is X.
 const CACHE_SESSION_LIFETIME = 1000 * 60 * 60; // 1 hour
@@ -215,6 +216,10 @@ async function delete_friend(client_id: number, friend_id: number) {
 	await db_execute('DELETE FROM `friends` WHERE (`client_id_a` = ? AND `client_id_b` = ?) OR (`client_id_a` = ? AND `client_id_b` = ?)', [client_id, friend_id, friend_id, client_id]);
 }
 
+async function set_user_icon(client_id: number, icon_id: string) {
+	await db_execute('UPDATE `clients` SET `icon_id` = ? WHERE `id` = ?', [icon_id, client_id]);
+}
+
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
 	return async (req: Request, url: URL) => {
 		let json = null;
@@ -331,6 +336,19 @@ session_post_route('/api/friends/add', async (req, url, client_id, json) => {
 	return { success: true } as JsonSerializable;
 });
 
+session_post_route('/api/client/set_icon', async (req, url, client_id, json) => {
+	const icon_id = json.icon_id;
+	if (typeof icon_id !== 'string')
+		return 400; // Bad Request
+
+	if (!icon_id.startsWith('melvorF:') && !icon_id.startsWith('melvorD:'))
+		return 400; // Bad Request
+
+	await set_user_icon(client_id, icon_id);
+
+	return { success: true };
+});
+
 server.route('/api/authenticate', validate_req_json(async (req, url, json) => {
 	server.allow_slow_request(req);
 	await Bun.sleep(1000);
@@ -344,7 +362,7 @@ server.route('/api/authenticate', validate_req_json(async (req, url, json) => {
 	if (!is_valid_uuid(client_identifier) || !is_valid_uuid(client_key))
 		return 400; // Bad Request
 
-	const client_row = await db_get_single('SELECT `id`, `client_key` FROM `clients` WHERE `client_identifier` = ? LIMIT 1', [client_identifier]) as db_row_clients;
+	const client_row = await db_get_single('SELECT `id`, `client_key`, `icon_id` FROM `clients` WHERE `client_identifier` = ? LIMIT 1', [client_identifier]) as db_row_clients;
 	if (client_row === null || client_row.client_key !== client_key)
 		return 401; // Unauthorized
 
@@ -354,7 +372,7 @@ server.route('/api/authenticate', validate_req_json(async (req, url, json) => {
 	const session_token = await generate_session_token(client_row.id);
 	log('client', 'authorized client session for {%s}', client_identifier);
 
-	return { session_token, friend_code: client_row.friend_code };
+	return { session_token, friend_code: client_row.friend_code, icon_id: client_row.icon_id };
 }), 'POST');
 
 server.route('/api/register', validate_req_json(async (req, url, json) => {
@@ -370,7 +388,7 @@ server.route('/api/register', validate_req_json(async (req, url, json) => {
 	const display_name = validate_display_name(json.display_name);
 
 	const client_identifier = crypto.randomUUID();
-	const client_id = await db_insert('INSERT INTO `clients` (`client_identifier`, `client_key`, `friend_code`, `display_name`) VALUES(?, ?, ?, ?)', [client_identifier, client_key, friend_code, display_name]);
+	const client_id = await db_insert('INSERT INTO `clients` (`client_identifier`, `client_key`, `friend_code`, `display_name`, `icon_id`) VALUES(?, ?, ?, ?, ?)', [client_identifier, client_key, friend_code, display_name, DEFAULT_USER_ICON_ID]);
 
 	if (client_id === -1)
 		return 500;
@@ -378,7 +396,7 @@ server.route('/api/register', validate_req_json(async (req, url, json) => {
 	log('client', 'registered new client {%d} [{%s}]', client_id, client_identifier);
 
 	const session_token = await generate_session_token(client_id);
-	return { session_token, client_identifier, friend_code };
+	return { session_token, client_identifier, friend_code, icon_id: DEFAULT_USER_ICON_ID };
 }), 'POST');
 
 // caution on slow requests
