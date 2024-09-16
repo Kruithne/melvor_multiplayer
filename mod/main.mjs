@@ -22,6 +22,7 @@ const state = ui.createStore({
 	profile_icon: 'melvorF:Fire_Acolyte_Wizard_Hat',
 
 	transfer_inventory: [],
+	selected_transfer_item_id: '',
 
 	events: {
 		friend_requests: []
