@@ -376,7 +376,7 @@ function patch_bank() {
 
 	const $transfer_value = document.getElementById('kmm-transfer-value');
 
-	slider.customOnChange = (amount, unk1) => {
+	slider.customOnChange = (amount) => {
 		$transfer_input.value = amount;
 		$transfer_value.textContent = selected_bank_item.item.sellsFor.currency.formatAmount(numberWithCommas(game.bank.getItemSalePrice(selected_bank_item.item, amount)));
 	};
