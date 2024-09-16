@@ -3,55 +3,20 @@
 	"data": {
 		"pages": [
 			{
-				"id": "Archaeology",
-				"customName": "Archaeology",
-				"media": "assets/svg/archaeology.svg",
-				"containerID": "kru-archaeology-container",
-				"headerBgClass": "bg-archaeology",
+				"id": "Transfer_Items",
+				"customName": "Transfer Items",
+				"media": "assets/multiplayer.svg",
+				"containerID": "kru-multiplayer-transfer-page",
+				"headerBgClass": "bg-bank",
 				"hasGameGuide": false,
-				"canBeDefault": true,
-				"skills": ["kru_archaeology:Archaeology"],
-				"skillSidebarCategoryID": "Passive"
-			}
-		],
-		"shopPurchases": [
-			{
-				"id": "Archaeology_Skillcape",
-				"media": "assets/svg/skillcape_archaeology.svg",
-				"category": "melvorD:Skillcapes",
-				"contains": {
-					"items": [
-						{
-							"id": "kru_archaeology:Archaeology_Skillcape",
-							"quantity": 1
-						}
-					]
-				},
-				"cost": {
-					"gp": { "type": "Fixed", "cost": 1000000 },
-					"raidCoins": { "type": "Fixed", "cost": 0 },
-					"slayerCoins": { "type": "Fixed", "cost": 0 },
-					"items": []
-				},
-				"allowQuantityPurchase": false,
-				"unlockRequirements": [],
-				"purchaseRequirements": [{
-					"type": "SkillLevel",
-					"skillID": "kru_archaeology:Archaeology",
-					"level": 99
-					}],
-					"defaultBuyLimit": 1,
-					"buyLimitOverrides": [],
-					"showBuyLimit": false
+				"canBeDefault": false,
+				"sidebarItem": {
+					"categoryID": "",
+					"icon": "assets/multiplayer.svg",
+					"asideClass": "kmm-transfer-nav",
+					"aside": "0 / 32"
 				}
-		],
-		"shopDisplayOrder": [
-			{
-				"ids": ["kru_archaeology:Archaeology_Skillcape"],
-				"afterID": "melvorD:Woodcutting_Skillcape",
-				"insertAt": "End"
 			}
 		]
 	}
 }
-	

@@ -19,6 +19,8 @@ const state = ui.createStore({
 	picked_icon: '',
 	profile_icon: 'melvorF:Fire_Acolyte_Wizard_Hat',
 
+	transfer_inventory: [],
+
 	events: {
 		friend_requests: []
 	},
@@ -268,7 +270,7 @@ function modal_component(template_id) {
 }
 
 function make_template(id, parent = null) {
-	return ui.create({ $template: '#template-kru-multiplayer-' + id, state }, parent ?? document);
+	return ui.create({ $template: '#template-kru-multiplayer-' + id, state }, parent ?? document.body);
 }
 
 function $(id) {
@@ -359,6 +361,19 @@ function patch_bank() {
 
 	const $transfer_all_but_1_button = document.getElementById('kmm-transfer-all-but-1');
 	$transfer_all_but_1_button.addEventListener('click', () => slider.setSliderPosition(slider.sliderMax - 1));
+
+	const $transfer_button = document.getElementById('kmm-transfer-button');
+	$transfer_button.addEventListener('click', () => {
+		add_item_to_transfer_inventory(selected_bank_item.item, slider.quantity);
+	});
+}
+
+function add_item_to_transfer_inventory(item, qty) {
+	state.transfer_inventory.push({
+		id: item.id,
+		media: item.media,
+		qty: qty
+	});
 }
 
 async function api_get(endpoint) {
@@ -484,16 +499,21 @@ export async function setup(ctx) {
 	await patch_localization(ctx);
 	await ctx.loadTemplates('ui/templates.html');
 
+	await ctx.gameData.addPackage('data.json');
+
 	ctx.onCharacterLoaded(() => {
 		start_multiplayer_session();
 	});
 	
 	ctx.onInterfaceReady(() => {
 		const $button_tray = document.getElementById('header-theme').querySelector('.align-items-right');
-		ui.create({ $template: '#template-kru-multiplayer-online-button', state }, $button_tray);
-		ui.create({ $template: '#template-kru-multiplayer-dropdown', state }, $('kru-mm-online-button-container'));
+
+		make_template('online-button', $button_tray);
+		make_template('dropdown', $('kru-mm-online-button-container'));
 
 		state.$dropdown_menu = $('kru-mm-online-dropdown');
+
+		make_template('transfer-page', $('main-container'));
 
 		patch_bank();
 	});

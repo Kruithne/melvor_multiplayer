@@ -158,7 +158,7 @@
 					<div class="dropdown-divider"></div>
 				</div>
 				<div class="col-12 text-center">
-					<button role="button" class="btn btn-danger m-1 w-75">
+					<button role="button" class="btn btn-danger m-1 w-75" id="kmm-transfer-button">
 						<lang-string lang-id="MOD_KMM_BUTTON_TRANSFER_ITEM"></lang-string>
 					</button><br>
 				</div>
@@ -169,6 +169,45 @@
 				<img class="skill-icon-xxs ml-1 mr-1" src="assets/media/main/coins.svg">
 				<span id="kmm-transfer-value">140 GP</span>
 			</h5>
+		</div>
+	</div>
+</template>
+<template id="template-kru-multiplayer-bank-tab">
+	<li class="nav-item">
+		<a class="nav-link" href="#bank-stats-tab">
+			<img class="skill-icon-xs m-1" src="assets/media/main/coins.svg">
+		</a>
+	</li>
+</template>
+<template id="template-kru-multiplayer-transfer-page">
+	<div class="content" id="kru-multiplayer-transfer-page">
+		<div class="row row-deck gutters-tiny">
+			<div class="block block-rounded block-link-pop border-top border-bank border-4x w-100">
+				<div class="row row-deck gutters-tiny">
+					<div class="p-3">
+						<button type="button" class="btn btn-info m-1">Test Button</button>
+						<button type="button" class="btn btn-secondary m-1">Test Button</button>
+						<button type="button" class="btn btn-danger m-1">Test Button</button>
+					</div>
+				</div>
+			</div>
+			<div class="block tabbable w-100">
+				<div class="block-content" v-if="state.transfer_inventory.length > 0">
+					<div class="pb-4 row">
+						<div v-for="item of state.transfer_inventory" class="bank-item pointer-enabled m-2" data-item-id="melvorD:Gem_Gloves">
+							<a role="button">
+								<img class="bank-img p-3" :src="item.media">
+								<div class="font-size-sm text-white text-center in-bank">
+									<small class="badge-pill bg-secondary">{{ formatNumber(item.qty) }}</small>
+								</div>
+							</a>
+						</div>
+					</div>
+				</div>
+				<div class="kmm-modal-text mt-3" v-else>
+					<lang-string lang-id="MOD_KMM_TRANSFER_NO_ITEMS"></lang-string>
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
