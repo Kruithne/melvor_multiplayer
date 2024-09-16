@@ -7,7 +7,7 @@
 				"customName": "Transfer",
 				"media": "assets/multiplayer.svg",
 				"containerID": "kru-multiplayer-transfer-page",
-				"headerBgClass": "bg-bank",
+				"headerBgClass": "kmm-transfer-bg",
 				"hasGameGuide": false,
 				"canBeDefault": false,
 				"sidebarItem": {

@@ -100,3 +100,11 @@
 	display: flex;
 	flex-direction: column;
 }
+
+.kmm-transfer-bg {
+	background-color: #179CD8 !important;
+}
+
+.kmm-transfer-border {
+	border-color: #179CD8 !important;
+}
