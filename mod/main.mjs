@@ -395,7 +395,7 @@ function patch_bank() {
 
 function return_all_transfer_inventory() {
 	for (const entry of state.transfer_inventory)
-		game.bank.addItemByID(entry.id, entry.qty);
+		game.bank.addItemByID(entry.id, entry.qty, false, false, true);
 
 	state.transfer_inventory = [];
 	update_transfer_inventory_nav();
@@ -406,7 +406,7 @@ function return_selected_transfer_inventory() {
 	if (selected_id.length > 0) {
 		const entry = state.transfer_inventory.find(e => e.id === selected_id);
 		if (entry) {
-			game.bank.addItemByID(selected_id, entry.qty);
+			game.bank.addItemByID(selected_id, entry.qty, false, false, true);
 			state.transfer_inventory = state.transfer_inventory.filter(e => e.id !== selected_id);
 
 			update_transfer_inventory_nav();
