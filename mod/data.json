@@ -4,7 +4,7 @@
 		"pages": [
 			{
 				"id": "Transfer_Items",
-				"customName": "Transfer",
+				"customName": "Trade / Gift",
 				"media": "assets/multiplayer.svg",
 				"containerID": "kru-multiplayer-transfer-page",
 				"headerBgClass": "kmm-transfer-bg",
