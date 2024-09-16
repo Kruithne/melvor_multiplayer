@@ -370,6 +370,12 @@ function patch_bank() {
 	});
 }
 
+function update_transfer_inventory_nav() {
+	const aside = document.querySelector('.kmm-transfer-nav');
+	aside.textContent = state.transfer_inventory.length + ' / ' + TRANSFER_INVENTORY_MAX_LIMIT;
+	aside.classList.toggle('text-danger', state.transfer_inventory.length >= TRANSFER_INVENTORY_MAX_LIMIT);
+}
+
 function add_item_to_transfer_inventory(item, qty) {
 	const existing_entry = state.transfer_inventory.find(e => e.id === item.id);
 	if (existing_entry) {
@@ -384,7 +390,8 @@ function add_item_to_transfer_inventory(item, qty) {
 		});
 	}
 
-	game.bank.remoteItemQuantity(item, qty);
+	game.bank.removeItemQuantity(item, qty);
+	update_transfer_inventory_nav();
 }
 
 async function api_get(endpoint) {
