@@ -357,28 +357,37 @@ function patch_bank() {
 
 	let selected_bank_item = null;
 
+	const $transfer_value = document.getElementById('kmm-transfer-value');
+
+	function update_transfer_value() {
+		const amount = slider.quantity;
+		$transfer_value.textContent = selected_bank_item.item.sellsFor.currency.formatAmount(numberWithCommas(game.bank.getItemSalePrice(selected_bank_item.item, amount)));
+	}
+
+	function update_bank_item(orig_func, ...args) {
+		orig_func.call(this, ...args);
+
+		selected_bank_item = args[0];
+		slider.setSliderRange(selected_bank_item);
+		update_transfer_value();
+	}
+
 	const orig_update_item_quantity = $bank_item_menu.updateItemQuantity;
-	$bank_item_menu.updateItemQuantity = function(bank_item) {
-		orig_update_item_quantity.call(this, bank_item);
-		selected_bank_item = bank_item;
-		slider.setSliderRange(bank_item);
-	};
+	$bank_item_menu.updateItemQuantity = function(...args) {
+		update_bank_item.call(this, orig_update_item_quantity, ...args);
+	}
 
 	const orig_set_item = $bank_item_menu.setItem;
-	$bank_item_menu.setItem = function(bank_item, bank) {
-		orig_set_item.call(this, bank_item, bank);
-		selected_bank_item = bank_item;
-		slider.setSliderRange(bank_item);
-	};
+	$bank_item_menu.setItem = function(...args) {
+		update_bank_item.call(this, orig_set_item, ...args);
+	}
 
 	const $transfer_input = document.getElementById('kmm-transfer-amount');
 	$transfer_input.addEventListener('keyup', () => slider.setSliderPosition($transfer_input.value));
 
-	const $transfer_value = document.getElementById('kmm-transfer-value');
-
 	slider.customOnChange = (amount) => {
 		$transfer_input.value = amount;
-		$transfer_value.textContent = selected_bank_item.item.sellsFor.currency.formatAmount(numberWithCommas(game.bank.getItemSalePrice(selected_bank_item.item, amount)));
+		update_transfer_value();
 	};
 
 	const $transfer_all_button = document.getElementById('kmm-transfer-all');
