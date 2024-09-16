@@ -217,6 +217,14 @@ const state = ui.createStore({
 
 		notify('MOD_KMM_NOTIF_FRIEND_REQ_SENT');
 		state.close_modal();
+	},
+
+	transfer_return_selected() {
+		return_selected_transfer_inventory();
+	},
+
+	transfer_return_all() {
+		return_all_transfer_inventory();
 	}
 });
 
@@ -369,6 +377,29 @@ function patch_bank() {
 	$transfer_button.addEventListener('click', () => {
 		add_item_to_transfer_inventory(selected_bank_item.item, slider.quantity);
 	});
+}
+
+function return_all_transfer_inventory() {
+	for (const entry of state.transfer_inventory)
+		game.bank.addItemByID(entry.id, entry.qty);
+
+	state.transfer_inventory = [];
+	update_transfer_inventory_nav();
+}
+
+function return_selected_transfer_inventory() {
+	const selected_id = state.selected_transfer_item_id;
+	if (selected_id.length > 0) {
+		const entry = state.transfer_inventory.find(e => e.id === selected_id);
+		if (entry) {
+			game.bank.addItemByID(selected_id, entry.qty);
+			state.transfer_inventory = state.transfer_inventory.filter(e => e.id !== selected_id);
+
+			update_transfer_inventory_nav();
+		}
+	} else {
+		notify_error('MOD_KMM_TRANSFER_NO_ITEM_SELECTED');
+	}
 }
 
 function update_transfer_inventory_nav() {
