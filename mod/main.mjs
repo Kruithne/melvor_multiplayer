@@ -8,6 +8,8 @@ const DEV_CHARACTER_STORAGE = {
 	friend_code: '689-388-847'
 };
 
+const TRANSFER_INVENTORY_MAX_LIMIT = 32;
+
 let session_token = null;
 let is_connecting = false;
 
@@ -369,6 +371,9 @@ function patch_bank() {
 }
 
 function add_item_to_transfer_inventory(item, qty) {
+	if (state.tranfer_inventory.length >= TRANSFER_INVENTORY_MAX_LIMIT)
+		return notify_error('MOD_KMM_TRANSFER_INVENTORY_FULL');
+
 	state.transfer_inventory.push({
 		id: item.id,
 		qty: qty
