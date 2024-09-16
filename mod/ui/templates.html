@@ -196,7 +196,7 @@
 					<div class="pb-4 row">
 						<div v-for="item of state.transfer_inventory" class="bank-item pointer-enabled m-2" data-item-id="melvorD:Gem_Gloves">
 							<a role="button">
-								<img class="bank-img p-3" :src="item.media">
+								<img class="bank-img p-3" :src="state.get_item_icon(item.id)">
 								<div class="font-size-sm text-white text-center in-bank">
 									<small class="badge-pill bg-secondary">{{ formatNumber(item.qty) }}</small>
 								</div>

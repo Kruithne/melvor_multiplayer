@@ -371,7 +371,6 @@ function patch_bank() {
 function add_item_to_transfer_inventory(item, qty) {
 	state.transfer_inventory.push({
 		id: item.id,
-		media: item.media,
 		qty: qty
 	});
 }
