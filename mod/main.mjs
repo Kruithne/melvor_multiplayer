@@ -383,6 +383,8 @@ function add_item_to_transfer_inventory(item, qty) {
 			qty: qty
 		});
 	}
+
+	game.bank.remoteItemQuantity(item, qty);
 }
 
 async function api_get(endpoint) {
