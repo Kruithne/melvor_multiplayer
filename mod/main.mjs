@@ -375,7 +375,7 @@ function add_item_to_transfer_inventory(item, qty) {
 	if (existing_entry) {
 		existing_entry.qty += qty;
 	} else {
-		if (state.tranfer_inventory.length >= TRANSFER_INVENTORY_MAX_LIMIT)
+		if (state.transfer_inventory.length >= TRANSFER_INVENTORY_MAX_LIMIT)
 			return notify_error('MOD_KMM_TRANSFER_INVENTORY_FULL');
 
 		state.transfer_inventory.push({
