@@ -42,6 +42,7 @@
 	"MOD_KMM_TRANSFER_NO_ITEMS": "No items to transfer! Chooses items from your bank to gift or trade.",
 	"MOD_KMM_TRANSFER_INVENTORY_FULL": "Transfer inventory is full!",
 	"MOD_KMM_TRANSFER_NO_ITEM_SELECTED": "No item selected to return",
+	"MOD_KMM_TRANSFER_VALUE": "Value:",
 
 	"MOD_KMM_NOTIF_FRIEND_REQ_SENT": "Friend request sent!",
 	"MOD_KMM_NOTIF_FRIEND_REMOVED": "Friend removed"

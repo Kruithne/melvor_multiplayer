@@ -15,6 +15,8 @@ let is_connecting = false;
 
 const ctx = mod.getContext(import.meta);
 const state = ui.createStore({
+	TRANSFER_INVENTORY_MAX_LIMIT,
+
 	removingFriend: null,
 	friend_code: '',
 	icon_search: '',
@@ -31,6 +33,18 @@ const state = ui.createStore({
 	available_icons: [],
 
 	friends: [],
+
+	get transfer_inventory_value() {
+		let total_value = 0;
+
+		for (const entry of this.transfer_inventory) {
+			const item = game.items.getObjectByID(entry.id);
+			if (item.sellsFor.currency === game.gp)
+				total_value += game.bank.getItemSalePrice(item, entry.qty);
+		}
+
+		return game.gp.formatAmount(numberWithCommas(total_value));
+	},
 
 	get filtered_icons() {
 		const icon_search_lower = this.icon_search.toLowerCase();

@@ -95,3 +95,8 @@
 .swal2-title {
 	padding: 0;
 }
+
+.kmm-col {
+	display: flex;
+	flex-direction: column;
+}
