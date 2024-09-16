@@ -5,7 +5,13 @@ const IS_DEV_MODE = true;
 const DEV_CHARACTER_STORAGE = {
 	client_identifier: '04fcad4c-7df5-43c3-a70e-299cd618a0ab',
 	client_key: 'f88596d3-e2b2-4a50-9754-6b05f1a15bac',
-	friend_code: '689-388-847'
+	friend_code: '689-388-847',
+	transfer_inventory: [
+		{
+			id: 'melvorF:Fire_Acolyte_Wizard_Hat', // hats, get your hats! free hats!
+			qty: 200
+		}
+	]
 };
 
 const TRANSFER_INVENTORY_MAX_LIMIT = 32;
@@ -447,6 +453,17 @@ function add_item_to_transfer_inventory(item, qty) {
 
 	game.bank.removeItemQuantity(item, qty);
 	update_transfer_inventory_nav();
+	persist_transfer_inventory();
+}
+
+function persist_transfer_inventory() {
+	set_character_storage_item('transfer_inventory', state.transfer_inventory);
+}
+
+function load_transfer_inventory() {
+	const stored = get_character_storage_item('transfer_inventory');
+	state.transfer_inventory = stored ?? [];
+	update_transfer_inventory_nav();
 }
 
 async function api_get(endpoint) {
@@ -576,6 +593,7 @@ export async function setup(ctx) {
 
 	ctx.onCharacterLoaded(() => {
 		start_multiplayer_session();
+		load_transfer_inventory();
 	});
 	
 	ctx.onInterfaceReady(() => {
