@@ -371,13 +371,18 @@ function patch_bank() {
 }
 
 function add_item_to_transfer_inventory(item, qty) {
-	if (state.tranfer_inventory.length >= TRANSFER_INVENTORY_MAX_LIMIT)
-		return notify_error('MOD_KMM_TRANSFER_INVENTORY_FULL');
+	const existing_entry = state.transfer_inventory.find(e => e.id === item.id);
+	if (existing_entry) {
+		existing_entry.qty += qty;
+	} else {
+		if (state.tranfer_inventory.length >= TRANSFER_INVENTORY_MAX_LIMIT)
+			return notify_error('MOD_KMM_TRANSFER_INVENTORY_FULL');
 
-	state.transfer_inventory.push({
-		id: item.id,
-		qty: qty
-	});
+		state.transfer_inventory.push({
+			id: item.id,
+			qty: qty
+		});
+	}
 }
 
 async function api_get(endpoint) {
