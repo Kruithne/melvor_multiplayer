@@ -4,7 +4,7 @@
 		"pages": [
 			{
 				"id": "Transfer_Items",
-				"customName": "Transfer Items",
+				"customName": "Transfer",
 				"media": "assets/multiplayer.svg",
 				"containerID": "kru-multiplayer-transfer-page",
 				"headerBgClass": "bg-bank",
