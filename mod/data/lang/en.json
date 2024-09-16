@@ -39,7 +39,7 @@
 	"MOD_KMM_MODAL_NO_FRIENDS": "You have no friends yet!",
 	"MOD_KMM_MODAL_NO_ICONS": "No matches found",
 	
-	"MOD_KMM_TRANSFER_NO_ITEMS": "Transfer items from your bank to gift or trade.",
+	"MOD_KMM_TRANSFER_NO_ITEMS": "No items to transfer! Chooses items from your bank to gift or trade.",
 
 	"MOD_KMM_NOTIF_FRIEND_REQ_SENT": "Friend request sent!",
 	"MOD_KMM_NOTIF_FRIEND_REMOVED": "Friend removed"
