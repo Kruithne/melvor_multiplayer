@@ -26,6 +26,8 @@ const state = ui.createStore({
 	is_connected: false,
 
 	removingFriend: null,
+	gifting_friend: null,
+
 	friend_code: '',
 	icon_search: '',
 	picked_icon: '',
@@ -158,6 +160,31 @@ const state = ui.createStore({
 			hide_button_spinner(event.currentTarget);
 			notify_error('MOD_KMM_GENERIC_ERR');
 		}
+	},
+
+	gift_friend() {
+		queue_modal('MOD_KMM_TITLE_SEND_GIFT', 'gift-friend-modal', 'assets/media/bank/present.png', {
+			showConfirmButton: false
+		}, true, false);
+	},
+
+	select_gift_recipient(friend) {
+		this.close_modal();
+
+		state.gifting_friend = friend;
+
+		queue_modal('MOD_KMM_TITLE_CONFIRM_GIFT_RECIPIENT', 'confirm-gift-recipient-modal', 'assets/media/bank/present.png', {
+			showConfirmButton: false
+		}, true, false);
+	},
+
+	async confirm_gift($event) {
+		show_button_spinner($event.currentTarget);
+		const friend_id = state.gifting_friend.friend_id;
+
+		// todo: send API call to ship this gift off
+
+		state.close_modal();
 	},
 
 	async remove_friend_prompt(friend) {

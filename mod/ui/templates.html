@@ -185,7 +185,7 @@
 			<div class="block block-rounded block-link-pop border-top kmm-transfer-border border-4x w-100">
 				<div class="row row-deck gutters-tiny">
 					<div class="p-3">
-						<button type="button" class="btn btn-success m-1">
+						<button type="button" class="btn btn-success m-1" @click="state.gift_friend()">
 							<lang-string lang-id="MOD_KMM_BUTTON_GIFT_ITEMS"></lang-string>
 						</button>
 						<button type="button" class="btn btn-danger m-1" @click="state.transfer_return_selected()">
@@ -238,4 +238,38 @@
 			</div>
 		</div>
 	</div>
+</template>
+<template id="template-kru-multiplayer-gift-friend-modal">
+	<div class="kmm-friends" v-if="state.friends.length > 0">
+		<div v-for="friend in state.friends" class="kmm-friend">
+			<img class="skill-icon-xs" :src="state.get_item_icon(friend.icon_id)"/>
+			<span>{{ friend.display_name }}</span>
+			<button type="button" class="btn btn-success" @click="state.select_gift_recipient(friend)">
+				<lang-string lang-id="MOD_KMM_BUTTON_SELECT"></lang-string>
+			</button>
+		</div>
+	</div>
+	<div class="kmm-modal-text" v-else>
+		<lang-string lang-id="MOD_KMM_MODAL_NO_FRIENDS"></lang-string>
+	</div>
+	<button type="button" class="btn btn-danger" @click="state.close_modal()">
+		<lang-string lang-id="MOD_KMM_BUTTON_CANCEL"></lang-string>
+	</button>
+</template>
+<template id="template-kru-multiplayer-confirm-gift-recipient-modal">
+	<div class="kmm-modal-text">
+		<lang-string-f lang-id="MOD_KMM_MODAL_DESC_CONFIRM_GIFT" :lang-arg-1="state.gifting_friend.display_name"></lang-string-f>
+		<lang-string lang-id="MOD_KMM_MODAL_DESC_GIFT_VALUE"></lang-string>
+		<span class="mr-2">
+			<img class="skill-icon-xxs mr-1" src="assets/media/main/coins.svg">
+			<span class="font-w400">{{ state.transfer_inventory_value }}</span>
+		</span>
+	</div>
+	<button type="button" class="btn btn-success" @click="state.confirm_gift($event)">
+		<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+		<lang-string lang-id="MOD_KMM_BUTTON_SEND_GIFT"></lang-string>
+	</button>
+	<button type="button" class="btn btn-danger" @click="state.close_modal()">
+		<lang-string lang-id="MOD_KMM_BUTTON_CANCEL"></lang-string>
+	</button>
 </template>

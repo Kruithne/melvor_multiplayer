@@ -12,6 +12,8 @@
 	"MOD_KMM_TITLE_FRIENDS": "Friends",
 	"MOD_KMM_TITLE_REMOVE_FRIEND_CONFIRM": "Confirm Removal",
 	"MOD_KMM_TITLE_TRANSFER_ITEM": "Trade / Gift (Multiplayer)",
+	"MOD_KMM_TITLE_CONFIRM_GIFT_RECIPIENT": "Confirm Gift",
+	"MOD_KMM_TITLE_SEND_GIFT": "Send Gift",
 
 	"MOD_KMM_BUTTON_ACCEPT_FRIEND": "Accept",
 	"MOD_KMM_BUTTON_IGNORE_FRIEND": "Ignore",
@@ -24,6 +26,8 @@
 	"MOD_KMM_BUTTON_RETURN_SELECTED": "Return Selected to Bank",
 	"MOD_KMM_BUTTON_RETURN_ALL": "Return All to Bank",
 	"MOD_KMM_BUTTON_GIFT_ITEMS": "Gift Items",
+	"MOD_KMM_BUTTON_SELECT": "Select",
+	"MOD_KMM_BUTTON_SEND_GIFT": "Send Gift",
 
 	"MOD_KMM_MENU_HEADER": "Multiplayer",
 	"MOD_KMM_MENU_HEADER_FRIENDS": "Friends",
@@ -37,6 +41,9 @@
 	"MOD_KMM_MODAL_DESC_CODE": "Let people add you by sharing the code below.",
 	"MOD_KMM_MODAL_DESC_ADD_FRIEND": "Enter a friend code to add another player.",
 	"MOD_KMM_MODAL_DESC_REMOVE_FRIEND": "Are you sure you want to remove %s as a friend?",
+
+	"MOD_KMM_MODAL_DESC_CONFIRM_GIFT": "Are you sure you wish to send these items to %s?",
+	"MOD_KMM_MODAL_DESC_GIFT_VALUE": "Total item value: ",
 
 	"MOD_KMM_MODAL_NO_FRIEND_REQUESTS": "You have no pending friend requests.",
 	"MOD_KMM_MODAL_NO_FRIENDS": "You have no friends yet!",
