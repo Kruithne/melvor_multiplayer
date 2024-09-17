@@ -25,7 +25,7 @@ const state = ui.createStore({
 
 	is_connected: false,
 
-	removingFriend: null,
+	removing_friend: null,
 	gifting_friend: null,
 
 	friend_code: '',
@@ -190,7 +190,7 @@ const state = ui.createStore({
 	remove_friend_prompt(friend) {
 		this.close_modal();
 
-		state.removingFriend = friend;
+		state.removing_friend = friend;
 
 		queue_modal('MOD_KMM_TITLE_REMOVE_FRIEND_CONFIRM', 'remove-friend-modal', 'assets/remove_friend.svg', {
 			showConfirmButton: false
@@ -199,7 +199,7 @@ const state = ui.createStore({
 
 	async remove_friend($event) {
 		show_button_spinner($event.currentTarget);
-		const friend_id = state.removingFriend.friend_id;
+		const friend_id = state.removing_friend.friend_id;
 
 		const res = await api_post('/api/friends/remove', { friend_id });
 
