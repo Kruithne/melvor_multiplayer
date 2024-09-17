@@ -163,9 +163,13 @@ const state = ui.createStore({
 	},
 
 	gift_friend() {
-		queue_modal('MOD_KMM_TITLE_SEND_GIFT', 'gift-friend-modal', 'assets/media/bank/present.png', {
-			showConfirmButton: false
-		}, true, false);
+		if (state.transfer_inventory.length > 0) {
+			queue_modal('MOD_KMM_TITLE_SEND_GIFT', 'gift-friend-modal', 'assets/media/bank/present.png', {
+				showConfirmButton: false
+			}, true, false);
+		} else {
+			notify_error('MOD_KMM_TRANSFER_NO_ITEMS_ERR');
+		}
 	},
 
 	select_gift_recipient(friend) {
