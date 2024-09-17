@@ -664,5 +664,28 @@ class LangStringFormattedElement extends HTMLElement {
 	}
 }
 
+class KMMItemIcon extends HTMLElement {
+	constructor() {
+		super();
+
+		const item_id = this.getAttribute('data-item-id');
+		this.item = game.items.getObjectByID(item_id);
+
+		this.tooltip = tippy(this, {
+			content: '',
+			placement: 'top',
+			allowHTML: true,
+			interactive: false,
+			animation: false,
+			touch: 'hold',
+			onShow: (instance)=>{
+				if (this.item !== undefined)
+					instance.setContent(createItemInformationTooltip(this.item));
+			}
+		});
+	}
+}
+
 window.customElements.define('lang-string-f', LangStringFormattedElement);
 window.customElements.define('kmm-modal-component', KMMModalComponent);
+window.customElements.define('kmm-item-icon', KMMItemIcon);

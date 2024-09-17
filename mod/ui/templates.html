@@ -217,14 +217,14 @@
 				</div>
 				<div class="block-content" v-if="state.transfer_inventory.length > 0">
 					<div class="pb-4 row">
-						<div v-for="item of state.transfer_inventory" class="bank-item pointer-enabled m-2" data-item-id="melvorD:Gem_Gloves">
+						<kmm-item-icon v-for="item of state.transfer_inventory" class="bank-item pointer-enabled m-2" :data-item-id="item.id">
 							<a role="button" @click="state.selected_transfer_item_id = item.id">
 								<img class="bank-img p-3" :src="state.get_item_icon(item.id)" :class="{ 'border border-4x border-success': state.selected_transfer_item_id === item.id }">
 								<div class="font-size-sm text-white text-center in-bank">
 									<small class="badge-pill bg-secondary">{{ formatNumber(item.qty) }}</small>
 								</div>
 							</a>
-						</div>
+						</kmm-item-icon>
 					</div>
 				</div>
 				<div class="p-4" v-else>
