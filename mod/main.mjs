@@ -204,7 +204,7 @@ const state = ui.createStore({
 			return show_modal_error(getLangString(e.message));
 		}
 
-		// todo: remove items from player bank
+		state.transfer_inventory = [];
 
 		notify('MOD_KMM_NOTIF_GIFT_SENT');
 		state.close_modal();
