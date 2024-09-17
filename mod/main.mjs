@@ -109,6 +109,10 @@ const state = ui.createStore({
 		this.close_modal();
 	},
 
+	open_transfer_data_page() {
+		changePage(game.pages.getObjectByID('kru_melvor_multiplayer:Transfer_Items'));
+	},
+
 	toggle_online_dropdown() {
 		const class_list = state.$dropdown_menu.classList;
 		class_list.toggle('show');
