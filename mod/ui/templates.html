@@ -10,7 +10,7 @@
 </template>
 <template id="template-kru-multiplayer-dropdown">
 	<div class="dropdown-menu dropdown-menu-right p-0 border-0 font-size-sm" id="kru-mm-online-dropdown">
-		<div class="p-2 connected-menu">
+		<div class="p-2" v-if="state.is_connected">
 			<h5 class="dropdown-header text-warning">
 				<lang-string lang-id="MOD_KMM_MENU_HEADER"></lang-string>
 			</h5>
@@ -35,7 +35,7 @@
 				<lang-string lang-id="MOD_KMM_MENU_SHOW_FRIEND_CODE"></lang-string>
 			</a>
 		</div>
-		<div class="p-2 disconnected-menu">
+		<div class="p-2" v-else>
 			<h5 class="dropdown-header text-warning">
 				<lang-string lang-id="MOD_KMM_MENU_HEADER"></lang-string>
 			</h5>

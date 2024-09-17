@@ -23,6 +23,8 @@ const ctx = mod.getContext(import.meta);
 const state = ui.createStore({
 	TRANSFER_INVENTORY_MAX_LIMIT,
 
+	is_connected: false,
+
 	removingFriend: null,
 	friend_code: '',
 	icon_search: '',
@@ -103,7 +105,6 @@ const state = ui.createStore({
 	toggle_online_dropdown() {
 		const class_list = state.$dropdown_menu.classList;
 		class_list.toggle('show');
-		class_list.toggle('connected', session_token !== null);
 	},
 
 	hide_online_dropdown() {
@@ -512,6 +513,7 @@ function set_character_storage_item(key, value) {
 
 function set_session_token(token) {
 	session_token = token;
+	state.is_connected = true;
 	log('client session authenticated (%s)', token);
 }
 
