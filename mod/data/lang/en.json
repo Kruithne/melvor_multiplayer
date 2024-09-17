@@ -5,6 +5,10 @@
 	"MOD_KMM_NO_SELF_LOVE_ERR": "Oh dear. You can't add yourself!",
 	"MOD_KMM_FRIENDSHIP_EXISTS": "You're already friends with them!",
 	"MOD_KMM_GENERIC_ERR": "That didn't work, try again later!",
+	"MOD_KMM_TRANSFER_NO_ITEMS_ERR": "No items in transfer inventory.",
+	"MOD_KMM_FRIENDSHIP_MISSING": "You are not friends with them.",
+	"MOD_KMM_TOO_MANY_ITEMS": "Too many items!",
+	"MOD_KMM_PENDING_GIFT": "You've already sent them a gift recently.",
 
 	"MOD_KMM_TITLE_FRIEND_CODE": "Your Friend Code",
 	"MOD_KMM_TITLE_ADD_FRIEND": "Add Friend",
@@ -55,5 +59,6 @@
 	"MOD_KMM_TRANSFER_VALUE": "Value:",
 
 	"MOD_KMM_NOTIF_FRIEND_REQ_SENT": "Friend request sent!",
-	"MOD_KMM_NOTIF_FRIEND_REMOVED": "Friend removed"
+	"MOD_KMM_NOTIF_FRIEND_REMOVED": "Friend removed",
+	"MOD_KMM_NOTIF_GIFT_SENT": "Gift sent!"
 }

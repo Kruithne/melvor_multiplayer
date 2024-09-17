@@ -21,6 +21,7 @@ type SessionRequestHandler = (req: Request, url: URL, client_id: number, json: J
 const server = serve(Number(process.env.SERVER_PORT));
 
 const DEFAULT_USER_ICON_ID = 'melvorF:Fire_Acolyte_Wizard_Hat';
+const MAX_TRANSFER_ITEM_COUNT = 32;
 
 // maximum cache life is X * 2, minimum is X.
 const CACHE_SESSION_LIFETIME = 1000 * 60 * 60; // 1 hour
@@ -34,6 +35,15 @@ const display_name_cache = new Map<number, string>();
 type FriendRequest = {
 	display_name: string;
 	request_id: number;
+}
+
+enum GiftFlags {
+	Returned = 1 << 0
+}
+
+type TransferItem = {
+	id: string;
+	qty: number;
 }
 
 function log(prefix: string, message: string, ...args: unknown[]): void {
@@ -213,6 +223,17 @@ async function set_user_icon(client_id: number, icon_id: string) {
 	await db_execute('UPDATE `clients` SET `icon_id` = ? WHERE `id` = ?', [icon_id, client_id]);
 }
 
+async function has_pending_gift(client_id: number, recipient_id: number) {
+	return await db_exists('SELECT 1 FROM `gifts` WHERE `client_id` = ? AND `sender_id` = ? LIMIT 1', [recipient_id, client_id]);
+}
+
+async function send_gift(client_id: number, recipient_id: number, items: TransferItem[]) {
+	const gift_id = await db_insert('INSERT INTO `gifts` (`client_id`, `sender_id`) VALUES(?, ?)', [recipient_id, client_id]);
+
+	for (const item of items)
+		await db_execute('INSERT INTO `gift_items` (`gift_id`, `item_id`, `qty`) VALUES(?, ?, ?)', [gift_id, item.id, item.qty]);
+}
+
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
 	return async (req: Request, url: URL) => {
 		let json = null;
@@ -246,6 +267,42 @@ function session_get_route(route: string, handler: SessionRequestHandler) {
 function session_post_route(route: string, handler: SessionRequestHandler) {
 	server.route(route, validate_session_request(handler, true), 'POST');
 }
+
+session_post_route('/api/gift/send', async (req, url, client_id, json) => {
+	// validate that client_id and friend_id are actually friends
+	// validate that the transfer item inventory contains equal or less than MAX_TRANSFER_ITEM_COUNT
+
+	const friend_id = json.friend_id;
+	if (typeof friend_id !== 'number')
+		return 400; // Bad Request
+
+	const items = json.items;
+	if (!Array.isArray(items))
+		return 400; // Bad Request
+
+	for (const item of items) {
+		if (typeof item !== 'object' || item === null || Array.isArray(item))
+			return 400; // Bad Request
+
+		// @ts-ignore
+		if (typeof item.id !== 'string' || typeof item.qty !== 'number')
+			return 400; // Bad Request
+	}
+
+	if (!(await friendship_exists(client_id, friend_id)))
+		return { error_lang: 'MOD_KMM_FRIENDSHIP_MISSING' };
+
+	if (items.length >= MAX_TRANSFER_ITEM_COUNT)
+		return { error_lang: 'MOD_KMM_TOO_MANY_ITEMS' };
+
+	if (await has_pending_gift(client_id, friend_id))
+		return { error_lang: 'MOD_KMM_PENDING_GIFT' };
+
+	await send_gift(client_id, friend_id, items as TransferItem[]);
+
+
+	return { success: true } as JsonSerializable;
+});
 
 session_get_route('/api/events', async (req, url, client_id) => {
 	return {

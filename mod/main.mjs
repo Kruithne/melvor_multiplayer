@@ -182,12 +182,31 @@ const state = ui.createStore({
 		}, true, false);
 	},
 
-	async confirm_gift($event) {
-		show_button_spinner($event.currentTarget);
+	async confirm_gift(event) {
+		const $button = event.currentTarget;
+
+		show_button_spinner($button);
 		const friend_id = state.gifting_friend.friend_id;
 
-		// todo: send API call to ship this gift off
+		try {
+			const res = await api_post('/api/gift/send', {
+				friend_id,
+				items: state.transfer_inventory
+			});
 
+			if (res === null)
+				throw new Error('MOD_KMM_GENERIC_ERR');
+
+			if (res.error_lang)
+				throw new Error(res.error_lang);
+		} catch (e) {
+			hide_button_spinner($button);
+			return show_modal_error(getLangString(e.message));
+		}
+
+		// todo: remove items from player bank
+
+		notify('MOD_KMM_NOTIF_GIFT_SENT');
 		state.close_modal();
 	},
 
