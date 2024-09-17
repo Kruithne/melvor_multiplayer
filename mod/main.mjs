@@ -187,7 +187,7 @@ const state = ui.createStore({
 		state.close_modal();
 	},
 
-	async remove_friend_prompt(friend) {
+	remove_friend_prompt(friend) {
 		this.close_modal();
 
 		state.removingFriend = friend;
