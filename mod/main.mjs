@@ -37,7 +37,8 @@ const state = ui.createStore({
 	selected_transfer_item_id: '',
 
 	events: {
-		friend_requests: []
+		friend_requests: [],
+		gifts: []
 	},
 
 	available_icons: [],
@@ -62,7 +63,11 @@ const state = ui.createStore({
 	},
 
 	get num_notifications() {
-		return this.num_friend_requests;
+		return this.num_friend_requests + this.num_transfer_offers;
+	},
+
+	get num_transfer_offers() {
+		return this.events.gifts.length;
 	},
 
 	get num_friend_requests() {

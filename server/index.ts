@@ -5,6 +5,7 @@ import { db_row_clients } from './db/types/clients';
 import { db_row_client_sessions } from './db/types/client_sessions';
 import type { JsonPrimitive, JsonArray, JsonObject } from 'spooder';
 import { db_row_friend_requests } from './db/types/friend_requests';
+import { db_row_gifts } from './db/types/gifts';
 
 interface ToJson {
 	toJSON(): any;
@@ -30,6 +31,7 @@ type CachedSession = { client_id: number, last_access: number };
 const client_session_cache = new Map<string, CachedSession>();
 
 const friend_request_cache = new Map<number, FriendRequest[]>();
+const gift_cache = new Map<number, number[]>();
 const display_name_cache = new Map<number, string>();
 
 type FriendRequest = {
@@ -234,6 +236,19 @@ async function send_gift(client_id: number, recipient_id: number, items: Transfe
 		await db_execute('INSERT INTO `gift_items` (`gift_id`, `item_id`, `qty`) VALUES(?, ?, ?)', [gift_id, item.id, item.qty]);
 }
 
+async function get_gifts(client_id: number) {
+	const cached_entries = gift_cache.get(client_id);
+	if (cached_entries)
+		return cached_entries;
+
+	const result = await db_get_all('SELECT `gift_id` FROM `gifts` WHERE `client_id` = ?', [client_id]) as db_row_gifts[];
+	const gift_ids = result.map(row => row?.gift_id) as number[];
+
+	gift_cache.set(client_id, gift_ids);
+
+	return gift_ids;
+}
+
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
 	return async (req: Request, url: URL) => {
 		let json = null;
@@ -306,7 +321,8 @@ session_post_route('/api/gift/send', async (req, url, client_id, json) => {
 
 session_get_route('/api/events', async (req, url, client_id) => {
 	return {
-		friend_requests: await get_friend_requests(client_id)
+		friend_requests: await get_friend_requests(client_id),
+		gifts: await get_gifts(client_id)
 	};
 });
 
