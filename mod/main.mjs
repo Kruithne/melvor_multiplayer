@@ -94,7 +94,7 @@ const state = ui.createStore({
 		return game.gp.formatAmount(numberWithCommas(total_value));
 	},
 
-	async accept_gift(event, gift_id) {
+	async resolve_gift(event, gift_id, accept) {
 		const gift = this.gift_data[gift_id];
 		if (gift === undefined)
 			return notify_error('MOD_KMM_GENERIC_ERR');
@@ -102,10 +102,11 @@ const state = ui.createStore({
 		const $button = event.currentTarget;
 		show_button_spinner($button);
 
-		const res = await api_post('/api/gift/accept', { gift_id });
+		const res = await api_post(accept ? '/api/gift/accept' : '/api/gift/decline', { gift_id });
 		if (res?.success) {
-			for (const item of gift.items)
-				game.bank.addItemByID(item.item_id, item.qty, false, false, true);
+			if (accept)
+				for (const item of gift.items)
+					game.bank.addItemByID(item.item_id, item.qty, false, false, true);
 
 			this.gift_data[gift_id] = undefined;
 			this.gifts = this.gifts.filter(g => g !== gift_id);
@@ -113,10 +114,6 @@ const state = ui.createStore({
 			hide_button_spinner($button);
 			notify_error('MOD_KMM_GENERIC_ERR');
 		}
-	},
-
-	async decline_gift(event, gift_id) {
-
 	},
 
 	get_svg(id) {
