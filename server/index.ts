@@ -230,8 +230,27 @@ async function has_pending_gift(client_id: number, recipient_id: number) {
 	return await db_exists('SELECT 1 FROM `gifts` WHERE `client_id` = ? AND `sender_id` = ? LIMIT 1', [recipient_id, client_id]);
 }
 
+function add_gift_cache_entry(client_id: number, gift_id: number) {
+	const cached_entries = gift_cache.get(client_id);
+	if (cached_entries)
+		cached_entries.push(gift_id);
+	else
+		gift_cache.set(client_id, [gift_id]);
+}
+
+function remove_gift_cache_entry(client_id: number, gift_id: number) {
+	const cached_entries = gift_cache.get(client_id);
+	if (cached_entries) {
+		const index = cached_entries.indexOf(gift_id);
+		if (index !== -1)
+			cached_entries.splice(index, 1);
+	}
+}
+
 async function send_gift(client_id: number, recipient_id: number, items: TransferItem[]) {
 	const gift_id = await db_insert('INSERT INTO `gifts` (`client_id`, `sender_id`) VALUES(?, ?)', [recipient_id, client_id]);
+
+	add_gift_cache_entry(recipient_id, gift_id);
 
 	for (const item of items)
 		await db_execute('INSERT INTO `gift_items` (`gift_id`, `item_id`, `qty`) VALUES(?, ?, ?)', [gift_id, item.id, item.qty]);
@@ -262,19 +281,23 @@ async function delete_gift(gift: db_row_gifts) {
 	if (!gift)
 		return;
 
-	const client_gift_cache = gift_cache.get(gift.client_id);
-	if (client_gift_cache) {
-		const index = client_gift_cache.indexOf(gift.gift_id);
-		if (index !== -1)
-			client_gift_cache.splice(index, 1);
-	}
+	remove_gift_cache_entry(gift.sender_id, gift.gift_id);
 
 	await db_execute('DELETE FROM `gifts` WHERE `gift_id` = ?', [gift.gift_id]);
 	await db_execute('DELETE FROM `gift_items` WHERE `gift_id` = ?', [gift.gift_id]);
 }
 
 async function return_gift(gift: db_row_gifts) {
-	await db_execute('UPDATE `gifts` SET `client_id` = ?, `sender_id` = ?, `flags` = `flags` | ? WHERE `gift_id` = ?', [gift?.sender_id, gift?.client_id, GiftFlags.Returned, gift?.gift_id]);
+	if (!gift)
+		return;
+
+	remove_gift_cache_entry(gift.client_id, gift.gift_id);
+	add_gift_cache_entry(gift.sender_id, gift.gift_id);
+
+	await db_execute(
+		'UPDATE `gifts` SET `client_id` = ?, `sender_id` = ?, `flags` = `flags` | ? WHERE `gift_id` = ?',
+		[gift.sender_id, gift.client_id, GiftFlags.Returned, gift.gift_id]
+	);
 }
 
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
