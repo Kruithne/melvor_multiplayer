@@ -258,9 +258,19 @@ async function get_client_gifts(client_id: number) {
 	return gift_ids;
 }
 
-async function delete_gift(gift_id: number) {
-	await db_execute('DELETE FROM `gifts` WHERE `gift_id` = ?', [gift_id]);
-	await db_execute('DELETE FROM `gift_items` WHERE `gift_id` = ?', [gift_id]);
+async function delete_gift(gift: db_row_gifts) {
+	if (!gift)
+		return;
+
+	const client_gift_cache = gift_cache.get(gift.client_id);
+	if (client_gift_cache) {
+		const index = client_gift_cache.indexOf(gift.gift_id);
+		if (index !== -1)
+			client_gift_cache.splice(index, 1);
+	}
+
+	await db_execute('DELETE FROM `gifts` WHERE `gift_id` = ?', [gift.gift_id]);
+	await db_execute('DELETE FROM `gift_items` WHERE `gift_id` = ?', [gift.gift_id]);
 }
 
 async function return_gift(gift: db_row_gifts) {
@@ -310,7 +320,7 @@ session_post_route('/api/gift/accept', async (req, url, client_id, json) => {
 	if (gift?.client_id !== client_id)
 		return 400; // Bad Request
 
-	await delete_gift(gift_id);
+	await delete_gift(gift);
 
 	return { success: true };
 });
