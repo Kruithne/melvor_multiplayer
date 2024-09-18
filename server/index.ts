@@ -309,7 +309,8 @@ session_post_route('/api/gift/get', async (req, url, client_id, json) => {
 			continue;
 
 		result[gift_id] = {
-			items: await get_gift_items(gift_id) ?? []
+			items: await get_gift_items(gift_id) ?? [],
+			sender_name: await get_client_display_name(gift.sender_id)
 		};
 	}
 
