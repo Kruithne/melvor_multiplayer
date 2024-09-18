@@ -122,7 +122,8 @@ const state = ui.createStore({
 	},
 
 	get_item_icon(id) {
-		return game.items.getObjectByID(id).media;
+		const item = game.items.getObjectByID(id);
+		return item?.media ?? 'assets/media/main/question.png';
 	},
 
 	close_modal() {
