@@ -6,6 +6,7 @@ import { db_row_client_sessions } from './db/types/client_sessions';
 import type { JsonPrimitive, JsonArray, JsonObject } from 'spooder';
 import { db_row_friend_requests } from './db/types/friend_requests';
 import { db_row_gifts } from './db/types/gifts';
+import { db_row_gift_items } from './db/types/gift_items';
 
 interface ToJson {
 	toJSON(): any;
@@ -236,7 +237,15 @@ async function send_gift(client_id: number, recipient_id: number, items: Transfe
 		await db_execute('INSERT INTO `gift_items` (`gift_id`, `item_id`, `qty`) VALUES(?, ?, ?)', [gift_id, item.id, item.qty]);
 }
 
-async function get_gifts(client_id: number) {
+async function get_gift(gift_id: number) {
+	return await db_get_single('SELECT * FROM `gifts` WHERE `gift_id` = ? LIMIT 1', [gift_id]) as db_row_gifts;
+}
+
+async function get_gift_items(gift_id: number) {
+	return await db_get_all('SELECT `id`, `item_id`, `qty` FROM `gift_items` WHERE `gift_id` = ?', [gift_id]) as db_row_gift_items[];
+}
+
+async function get_client_gifts(client_id: number) {
 	const cached_entries = gift_cache.get(client_id);
 	if (cached_entries)
 		return cached_entries;
@@ -283,6 +292,30 @@ function session_post_route(route: string, handler: SessionRequestHandler) {
 	server.route(route, validate_session_request(handler, true), 'POST');
 }
 
+session_post_route('/api/gift/get', async (req, url, client_id, json) => {
+	const gift_ids = json.gift_ids;
+	if (!Array.isArray(gift_ids))
+		return 400; // Bad Request
+
+	// check ids first, no point hitting db for an invalid request
+	for (const gift_id of gift_ids)
+		if (typeof gift_id !== 'number')
+			return 400; // Bad request
+
+	const result = {} as Record<number, object>;
+	for (const gift_id of gift_ids as number[]) {
+		const gift = await get_gift(gift_id);
+		if (!gift || gift.client_id !== client_id)
+			continue;
+
+		result[gift_id] = {
+			items: await get_gift_items(gift_id) ?? []
+		};
+	}
+
+	return result as JsonSerializable;
+});
+
 session_post_route('/api/gift/send', async (req, url, client_id, json) => {
 	// validate that client_id and friend_id are actually friends
 	// validate that the transfer item inventory contains equal or less than MAX_TRANSFER_ITEM_COUNT
@@ -322,7 +355,7 @@ session_post_route('/api/gift/send', async (req, url, client_id, json) => {
 session_get_route('/api/events', async (req, url, client_id) => {
 	return {
 		friend_requests: await get_friend_requests(client_id),
-		gifts: await get_gifts(client_id)
+		gifts: await get_client_gifts(client_id)
 	};
 });
 

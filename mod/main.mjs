@@ -24,6 +24,8 @@ const state = ui.createStore({
 	TRANSFER_INVENTORY_MAX_LIMIT,
 
 	is_connected: false,
+	is_transfer_page_visible: false,
+	is_updating_gifts: false,
 
 	removing_friend: null,
 	gifting_friend: null,
@@ -40,6 +42,8 @@ const state = ui.createStore({
 		friend_requests: [],
 		gifts: []
 	},
+
+	gift_data: {},
 
 	available_icons: [],
 
@@ -466,6 +470,39 @@ function patch_bank() {
 	$transfer_button.addEventListener('click', () => {
 		add_item_to_transfer_inventory(selected_bank_item.item, slider.quantity);
 	});
+
+	// detect data page open
+	const $transfer_page = $('kru-multiplayer-transfer-page');
+
+	const observer = new MutationObserver(() => {
+		const is_visible = !$transfer_page.classList.contains('d-none');
+		state.is_transfer_page_visible = is_visible;
+		
+		if (is_visible)
+			update_gift_contents();
+	});
+
+	observer.observe($transfer_page, {
+		attributes: true,
+		attributeFilter: ['class']
+	});
+}
+
+async function update_gift_contents() {
+	if (state.is_updating_gifts)
+		return;
+
+	state.is_updating_gifts = true;
+
+	const missing_gifts = state.events.gifts.filter(gift_id => state.gift_data[gift_id] === undefined);
+	if (missing_gifts.length > 0) {
+		const res = await api_post('/api/gift/get', { gift_ids: missing_gifts });
+
+		if (res !== null)
+			Object.assign(state.gift_data, res.items);
+	}
+
+	state.is_updating_gifts = false;
 }
 
 function return_all_transfer_inventory() {
