@@ -493,7 +493,7 @@ function patch_bank() {
 	}
 
 	const $transfer_input = document.getElementById('kmm-transfer-amount');
-	$transfer_input.addEventListener('keyup', () => slider.setSliderPosition($transfer_input.value));
+	$transfer_input.addEventListener('input', () => slider.setSliderPosition($transfer_input.value));
 
 	slider.customOnChange = (amount) => {
 		$transfer_input.value = amount;
