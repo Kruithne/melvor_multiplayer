@@ -243,14 +243,14 @@
 					<lang-string lang-id="MOD_KMM_TRANSFER_NO_ITEMS"></lang-string>
 				</div>
 			</div>
-			<template v-for="gift_id in state.events.gifts">
-				<div class="block tabbable w-100 kmm-col" v-if="state.gift_data[gift_id]">
+			<template v-for="gift in state.gifts">
+				<div class="block tabbable w-100 kmm-col" v-if="gift.data">
 					<div class="pl-3 pt-1 pb-1 bg-dark-bank-info text-center">
 						<div class="row gutters-tiny">
 							<div class="col-6 col-lg-3">
 								<span class="font-w400 font-size-sm mb-0">
 									<span class="font-w600">
-										<lang-string-f lang-id="MOD_KMM_TRANSFER_GIFT_SENDER" :lang-arg-1="state.gift_data[gift_id].sender_name"></lang-string-f>
+										<lang-string-f lang-id="MOD_KMM_TRANSFER_GIFT_SENDER" :lang-arg-1="gift.data.sender_name"></lang-string-f>
 									</span>
 								</span>
 							</div>
@@ -261,7 +261,7 @@
 										<span>
 											<span class="mr-2">
 												<img class="skill-icon-xxs mr-1" src="assets/media/main/coins.svg">
-												<span class="font-w400">{{ state.get_gift_value(gift_id) }}</span>
+												<span class="font-w400">{{ state.get_gift_value(gift) }}</span>
 											</span>
 										</span>
 									</span>
@@ -271,7 +271,7 @@
 					</div>
 					<div class="block-content">
 						<div class="pb-4 row">
-							<kmm-item-icon v-for="item of state.gift_data[gift_id].items" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id">
+							<kmm-item-icon v-for="item of gift.data.items" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id">
 								<a role="button">
 									<img class="bank-img p-3" :src="state.get_item_icon(item.item_id)">
 									<div class="font-size-sm text-white text-center in-bank">
@@ -282,11 +282,11 @@
 						</div>
 					</div>
 					<div class="p-3 kmm-transfer-buttons">
-						<button type="button" class="btn btn-success m-1" @click="state.resolve_gift($event, gift_id, true)">
+						<button type="button" class="btn btn-success m-1" @click="state.resolve_gift($event, gift.id, true)">
 							<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 							<lang-string lang-id="MOD_KMM_BUTTON_ACCEPT_GIFT"></lang-string>
 						</button>
-						<button type="button" class="btn btn-danger m-1" @click="state.resolve_gift($event, gift_id, false)">
+						<button type="button" class="btn btn-danger m-1" @click="state.resolve_gift($event, gift.id, false)">
 							<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 							<lang-string lang-id="MOD_KMM_BUTTON_DECLINE_GIFT"></lang-string>
 						</button>

@@ -39,11 +39,10 @@ const state = ui.createStore({
 	selected_transfer_item_id: '',
 
 	events: {
-		friend_requests: [],
-		gifts: []
+		friend_requests: []
 	},
 
-	gift_data: {},
+	gifts: [],
 
 	available_icons: [],
 
@@ -71,21 +70,20 @@ const state = ui.createStore({
 	},
 
 	get num_transfer_offers() {
-		return this.events.gifts.length;
+		return this.gifts.length;
 	},
 
 	get num_friend_requests() {
 		return this.events.friend_requests.length;
 	},
 
-	get_gift_value(gift_id) {
-		const gift = this.gift_data[gift_id];
-		if (gift === undefined)
+	get_gift_value(gift) {
+		if (gift.data === null)
 			return '...';
 
 		let total_value = 0;
 
-		for (const entry of gift.items) {
+		for (const entry of gift.data.items) {
 			const item = game.items.getObjectByID(entry.item_id);
 			if (item?.sellsFor.currency === game.gp)
 				total_value += game.bank.getItemSalePrice(item, entry.qty);
@@ -95,7 +93,7 @@ const state = ui.createStore({
 	},
 
 	async resolve_gift(event, gift_id, accept) {
-		const gift = this.gift_data[gift_id];
+		const gift = this.gifts.find(g => g.id === gift_id);
 		if (gift === undefined)
 			return notify_error('MOD_KMM_GENERIC_ERR');
 
@@ -105,11 +103,10 @@ const state = ui.createStore({
 		const res = await api_post(accept ? '/api/gift/accept' : '/api/gift/decline', { gift_id });
 		if (res?.success) {
 			if (accept)
-				for (const item of gift.items)
+				for (const item of gift.data.items)
 					game.bank.addItemByID(item.item_id, item.qty, false, false, true);
 
-			this.events.gifts = this.events.gifts.filter(g => g !== gift_id);
-			delete this.gift_data[gift_id];
+			this.gifts = this.gifts.filter(g => g.id !== gift_id);
 		} else {
 			hide_button_spinner($button);
 			notify_error('MOD_KMM_GENERIC_ERR');
@@ -532,13 +529,16 @@ async function update_gift_contents() {
 
 	state.is_updating_gifts = true;
 
-	const missing_gifts = state.events.gifts.filter(gift_id => state.gift_data[gift_id] === undefined);
+	const missing_gifts = state.gifts.filter(gift => gift.data === null).map(gift => gift.id);
 	if (missing_gifts.length > 0) {
 		const res = await api_post('/api/gift/get', { gift_ids: missing_gifts });
 
 		if (res !== null) {
-			for (const [gift_id, gift_data] of Object.entries(res))
-				state.gift_data[gift_id] = gift_data;
+			for (const gift of state.gifts) {
+				const gift_data = res[gift.id];
+				if (gift_data)
+					gift.data = gift_data;
+			}
 		}
 	}
 
@@ -661,8 +661,14 @@ async function get_friends() {
 
 async function get_client_events() {
 	const res = await api_get('/api/events');
-	if (res !== null)
-		state.events = res;
+	if (res !== null) {
+		state.events.friend_requests = res.friend_requests;
+		
+		for (const gift_id of res.gifts) {
+			if (!state.gifts.some(e => e.id === gift_id))
+				state.gifts.push({ id: gift_id, data: null });
+		}
+	}
 
 	setTimeout(get_client_events, 60000);
 }
