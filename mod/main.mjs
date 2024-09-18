@@ -102,9 +102,13 @@ const state = ui.createStore({
 
 		const res = await api_post(accept ? '/api/gift/accept' : '/api/gift/decline', { gift_id });
 		if (res?.success) {
-			if (accept)
-				for (const item of gift.data.items)
-					game.bank.addItemByID(item.item_id, item.qty, false, false, true);
+			if (accept) {
+				for (const item of gift.data.items) {
+					const check_item = game.items.getObjectByID(item.item_id);
+					if (check_item)
+						game.bank.addItemByID(item.item_id, item.qty, false, false, true);
+				}
+			}
 
 			this.gifts = this.gifts.filter(g => g.id !== gift_id);
 		} else {
@@ -817,6 +821,21 @@ class KMMItemIcon extends HTMLElement {
 		super();
 	}
 
+	createUnsupportedItemTooltip() {
+		return `<div class="text-center">
+				<div class="media d-flex align-items-center push">
+					<div class="mr-3">
+						<img class="bank-img m-1" src="assets/media/main/question.png">
+					</div>
+					<div class="media-body">
+						<div class="font-w600 text-danger">Unsupported Item</div>
+						<div role="separator" class="dropdown-divider m-0 mb-1"></div>
+						<small class="text-info">This item will not be added to your inventory.</small>
+					</div>
+				</div>
+		</div>`;
+	}
+
 	connectedCallback() {
 		const item_id = this.getAttribute('data-item-id');
 		this.item = game.items.getObjectByID(item_id);
@@ -831,6 +850,8 @@ class KMMItemIcon extends HTMLElement {
 			onShow: (instance)=>{
 				if (this.item !== undefined)
 					instance.setContent(createItemInformationTooltip(this.item));
+				else
+					instance.setContent(this.createUnsupportedItemTooltip());
 			}
 		});
 	}
