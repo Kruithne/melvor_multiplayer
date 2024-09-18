@@ -16,6 +16,8 @@ const DEV_CHARACTER_STORAGE = {
 
 const TRANSFER_INVENTORY_MAX_LIMIT = 32;
 
+const GIFT_FLAG_RETURNED = 1 << 0;
+
 let session_token = null;
 let is_connecting = false;
 
@@ -75,6 +77,10 @@ const state = ui.createStore({
 
 	get num_friend_requests() {
 		return this.events.friend_requests.length;
+	},
+
+	is_returned_gift(gift) {
+		return (gift.data.flags & GIFT_FLAG_RETURNED) !== 0;
 	},
 
 	get_gift_value(gift) {

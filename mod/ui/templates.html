@@ -250,7 +250,8 @@
 							<div class="col-6 col-lg-3">
 								<span class="font-w400 font-size-sm mb-0">
 									<span class="font-w600">
-										<lang-string-f lang-id="MOD_KMM_TRANSFER_GIFT_SENDER" :lang-arg-1="gift.data.sender_name"></lang-string-f>
+										<lang-string-f lang-id="MOD_KMM_TRANSFER_GIFT_SENDER" :lang-arg-1="gift.data.sender_name" v-if="state.is_returned_gift(gift)"></lang-string-f>
+										<lang-string-f lang-id="MOD_KMM_TRANSFER_GIFT_RETURN_SENDER" :lang-arg-1="gift.data.sender_name" v-else></lang-string-f>
 									</span>
 								</span>
 							</div>
@@ -286,7 +287,7 @@
 							<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 							<lang-string lang-id="MOD_KMM_BUTTON_ACCEPT_GIFT"></lang-string>
 						</button>
-						<button type="button" class="btn btn-danger m-1" @click="state.resolve_gift($event, gift.id, false)">
+						<button type="button" class="btn btn-danger m-1" @click="state.resolve_gift($event, gift.id, false)" v-if="!state.is_returned_gift(gift)">
 							<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 							<lang-string lang-id="MOD_KMM_BUTTON_DECLINE_GIFT"></lang-string>
 						</button>

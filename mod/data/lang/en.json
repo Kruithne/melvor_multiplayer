@@ -63,6 +63,7 @@
 	"MOD_KMM_TRANSFER_VALUE": "Value:",
 	"MOD_KMM_TRANSFER_LOADING_GIFT": "Loading gift contents...",
 	"MOD_KMM_TRANSFER_GIFT_SENDER": "Gift From: %s",
+	"MOD_KMM_TRANSFER_GIFT_RETURN_SENDER": "Returned Gift From: %s",
 
 	"MOD_KMM_NOTIF_FRIEND_REQ_SENT": "Friend request sent!",
 	"MOD_KMM_NOTIF_FRIEND_REMOVED": "Friend removed",
