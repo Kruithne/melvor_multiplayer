@@ -663,6 +663,9 @@ async function get_client_events() {
 	const res = await api_get('/api/events');
 	if (res !== null) {
 		state.events.friend_requests = res.friend_requests;
+
+		if (state.is_transfer_page_visible)
+			update_gift_contents();
 		
 		for (const gift_id of res.gifts) {
 			if (!state.gifts.some(e => e.id === gift_id))
