@@ -264,7 +264,7 @@ async function delete_gift(gift_id: number) {
 }
 
 async function return_gift(gift: db_row_gifts) {
-	await db_execute('UPDATE `gifts` SET `client_id` = ?, `sender_id` = ?, `flags` = `flags` | ? WHERE `gift_id` = ?', [GiftFlags.Returned, gift?.sender_id, gift?.client_id, gift?.gift_id]);
+	await db_execute('UPDATE `gifts` SET `client_id` = ?, `sender_id` = ?, `flags` = `flags` | ? WHERE `gift_id` = ?', [gift?.sender_id, gift?.client_id, GiftFlags.Returned, gift?.gift_id]);
 }
 
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
