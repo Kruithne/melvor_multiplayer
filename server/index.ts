@@ -357,6 +357,10 @@ session_post_route('/api/gift/decline', async (req, url, client_id, json) => {
 	if (gift?.client_id !== client_id)
 		return 400; // Bad Request
 
+	// client shouldn't allow this, so no need for bespoke error
+	if ((gift.flags & GiftFlags.Returned) === GiftFlags.Returned)
+		return 400; // Bad Request
+
 	await return_gift(gift);
 
 	return { success: true };
