@@ -281,7 +281,7 @@ async function delete_gift(gift: db_row_gifts) {
 	if (!gift)
 		return;
 
-	remove_gift_cache_entry(gift.sender_id, gift.gift_id);
+	remove_gift_cache_entry(gift.client_id, gift.gift_id);
 
 	await db_execute('DELETE FROM `gifts` WHERE `gift_id` = ?', [gift.gift_id]);
 	await db_execute('DELETE FROM `gift_items` WHERE `gift_id` = ?', [gift.gift_id]);
