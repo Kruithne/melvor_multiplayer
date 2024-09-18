@@ -32,6 +32,8 @@
 	"MOD_KMM_BUTTON_GIFT_ITEMS": "Gift Items",
 	"MOD_KMM_BUTTON_SELECT": "Select",
 	"MOD_KMM_BUTTON_SEND_GIFT": "Send Gift",
+	"MOD_KMM_BUTTON_ACCEPT_GIFT": "Accept Gift",
+	"MOD_KMM_BUTTON_DECLINE_GIFT": "Decline Gift",
 
 	"MOD_KMM_MENU_HEADER": "Multiplayer",
 	"MOD_KMM_MENU_HEADER_FRIENDS": "Friends",

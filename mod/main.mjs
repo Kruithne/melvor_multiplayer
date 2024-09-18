@@ -54,7 +54,7 @@ const state = ui.createStore({
 
 		for (const entry of this.transfer_inventory) {
 			const item = game.items.getObjectByID(entry.id);
-			if (item.sellsFor.currency === game.gp)
+			if (item?.sellsFor.currency === game.gp)
 				total_value += game.bank.getItemSalePrice(item, entry.qty);
 		}
 
@@ -76,6 +76,47 @@ const state = ui.createStore({
 
 	get num_friend_requests() {
 		return this.events.friend_requests.length;
+	},
+
+	get_gift_value(gift_id) {
+		const gift = this.gift_data[gift_id];
+		if (gift === undefined)
+			return '...';
+
+		let total_value = 0;
+
+		for (const entry of gift.items) {
+			const item = game.items.getObjectByID(entry.item_id);
+			if (item?.sellsFor.currency === game.gp)
+				total_value += game.bank.getItemSalePrice(item, entry.qty);
+		}
+
+		return game.gp.formatAmount(numberWithCommas(total_value));
+	},
+
+	async accept_gift(event, gift_id) {
+		const gift = this.gift_data[gift_id];
+		if (gift === undefined)
+			return notify_error('MOD_KMM_GENERIC_ERR');
+
+		const $button = event.currentTarget;
+		show_button_spinner($button);
+
+		const res = await api_post('/api/gift/accept', { gift_id });
+		if (res?.success) {
+			for (const item of gift.items)
+				game.bank.addItemByID(item.item_id, item.qty, false, false, true);
+
+			this.gift_data[gift_id] = undefined;
+			this.gifts = this.gifts.filter(g => g !== gift_id);
+		} else {
+			hide_button_spinner($button);
+			notify_error('MOD_KMM_GENERIC_ERR');
+		}
+	},
+
+	async decline_gift(event, gift_id) {
+
 	},
 
 	get_svg(id) {

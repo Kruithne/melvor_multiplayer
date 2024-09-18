@@ -258,6 +258,11 @@ async function get_client_gifts(client_id: number) {
 	return gift_ids;
 }
 
+async function delete_gift(gift_id: number) {
+	await db_execute('DELETE FROM `gifts` WHERE `gift_id` = ?', [gift_id]);
+	await db_execute('DELETE FROM `gift_items` WHERE `gift_id` = ?', [gift_id]);
+}
+
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
 	return async (req: Request, url: URL) => {
 		let json = null;
@@ -291,6 +296,20 @@ function session_get_route(route: string, handler: SessionRequestHandler) {
 function session_post_route(route: string, handler: SessionRequestHandler) {
 	server.route(route, validate_session_request(handler, true), 'POST');
 }
+
+session_post_route('/api/gift/accept', async (req, url, client_id, json) => {
+	const gift_id = json.gift_id;
+	if (typeof gift_id !== 'number')
+		return 400; // Bad Request
+
+	const gift = await get_gift(gift_id);
+	if (gift?.client_id !== client_id)
+		return 400; // Bad Request
+
+	await delete_gift(gift_id);
+
+	return { success: true };
+});
 
 session_post_route('/api/gift/get', async (req, url, client_id, json) => {
 	const gift_ids = json.gift_ids;

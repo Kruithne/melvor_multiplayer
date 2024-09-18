@@ -100,3 +100,7 @@
 .kmm-transfer-border {
 	border-color: #179CD8 !important;
 }
+
+.kmm-transfer-buttons {
+	padding-top: 0 !important;
+}
