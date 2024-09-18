@@ -285,7 +285,8 @@
 					<div class="p-3 kmm-transfer-buttons">
 						<button type="button" class="btn btn-success m-1" @click="state.resolve_gift($event, gift.id, true)">
 							<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
-							<lang-string lang-id="MOD_KMM_BUTTON_ACCEPT_GIFT"></lang-string>
+							<lang-string lang-id="MOD_KMM_BUTTON_TAKE_ITEMS" v-if="state.is_returned_gift(gift)"></lang-string>
+							<lang-string lang-id="MOD_KMM_BUTTON_ACCEPT_GIFT" v-else></lang-string>
 						</button>
 						<button type="button" class="btn btn-danger m-1" @click="state.resolve_gift($event, gift.id, false)" v-if="!state.is_returned_gift(gift)">
 							<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
