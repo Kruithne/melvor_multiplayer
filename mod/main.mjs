@@ -498,8 +498,10 @@ async function update_gift_contents() {
 	if (missing_gifts.length > 0) {
 		const res = await api_post('/api/gift/get', { gift_ids: missing_gifts });
 
-		if (res !== null)
-			Object.assign(state.gift_data, res.items);
+		if (res !== null) {
+			for (const [gift_id, gift_data] of Object.entries(res))
+				state.gift_data[gift_id] = gift_data;
+		}
 	}
 
 	state.is_updating_gifts = false;
