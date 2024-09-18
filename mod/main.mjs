@@ -814,7 +814,9 @@ class LangStringFormattedElement extends HTMLElement {
 class KMMItemIcon extends HTMLElement {
 	constructor() {
 		super();
+	}
 
+	connectedCallback() {
 		const item_id = this.getAttribute('data-item-id');
 		this.item = game.items.getObjectByID(item_id);
 
