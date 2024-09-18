@@ -154,6 +154,7 @@ const state = ui.createStore({
 	},
 
 	open_transfer_data_page() {
+		state.hide_online_dropdown();
 		changePage(game.pages.getObjectByID('kru_melvor_multiplayer:Transfer_Items'));
 	},
 
