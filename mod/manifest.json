@@ -1,7 +1,7 @@
 {
 	"namespace": "kru_melvor_multiplayer",
 	"setup": "main.mjs",
-	"icon": "assets/archaeology.svg",
+	"icon": "assets/multiplayer.svg",
 	"load": [
 		"ui/style.css"
 	]
