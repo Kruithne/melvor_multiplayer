@@ -108,7 +108,7 @@ const state = ui.createStore({
 				for (const item of gift.items)
 					game.bank.addItemByID(item.item_id, item.qty, false, false, true);
 
-			this.gift_ids = this.gift_ids.filter(g => g !== gift_id);
+			this.events.gifts = this.events.gifts.filter(g => g !== gift_id);
 			delete this.gift_data[gift_id];
 		} else {
 			hide_button_spinner($button);
