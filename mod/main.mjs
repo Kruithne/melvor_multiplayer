@@ -27,8 +27,7 @@ const state = ui.createStore({
 
 	is_connected: false,
 	is_transfer_page_visible: false,
-	is_updating_gifts: false,
-	is_updating_trades: false,
+	is_updating_transfer_contents: false,
 
 	removing_friend: null,
 	gifting_friend: null,
@@ -562,10 +561,8 @@ function patch_bank() {
 		const is_visible = !$transfer_page.classList.contains('d-none');
 		state.is_transfer_page_visible = is_visible;
 		
-		if (is_visible) {
-			update_gift_contents();
-			update_trade_contents();
-		}
+		if (is_visible)
+			update_transfer_contents();
 	});
 
 	observer.observe($transfer_page, {
@@ -574,15 +571,20 @@ function patch_bank() {
 	});
 }
 
-async function update_gift_contents() {
-	if (state.is_updating_gifts)
+async function update_transfer_contents() {
+	if (state.is_updating_transfer_contents)
 		return;
 
-	state.is_updating_gifts = true;
+	state.is_updating_transfer_contents = true;
 
 	const missing_gifts = state.gifts.filter(gift => gift.data === null).map(gift => gift.id);
-	if (missing_gifts.length > 0) {
-		const res = await api_post('/api/gift/get', { gift_ids: missing_gifts });
+	const missing_trades = state.trades.filter(trade => trade.data === null).map(trade => trade.trade_id);
+
+	if (missing_gifts.length > 0 || missing_trades.length > 0) {
+		const res = await api_post('/api/transfers/get_contents', {
+			gift_ids: missing_gifts,
+			trade_ids: missing_trades
+		});
 
 		if (res !== null) {
 			for (const gift of state.gifts) {
@@ -590,23 +592,7 @@ async function update_gift_contents() {
 				if (gift_data)
 					gift.data = gift_data;
 			}
-		}
-	}
 
-	state.is_updating_gifts = false;
-}
-
-async function update_trade_contents() {
-	if (state.is_updating_trades)
-		return;
-
-	state.is_updating_trades = true;
-
-	const missing_trades = state.trades.filter(trade => trade.data === null).map(trade => trade.trade_id);
-	if (missing_trades.length > 0) {
-		const res = await api_post('/api/trade/get', { trade_ids: missing_trades });
-
-		if (res !== null) {
 			for (const trade of state.trades) {
 				const trade_data = res[trade.trade_id];
 				if (trade_data)
@@ -615,7 +601,7 @@ async function update_trade_contents() {
 		}
 	}
 
-	state.is_updating_trades = false;
+	state.is_updating_transfer_contents = false;
 }
 
 function return_all_transfer_inventory() {
@@ -760,10 +746,8 @@ async function get_client_events() {
 				state.gifts.push({ id: gift_id, data: null });
 		}
 
-		if (state.is_transfer_page_visible) {
-			update_gift_contents();
-			update_trade_contents();
-		}
+		if (state.is_transfer_page_visible)
+			update_transfer_contents();
 	}
 
 	setTimeout(get_client_events, 60000);

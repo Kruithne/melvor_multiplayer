@@ -379,7 +379,29 @@ function session_post_route(route: string, handler: SessionRequestHandler) {
 	server.route(route, validate_session_request(handler, true), 'POST');
 }
 
-session_post_route('/api/trade/get', async (req, url, client_id, json) => {
+session_post_route('/api/transfers/get_contents', async (req, url, client_id, json) => {
+	const gift_ids = json.gift_ids;
+	if (!Array.isArray(gift_ids))
+		return 400; // Bad Request
+
+	// check ids first, no point hitting db for an invalid request
+	for (const gift_id of gift_ids)
+		if (typeof gift_id !== 'number')
+			return 400; // Bad request
+
+	const gift_results = {} as Record<number, object>;
+	for (const gift_id of gift_ids as number[]) {
+		const gift = await get_gift(gift_id);
+		if (!gift || gift.client_id !== client_id)
+			continue;
+
+		gift_results[gift_id] = {
+			items: await get_gift_items(gift_id) ?? [],
+			sender_name: await get_client_display_name(gift.sender_id),
+			flags: gift.flags
+		};
+	}
+
 	const trade_ids = json.trade_ids;
 	if (!Array.isArray(trade_ids))
 		return 400; // Bad Request
@@ -389,7 +411,7 @@ session_post_route('/api/trade/get', async (req, url, client_id, json) => {
 		if (typeof trade_id !== 'number')
 			return 400; // Bad request
 
-	const result = {} as Record<number, object>;
+	const trade_results = {} as Record<number, object>;
 	for (const trade_id of trade_ids as number[]) {
 		const trade_offer = await get_trade_offer(trade_id);
 		if (!trade_offer || (trade_offer.sender_id !== client_id && trade_offer.recipient_id !== client_id))
@@ -397,13 +419,16 @@ session_post_route('/api/trade/get', async (req, url, client_id, json) => {
 
 		const other_player_id = trade_offer.sender_id === client_id ? trade_offer.recipient_id : trade_offer.sender_id;
 
-		result[trade_id] = {
+		trade_results[trade_id] = {
 			items: await get_trade_items(trade_id) ?? [],
 			other_player: await get_client_display_name(other_player_id)
 		};
 	}
 
-	return result as JsonSerializable;
+	return {
+		gifts: gift_results,
+		trades: trade_results
+	} as JsonSerializable;
 });
 
 session_post_route('/api/trade/offer', async (req, url, client_id, json) => {
@@ -481,32 +506,6 @@ session_post_route('/api/gift/decline', async (req, url, client_id, json) => {
 	await return_gift(gift);
 
 	return { success: true };
-});
-
-session_post_route('/api/gift/get', async (req, url, client_id, json) => {
-	const gift_ids = json.gift_ids;
-	if (!Array.isArray(gift_ids))
-		return 400; // Bad Request
-
-	// check ids first, no point hitting db for an invalid request
-	for (const gift_id of gift_ids)
-		if (typeof gift_id !== 'number')
-			return 400; // Bad request
-
-	const result = {} as Record<number, object>;
-	for (const gift_id of gift_ids as number[]) {
-		const gift = await get_gift(gift_id);
-		if (!gift || gift.client_id !== client_id)
-			continue;
-
-		result[gift_id] = {
-			items: await get_gift_items(gift_id) ?? [],
-			sender_name: await get_client_display_name(gift.sender_id),
-			flags: gift.flags
-		};
-	}
-
-	return result as JsonSerializable;
 });
 
 session_post_route('/api/gift/send', async (req, url, client_id, json) => {
