@@ -265,7 +265,7 @@
 										<span>
 											<span class="mr-2">
 												<img class="skill-icon-xxs mr-1" src="assets/media/main/coins.svg">
-												<span class="font-w400">{{ state.get_gift_value(gift) }}</span>
+												<span class="font-w400">{{ state.get_transfer_value(gift) }}</span>
 											</span>
 										</span>
 									</span>
@@ -300,6 +300,54 @@
 				<div class="block tabbable w-100 kmm-col" v-else>
 					<div class="p-4" v-else>
 						<lang-string lang-id="MOD_KMM_TRANSFER_LOADING_GIFT"></lang-string>
+					</div>
+				</div>
+			</template>
+			<template v-for="trade in state.trades">
+				<div class="block tabbable w-100 kmm-col" v-if="trade.data">
+					<div class="pl-3 pt-1 pb-1 bg-dark-bank-info text-center">
+						<div class="row gutters-tiny">
+							<div class="col-6 col-lg-3">
+								<span class="font-w400 font-size-sm mb-0">
+									<span class="font-w600">
+										<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_FROM" :lang-arg-1="trade.data.other_player"></lang-string-f>
+									</span>
+								</span>
+							</div>
+							<div class="col-6 col-lg-3">
+								<span class="font-w400 font-size-sm mb-0 ml-3">
+									<span class="font-w600">
+										<lang-string lang-id="MOD_KMM_TRANSFER_VALUE"></lang-string>
+										<span>
+											<span class="mr-2">
+												<img class="skill-icon-xxs mr-1" src="assets/media/main/coins.svg">
+												<span class="font-w400">{{ state.get_transfer_value(trade) }}</span>
+											</span>
+										</span>
+									</span>
+								</span>
+							</div>
+						</div>
+					</div>
+					<div class="block-content">
+						<div class="pb-4 row">
+							<kmm-item-icon v-for="item of trade.data.items" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id">
+								<a role="button">
+									<img class="bank-img p-3" :src="state.get_item_icon(item.item_id)">
+									<div class="font-size-sm text-white text-center in-bank">
+										<small class="badge-pill bg-secondary">{{ formatNumber(item.qty) }}</small>
+									</div>
+								</a>
+							</kmm-item-icon>
+						</div>
+					</div>
+					<div class="p-3 kmm-transfer-buttons">
+						<!-- TODO: Buttons-->
+					</div>
+				</div>
+				<div class="block tabbable w-100 kmm-col" v-else>
+					<div class="p-4" v-else>
+						<lang-string lang-id="MOD_KMM_TRANSFER_LOADING_TRADE"></lang-string>
 					</div>
 				</div>
 			</template>

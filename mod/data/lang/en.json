@@ -69,6 +69,9 @@
 	"MOD_KMM_TRANSFER_GIFT_SENDER": "Gift From: %s",
 	"MOD_KMM_TRANSFER_GIFT_RETURN_SENDER": "Returned Gift From: %s",
 
+	"MOD_KMM_TRANSFER_LOADING_TRADE": "Loading trade contents...",
+	"MOD_KMM_TRANSFER_TRADE_FROM": "Trade Offer From: %s",
+
 	"MOD_KMM_NOTIF_FRIEND_REQ_SENT": "Friend request sent!",
 	"MOD_KMM_NOTIF_FRIEND_REMOVED": "Friend removed",
 	"MOD_KMM_NOTIF_GIFT_SENT": "Gift sent!"

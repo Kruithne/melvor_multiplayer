@@ -28,6 +28,7 @@ const state = ui.createStore({
 	is_connected: false,
 	is_transfer_page_visible: false,
 	is_updating_gifts: false,
+	is_updating_trades: false,
 
 	removing_friend: null,
 	gifting_friend: null,
@@ -119,13 +120,13 @@ const state = ui.createStore({
 		return (gift.data.flags & GIFT_FLAG_RETURNED) !== 0;
 	},
 
-	get_gift_value(gift) {
-		if (gift.data === null)
+	get_transfer_value(transfer) {
+		if (transfer.data === null)
 			return '...';
 
 		let total_value = 0;
 
-		for (const entry of gift.data.items) {
+		for (const entry of transfer.data.items) {
 			const item = game.items.getObjectByID(entry.item_id);
 			if (item?.sellsFor.currency === game.gp)
 				total_value += game.bank.getItemSalePrice(item, entry.qty);
@@ -561,8 +562,10 @@ function patch_bank() {
 		const is_visible = !$transfer_page.classList.contains('d-none');
 		state.is_transfer_page_visible = is_visible;
 		
-		if (is_visible)
+		if (is_visible) {
 			update_gift_contents();
+			update_trade_contents();
+		}
 	});
 
 	observer.observe($transfer_page, {
@@ -591,6 +594,28 @@ async function update_gift_contents() {
 	}
 
 	state.is_updating_gifts = false;
+}
+
+async function update_trade_contents() {
+	if (state.is_updating_trades)
+		return;
+
+	state.is_updating_trades = true;
+
+	const missing_trades = state.trades.filter(trade => trade.data === null).map(trade => trade.trade_id);
+	if (missing_trades.length > 0) {
+		const res = await api_post('/api/trade/get', { trade_ids: missing_trades });
+
+		if (res !== null) {
+			for (const trade of state.trades) {
+				const trade_data = res[trade.trade_id];
+				if (trade_data)
+					trade.data = trade_data;
+			}
+		}
+	}
+
+	state.is_updating_trades = false;
 }
 
 function return_all_transfer_inventory() {
@@ -737,8 +762,7 @@ async function get_client_events() {
 
 		if (state.is_transfer_page_visible) {
 			update_gift_contents();
-
-			// todo: trigger a trade contents update
+			update_trade_contents();
 		}
 	}
 
