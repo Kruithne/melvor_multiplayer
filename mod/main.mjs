@@ -102,7 +102,8 @@ const state = ui.createStore({
 			state.transfer_inventory = [];
 
 			state.trades.push({
-				id: res.trade_id,
+				trade_id: res.trade_id,
+				state: 0,
 				data: null
 			});
 
@@ -709,7 +710,7 @@ async function get_client_events() {
 
 		for (const trade of res.trades) {
 			// .trade_id, .attending_id, .state
-			const cache_trade = state.trades.find(e => e.id === trade.trade_id);
+			const cache_trade = state.trades.find(e => e.trade_id === trade.trade_id);
 			if (cache_trade) {
 				if (cache_trade.state !== trade.state) {
 					cache_trade.data = null;
