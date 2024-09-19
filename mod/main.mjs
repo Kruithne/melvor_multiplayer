@@ -588,13 +588,13 @@ async function update_transfer_contents() {
 
 		if (res !== null) {
 			for (const gift of state.gifts) {
-				const gift_data = res[gift.id];
+				const gift_data = res.gifts[gift.id];
 				if (gift_data)
 					gift.data = gift_data;
 			}
 
 			for (const trade of state.trades) {
-				const trade_data = res[trade.trade_id];
+				const trade_data = res.trades[trade.trade_id];
 				if (trade_data)
 					trade.data = trade_data;
 			}
