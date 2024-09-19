@@ -709,12 +709,13 @@ async function get_client_events() {
 		state.events.friend_requests = res.friend_requests;
 
 		for (const trade of res.trades) {
-			// .trade_id, .attending_id, .state
+			// .trade_id, .attending, .state
 			const cache_trade = state.trades.find(e => e.trade_id === trade.trade_id);
 			if (cache_trade) {
 				if (cache_trade.state !== trade.state) {
 					cache_trade.data = null;
 					cache_trade.state = trade.state;
+					cache_trade.attending = trade.attending;
 					console.log('got existing trade %d with different state (wiping data)', trade.trade_id);
 				} else {
 					console.log('got existing trade %d, no different', trade.trade_id);
