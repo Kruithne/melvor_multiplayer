@@ -714,6 +714,7 @@ async function get_client_events() {
 			if (cache_trade) {
 				if (cache_trade.state !== trade.state) {
 					cache_trade.data = null;
+					cache_trade.state = trade.state;
 					console.log('got existing trade %d with different state (wiping data)', trade.trade_id);
 				} else {
 					console.log('got existing trade %d, no different', trade.trade_id);
