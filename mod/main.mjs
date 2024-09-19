@@ -72,8 +72,12 @@ const state = ui.createStore({
 		return this.num_friend_requests + this.num_transfer_offers;
 	},
 
+	get num_attending_trades() {
+		return this.trades.filter(trade => trade.attending).length;
+	},
+
 	get num_transfer_offers() {
-		return this.gifts.length;
+		return this.gifts.length + this.num_attending_trades;
 	},
 
 	get num_friend_requests() {
