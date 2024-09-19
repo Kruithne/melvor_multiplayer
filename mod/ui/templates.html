@@ -192,6 +192,9 @@
 			<div class="block block-rounded block-link-pop border-top kmm-transfer-border border-4x w-100">
 				<div class="row row-deck gutters-tiny">
 					<div class="p-3">
+						<button type="button" class="btn btn-success m-1" @click="state.create_trade()">
+							<lang-string lang-id="MOD_KMM_BUTTON_CREATE_TRADE"></lang-string>
+						</button>
 						<button type="button" class="btn btn-success m-1" @click="state.gift_friend()">
 							<lang-string lang-id="MOD_KMM_BUTTON_GIFT_ITEMS"></lang-string>
 						</button>
@@ -309,6 +312,23 @@
 			<img class="skill-icon-xs" :src="state.get_item_icon(friend.icon_id)"/>
 			<span>{{ friend.display_name }}</span>
 			<button type="button" class="btn btn-success" @click="state.select_gift_recipient(friend)">
+				<lang-string lang-id="MOD_KMM_BUTTON_SELECT"></lang-string>
+			</button>
+		</div>
+	</div>
+	<div class="kmm-modal-text" v-else>
+		<lang-string lang-id="MOD_KMM_MODAL_NO_FRIENDS"></lang-string>
+	</div>
+	<button type="button" class="btn btn-danger" @click="state.close_modal()">
+		<lang-string lang-id="MOD_KMM_BUTTON_CANCEL"></lang-string>
+	</button>
+</template>
+<template id="template-kru-multiplayer-create-trade-modal">
+	<div class="kmm-friends" v-if="state.friends.length > 0">
+		<div v-for="friend in state.friends" class="kmm-friend">
+			<img class="skill-icon-xs" :src="state.get_item_icon(friend.icon_id)"/>
+			<span>{{ friend.display_name }}</span>
+			<button type="button" class="btn btn-success" @click="state.select_trade_recipient(friend)">
 				<lang-string lang-id="MOD_KMM_BUTTON_SELECT"></lang-string>
 			</button>
 		</div>

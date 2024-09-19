@@ -7,6 +7,7 @@
 	"MOD_KMM_GENERIC_ERR": "That didn't work, try again later!",
 	"MOD_KMM_TRANSFER_NO_ITEMS_ERR": "No items in transfer inventory.",
 	"MOD_KMM_FRIENDSHIP_MISSING": "You are not friends with them.",
+	"MOD_KMM_TRADE_EXISTS": "You already have a trade pending with that player.",
 	"MOD_KMM_TOO_MANY_ITEMS": "Too many items!",
 	"MOD_KMM_PENDING_GIFT": "You've already sent them a gift recently.",
 
@@ -18,6 +19,7 @@
 	"MOD_KMM_TITLE_TRANSFER_ITEM": "Trade / Gift (Multiplayer)",
 	"MOD_KMM_TITLE_CONFIRM_GIFT_RECIPIENT": "Confirm Gift",
 	"MOD_KMM_TITLE_SEND_GIFT": "Send Gift",
+	"MOD_KMM_TITLE_SEND_TRADE_OFFER": "Send Trade Offer",
 
 	"MOD_KMM_BUTTON_ACCEPT_FRIEND": "Accept",
 	"MOD_KMM_BUTTON_IGNORE_FRIEND": "Ignore",
@@ -30,6 +32,7 @@
 	"MOD_KMM_BUTTON_RETURN_SELECTED": "Return Selected to Bank",
 	"MOD_KMM_BUTTON_RETURN_ALL": "Return All to Bank",
 	"MOD_KMM_BUTTON_GIFT_ITEMS": "Gift Items",
+	"MOD_KMM_BUTTON_CREATE_TRADE": "Send Trade Offer",
 	"MOD_KMM_BUTTON_SELECT": "Select",
 	"MOD_KMM_BUTTON_SEND_GIFT": "Send Gift",
 	"MOD_KMM_BUTTON_ACCEPT_GIFT": "Accept Gift",

@@ -44,6 +44,7 @@ const state = ui.createStore({
 		friend_requests: []
 	},
 
+	trades: [],
 	gifts: [],
 
 	available_icons: [],
@@ -77,6 +78,36 @@ const state = ui.createStore({
 
 	get num_friend_requests() {
 		return this.events.friend_requests.length;
+	},
+
+	create_trade() {
+		if (state.transfer_inventory.length > 0) {
+			queue_modal('MOD_KMM_TITLE_SEND_TRADE_OFFER', 'create-trade-modal', 'assets/media/bank/fine_coinpurse.png', {
+				showConfirmButton: false
+			}, true, false);
+		} else {
+			notify_error('MOD_KMM_TRANSFER_NO_ITEMS_ERR');
+		}
+	},
+
+	async select_trade_recipient(friend) {
+		this.close_modal();
+
+		const res = await api_post('/api/trade/offer', {
+			recipient_id: friend.friend_id,
+			items: state.transfer_inventory
+		});
+
+		if (res?.success) {
+			state.transfer_inventory = [];
+
+			state.trades.push({
+				id: res.trade_id,
+				data: null
+			});
+
+			// todo: trigger a data pull for trade data.
+		}
 	},
 
 	is_returned_gift(gift) {
@@ -676,12 +707,31 @@ async function get_client_events() {
 	if (res !== null) {
 		state.events.friend_requests = res.friend_requests;
 
-		if (state.is_transfer_page_visible)
-			update_gift_contents();
+		for (const trade of res.trades) {
+			// .trade_id, .attending_id, .state
+			const cache_trade = state.trades.find(e => e.id === trade.trade_id);
+			if (cache_trade) {
+				if (cache_trade.state !== trade.state) {
+					cache_trade.data = null;
+					console.log('got existing trade %d with different state (wiping data)', trade.trade_id);
+				} else {
+					console.log('got existing trade %d, no different', trade.trade_id);
+				}
+			} else {
+				console.log('got new trade meta %d, adding to cache', trade.trade_id);
+				state.trades.push(Object.assign({ data: null }, trade));
+			}
+		}
 		
 		for (const gift_id of res.gifts) {
 			if (!state.gifts.some(e => e.id === gift_id))
 				state.gifts.push({ id: gift_id, data: null });
+		}
+
+		if (state.is_transfer_page_visible) {
+			update_gift_contents();
+
+			// todo: trigger a trade contents update
 		}
 	}
 

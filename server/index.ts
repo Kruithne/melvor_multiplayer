@@ -7,6 +7,7 @@ import type { JsonPrimitive, JsonArray, JsonObject } from 'spooder';
 import { db_row_friend_requests } from './db/types/friend_requests';
 import { db_row_gifts } from './db/types/gifts';
 import { db_row_gift_items } from './db/types/gift_items';
+import { db_row_trade_offers } from './db/types/trade_offers';
 
 interface ToJson {
 	toJSON(): any;
@@ -34,6 +35,15 @@ const client_session_cache = new Map<string, CachedSession>();
 const friend_request_cache = new Map<number, FriendRequest[]>();
 const gift_cache = new Map<number, number[]>();
 const display_name_cache = new Map<number, string>();
+
+const trade_cache = new Map<number, ActiveTrade>(); // trade_id to ActiveTrade
+const trade_player_cache = new Map<number, number[]>(); // client_id to trade_id[]
+
+type ActiveTrade = {
+	trade_id: number;
+	state: number;
+	attending_id: number;
+}
 
 type FriendRequest = {
 	display_name: string;
@@ -230,27 +240,16 @@ async function has_pending_gift(client_id: number, recipient_id: number) {
 	return await db_exists('SELECT 1 FROM `gifts` WHERE `client_id` = ? AND `sender_id` = ? LIMIT 1', [recipient_id, client_id]);
 }
 
-function add_gift_cache_entry(client_id: number, gift_id: number) {
-	const cached_entries = gift_cache.get(client_id);
+function remove_player_cache_entry(cache: Map<number, number[]>, client_id: number, item_id: number) {
+	const cached_entries = cache.get(client_id);
 	if (cached_entries)
-		cached_entries.push(gift_id);
-	else
-		gift_cache.set(client_id, [gift_id]);
-}
-
-function remove_gift_cache_entry(client_id: number, gift_id: number) {
-	const cached_entries = gift_cache.get(client_id);
-	if (cached_entries) {
-		const index = cached_entries.indexOf(gift_id);
-		if (index !== -1)
-			cached_entries.splice(index, 1);
-	}
+		cache.set(client_id, cached_entries.filter(e => e !== item_id));
 }
 
 async function send_gift(client_id: number, recipient_id: number, items: TransferItem[]) {
 	const gift_id = await db_insert('INSERT INTO `gifts` (`client_id`, `sender_id`) VALUES(?, ?)', [recipient_id, client_id]);
 
-	add_gift_cache_entry(recipient_id, gift_id);
+	gift_cache.get(recipient_id)?.push(gift_id);
 
 	for (const item of items)
 		await db_execute('INSERT INTO `gift_items` (`gift_id`, `item_id`, `qty`) VALUES(?, ?, ?)', [gift_id, item.id, item.qty]);
@@ -281,7 +280,7 @@ async function delete_gift(gift: db_row_gifts) {
 	if (!gift)
 		return;
 
-	remove_gift_cache_entry(gift.client_id, gift.gift_id);
+	remove_player_cache_entry(gift_cache, gift.client_id, gift.gift_id);
 
 	await db_execute('DELETE FROM `gifts` WHERE `gift_id` = ?', [gift.gift_id]);
 	await db_execute('DELETE FROM `gift_items` WHERE `gift_id` = ?', [gift.gift_id]);
@@ -291,13 +290,59 @@ async function return_gift(gift: db_row_gifts) {
 	if (!gift)
 		return;
 
-	remove_gift_cache_entry(gift.client_id, gift.gift_id);
-	add_gift_cache_entry(gift.sender_id, gift.gift_id);
+	remove_player_cache_entry(gift_cache, gift.client_id, gift.gift_id);
+	gift_cache.get(gift.sender_id)?.push(gift.gift_id);
 
 	await db_execute(
 		'UPDATE `gifts` SET `client_id` = ?, `sender_id` = ?, `flags` = `flags` | ? WHERE `gift_id` = ?',
 		[gift.sender_id, gift.client_id, GiftFlags.Returned, gift.gift_id]
 	);
+}
+
+async function trade_exists(sender_id: number, recipient_id: number) {
+	return await db_exists('SELECT 1 FROM `trade_offers` WHERE `sender_id` = ? AND `recipient_id` = ? LIMIT 1', [sender_id, recipient_id]);
+}
+
+async function get_client_trades(client_id: number) {
+	const cached_entries = trade_player_cache.get(client_id);
+	if (cached_entries) {
+		console.log('get_client_trades(): cache hit for client_id %d', client_id);
+		return cached_entries;
+	}
+
+	console.log('get_client_trades(): cache miss for client_id %d', client_id);
+
+	const result = await db_get_all('SELECT `trade_id` FROM `trade_offers` WHERE `sender_id` = ? OR `recipient_id` = ?', [client_id, client_id]) as db_row_trade_offers[];
+	const trade_ids = result.map(row => row?.trade_id) as number[];
+
+	trade_player_cache.set(client_id, trade_ids);
+
+	return trade_ids;
+}
+
+async function get_trade_offer_meta(trade_id: number) {
+	const cached = trade_cache.get(trade_id);
+	if (cached) {
+		console.log('get_trade_offer_meta(): cache hit for trade_id %d', trade_id);
+		return cached;
+	}
+
+	console.log('get_trade_offer_meta(): cache miss for trade_id %d', trade_id);
+
+	const result = await db_get_single('SELECT `attending_id`, `state` FROM `trade_offers` WHERE `trade_id` = ?', [trade_id]) as db_row_trade_offers;
+
+	if (result)
+		trade_cache.set(trade_id, result as ActiveTrade);
+
+	return result;
+}
+
+async function get_trade_offer(trade_id: number) {
+	return await db_get_single('SELECT * FROM `trade_offers` WHERE `trade_id` = ? LIMIT 1', [trade_id]) as db_row_trade_offers;
+}
+
+async function get_trade_items(trade_id: number) {
+	return await db_get_all('SELECT `id`, `item_id`, `qty` FROM `trade_items` WHERE `trade_id` = ?', [trade_id]) as db_row_gift_items[];
 }
 
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
@@ -333,6 +378,78 @@ function session_get_route(route: string, handler: SessionRequestHandler) {
 function session_post_route(route: string, handler: SessionRequestHandler) {
 	server.route(route, validate_session_request(handler, true), 'POST');
 }
+
+session_post_route('/api/trade/get', async (req, url, client_id, json) => {
+	const trade_ids = json.trade_ids;
+	if (!Array.isArray(trade_ids))
+		return 400; // Bad Request
+
+	// check ids first, no point hitting db for an invalid request
+	for (const trade_id of trade_ids)
+		if (typeof trade_id !== 'number')
+			return 400; // Bad request
+
+	const result = {} as Record<number, object>;
+	for (const trade_id of trade_ids as number[]) {
+		const trade_offer = await get_trade_offer(trade_id);
+		if (!trade_offer || (trade_offer.sender_id !== client_id && trade_offer.recipient_id !== client_id))
+			continue;
+
+		const other_player_id = trade_offer.sender_id === client_id ? trade_offer.recipient_id : trade_offer.sender_id;
+
+		result[trade_id] = {
+			items: await get_trade_items(trade_id) ?? [],
+			other_player: await get_client_display_name(other_player_id)
+		};
+	}
+
+	return result as JsonSerializable;
+});
+
+session_post_route('/api/trade/offer', async (req, url, client_id, json) => {
+	const recipient_id = json.recipient_id;
+	if (typeof recipient_id !== 'number')
+		return 400; // Bad Request
+
+	const items = json.items;
+	if (!Array.isArray(items))
+		return 400; // Bad Request
+
+	for (const item of items) {
+		if (typeof item !== 'object' || item === null || Array.isArray(item))
+			return 400; // Bad Request
+
+		// @ts-ignore
+		if (typeof item.id !== 'string' || typeof item.qty !== 'number')
+			return 400; // Bad Request
+	}
+
+	if (!(await friendship_exists(client_id, recipient_id)))
+		return { error_lang: 'MOD_KMM_FRIENDSHIP_MISSING' };
+
+	if (await trade_exists(client_id, recipient_id))
+		return { error_lang: 'MOD_KMM_TRADE_EXISTS' };
+
+	const trade_id = await db_insert(
+		'INSERT INTO `trade_offers` (sender_id, recipient_id, attending_id) VALUES(?, ?, ?)',
+		[client_id, recipient_id, recipient_id]
+	);
+
+	for (const item of items as TransferItem[]) {
+		await db_execute(
+			'INSERT INTO `trade_items` (trade_id, item_id, qty, counter) VALUES(?, ?, ?, ?)',
+			[trade_id, item.id, item.qty, 0]
+		);
+	}
+
+	const trade_entry: ActiveTrade = { trade_id, state: 0, attending_id: recipient_id };
+	trade_cache.set(trade_id, trade_entry);
+
+	trade_player_cache.get(client_id)?.push(trade_id);
+	trade_player_cache.get(recipient_id)?.push(trade_id);
+	
+	return { success: true, trade_id } as JsonSerializable;
+});
 
 session_post_route('/api/gift/accept', async (req, url, client_id, json) => {
 	const gift_id = json.gift_id;
@@ -429,9 +546,25 @@ session_post_route('/api/gift/send', async (req, url, client_id, json) => {
 });
 
 session_get_route('/api/events', async (req, url, client_id) => {
+	const trade_ids = await get_client_trades(client_id);
+	const trade_meta = [];
+
+	for (const trade_id of trade_ids) {
+		const meta = await get_trade_offer_meta(trade_id);
+		if (!meta)
+			continue;
+
+		trade_meta.push({
+			trade_id,
+			attending: meta.attending_id === client_id,
+			state: meta.state
+		});
+	}
+
 	return {
 		friend_requests: await get_friend_requests(client_id),
-		gifts: await get_client_gifts(client_id)
+		gifts: await get_client_gifts(client_id),
+		trades: trade_meta
 	};
 });
 
