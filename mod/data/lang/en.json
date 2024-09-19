@@ -38,6 +38,9 @@
 	"MOD_KMM_BUTTON_ACCEPT_GIFT": "Accept Gift",
 	"MOD_KMM_BUTTON_DECLINE_GIFT": "Decline Gift",
 	"MOD_KMM_BUTTON_TAKE_ITEMS": "Take Items",
+	"MOD_KMM_BUTTON_CANCEL_TRADE": "Cancel Trade Offer",
+	"MOD_KMM_BUTTON_DECLINE_TRADE": "Decline Trade",
+	"MOD_KMM_BUTTON_COUNTER_TRADE": "Send Offer",
 
 	"MOD_KMM_MENU_HEADER": "Multiplayer",
 	"MOD_KMM_MENU_HEADER_FRIENDS": "Friends",
@@ -66,11 +69,12 @@
 	"MOD_KMM_TRANSFER_NO_ITEM_SELECTED": "No item selected to return",
 	"MOD_KMM_TRANSFER_VALUE": "Value:",
 	"MOD_KMM_TRANSFER_LOADING_GIFT": "Loading gift contents...",
-	"MOD_KMM_TRANSFER_GIFT_SENDER": "Gift From: %s",
+	"MOD_KMM_TRANSFER_GIFT_SENDER": "Gift From %s",
 	"MOD_KMM_TRANSFER_GIFT_RETURN_SENDER": "Returned Gift From: %s",
 
 	"MOD_KMM_TRANSFER_LOADING_TRADE": "Loading trade contents...",
-	"MOD_KMM_TRANSFER_TRADE_FROM": "Trade Offer From: %s",
+	"MOD_KMM_TRANSFER_TRADE_FROM": "Trade Offer From %s",
+	"MOD_KMM_TRANSFER_TRADE_SENT": "Trade Offer Sent To %s",
 
 	"MOD_KMM_NOTIF_FRIEND_REQ_SENT": "Friend request sent!",
 	"MOD_KMM_NOTIF_FRIEND_REMOVED": "Friend removed",

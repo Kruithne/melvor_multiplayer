@@ -298,7 +298,7 @@
 					</div>
 				</div>
 				<div class="block tabbable w-100 kmm-col" v-else>
-					<div class="p-4" v-else>
+					<div class="p-4">
 						<lang-string lang-id="MOD_KMM_TRANSFER_LOADING_GIFT"></lang-string>
 					</div>
 				</div>
@@ -310,7 +310,10 @@
 							<div class="col-6 col-lg-3">
 								<span class="font-w400 font-size-sm mb-0">
 									<span class="font-w600">
-										<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_FROM" :lang-arg-1="trade.data.other_player"></lang-string-f>
+										<template v-if="trade.state === 0">
+											<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_FROM" :lang-arg-1="trade.data.other_player" v-if="trade.attending"></lang-string-f>
+											<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_SENT" :lang-arg-1="trade.data.other_player" v-else></lang-string-f>
+										</template>
 									</span>
 								</span>
 							</div>
@@ -342,11 +345,28 @@
 						</div>
 					</div>
 					<div class="p-3 kmm-transfer-buttons">
-						<!-- TODO: Buttons-->
+						<template v-if="trade.state === 0">
+							<template v-if="trade.attending">
+								<button type="button" class="btn btn-success m-1" @click="state.counter_trade($event, trade.trade_id)">
+									<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+									<lang-string lang-id="MOD_KMM_BUTTON_COUNTER_TRADE"></lang-string>
+								</button>
+								<button type="button" class="btn btn-danger m-1" @click="state.decline_trade($event, trade.trade_id)">
+									<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+									<lang-string lang-id="MOD_KMM_BUTTON_DECLINE_TRADE"></lang-string>
+								</button>
+							</template>
+							<template v-else>
+								<button type="button" class="btn btn-danger m-1" @click="state.cancel_trade($event, trade.trade_id)">
+									<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+									<lang-string lang-id="MOD_KMM_BUTTON_CANCEL_TRADE"></lang-string>
+								</button>
+							</template>
+						</template>
 					</div>
 				</div>
 				<div class="block tabbable w-100 kmm-col" v-else>
-					<div class="p-4" v-else>
+					<div class="p-4">
 						<lang-string lang-id="MOD_KMM_TRANSFER_LOADING_TRADE"></lang-string>
 					</div>
 				</div>
