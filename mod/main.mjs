@@ -112,7 +112,7 @@ const state = ui.createStore({
 				data: null
 			});
 
-			// todo: trigger a data pull for trade data.
+			update_transfer_contents();
 		}
 	},
 
