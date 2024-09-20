@@ -136,14 +136,16 @@ const state = ui.createStore({
 	},
 
 	async resolve_gift(event, gift_id, accept) {
+		const $button = event.currentTarget;
+
 		const gift = this.gifts.find(g => g.id === gift_id);
 		if (gift === undefined)
 			return notify_error('MOD_KMM_GENERIC_ERR');
 
-		show_button_spinner(event.currentTarget);
+		show_button_spinner($button);
 
 		const res = await api_post(accept ? '/api/gift/accept' : '/api/gift/decline', { gift_id });
-		hide_button_spinner(event.currentTarget);
+		hide_button_spinner($button);
 
 		if (res?.success) {
 			if (accept) {
@@ -227,13 +229,14 @@ const state = ui.createStore({
 	},
 
 	async accept_friend_request(event, request) {
-		show_button_spinner(event.currentTarget);
+		const $button = event.currentTarget;
+		show_button_spinner($button);
 
 		const res = await api_post('/api/friends/accept', {
 			request_id: request.request_id
 		});
 
-		hide_button_spinner(event.currentTarget);
+		hide_button_spinner($button);
 
 		if (res?.success === true) {
 			state.events.friend_requests.splice(state.events.friend_requests.indexOf(request), 1);
@@ -246,13 +249,14 @@ const state = ui.createStore({
 	},
 
 	async ignore_friend_request(event, request) {
-		show_button_spinner(event.currentTarget);
+		const $button = event.currentTarget;
+		show_button_spinner($button);
 
 		const res = await api_post('/api/friends/ignore', {
 			request_id: request.request_id
 		});
 
-		hide_button_spinner(event.currentTarget);
+		hide_button_spinner($button);
 
 		if (res?.success === true) {
 			state.events.friend_requests.splice(state.events.friend_requests.indexOf(request), 1);
@@ -266,14 +270,15 @@ const state = ui.createStore({
 		if (!trade)
 			return;
 
-		show_button_spinner(event.currentTarget);
+		const $button = event.currentTarget;
+		show_button_spinner($button);
 
 		const res = await api_post('/api/trade/counter', {
 			trade_id,
 			items: state.transfer_inventory
 		});
 
-		hide_button_spinner(event.currentTarget);
+		hide_button_spinner($button);
 
 		if (res?.success) {
 			state.transfer_inventory = [];
@@ -294,11 +299,12 @@ const state = ui.createStore({
 		if (!trade?.data)
 			return;
 
-		show_button_spinner(event.currentTarget);
+		const $button = event.currentTarget;
+		show_button_spinner($button);
 
 		const res = await api_post('/api/trade/resolve', { trade_id });
 
-		hide_button_spinner(event.currentTarget);
+		hide_button_spinner($button);
 
 		if (res?.success === true) {
 			for (const item of trade.data.items)
@@ -316,10 +322,11 @@ const state = ui.createStore({
 		if (!trade?.data)
 			return;
 
-		show_button_spinner(event.currentTarget);
+		const $button = event.currentTarget;
+		show_button_spinner($button);
 
 		const res = await api_post('/api/trade/decline', { trade_id });
-		hide_button_spinner(event.currentTarget);
+		hide_button_spinner($button);
 
 		if (res?.success === true) {
 			state.trades = state.trades.filter(trade => trade.trade_id !== trade_id);
@@ -334,10 +341,11 @@ const state = ui.createStore({
 		if (!trade?.data)
 			return;
 
-		show_button_spinner(event.currentTarget);
+		const $button = event.currentTarget;
+		show_button_spinner($button);
 
 		const res = await api_post('/api/trade/cancel', { trade_id });
-		hide_button_spinner(event.currentTarget);
+		hide_button_spinner($button);
 
 		if (res?.success === true) {
 			for (const item of trade.data.items)
