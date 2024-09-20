@@ -78,7 +78,7 @@ const state = ui.createStore({
 	},
 
 	get num_transfer_offers() {
-		return this.gifts.length + this.num_attending_trades;
+		return this.gifts.length + this.num_attending_trades + this.resolved_trades.length;
 	},
 
 	get num_friend_requests() {
