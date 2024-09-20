@@ -140,10 +140,11 @@ const state = ui.createStore({
 		if (gift === undefined)
 			return notify_error('MOD_KMM_GENERIC_ERR');
 
-		const $button = event.currentTarget;
-		show_button_spinner($button);
+		show_button_spinner(event.currentTarget);
 
 		const res = await api_post(accept ? '/api/gift/accept' : '/api/gift/decline', { gift_id });
+		hide_button_spinner(event.currentTarget);
+
 		if (res?.success) {
 			if (accept) {
 				for (const item of gift.data.items) {
@@ -155,7 +156,6 @@ const state = ui.createStore({
 
 			this.gifts = this.gifts.filter(g => g.id !== gift_id);
 		} else {
-			hide_button_spinner($button);
 			notify_error('MOD_KMM_GENERIC_ERR');
 		}
 	},
@@ -233,13 +233,14 @@ const state = ui.createStore({
 			request_id: request.request_id
 		});
 
+		hide_button_spinner(event.currentTarget);
+
 		if (res?.success === true) {
 			state.events.friend_requests.splice(state.events.friend_requests.indexOf(request), 1);
 
 			if (res.friend)
 				state.friends.push(res.friend);
 		} else {
-			hide_button_spinner(event.currentTarget);
 			notify_error('MOD_KMM_GENERIC_ERR');
 		}
 	},
@@ -251,10 +252,11 @@ const state = ui.createStore({
 			request_id: request.request_id
 		});
 
+		hide_button_spinner(event.currentTarget);
+
 		if (res?.success === true) {
 			state.events.friend_requests.splice(state.events.friend_requests.indexOf(request), 1);
 		} else {
-			hide_button_spinner(event.currentTarget);
 			notify_error('MOD_KMM_GENERIC_ERR');
 		}
 	},
@@ -271,6 +273,8 @@ const state = ui.createStore({
 			items: state.transfer_inventory
 		});
 
+		hide_button_spinner(event.currentTarget);
+
 		if (res?.success) {
 			state.transfer_inventory = [];
 			
@@ -280,7 +284,6 @@ const state = ui.createStore({
 
 			update_transfer_contents();
 		} else {
-			hide_button_spinner(event.currentTarget);
 			notify_error('MOD_KMM_GENERIC_ERR');
 		}
 	},
@@ -295,13 +298,14 @@ const state = ui.createStore({
 
 		const res = await api_post('/api/trade/resolve', { trade_id });
 
+		hide_button_spinner(event.currentTarget);
+
 		if (res?.success === true) {
 			for (const item of trade.data.items)
 				game.bank.addItemByID(item.item_id, item.qty, false, false, true);
 
 			state.resolved_trades = state.resolved_trades.filter(trade => trade.trade_id !== trade_id);
 		} else {
-			hide_button_spinner(event.currentTarget);
 			notify_error('MOD_KMM_GENERIC_ERR');
 		}
 	},
@@ -315,11 +319,11 @@ const state = ui.createStore({
 		show_button_spinner(event.currentTarget);
 
 		const res = await api_post('/api/trade/decline', { trade_id });
+		hide_button_spinner(event.currentTarget);
 
 		if (res?.success === true) {
 			state.trades = state.trades.filter(trade => trade.trade_id !== trade_id);
 		} else {
-			hide_button_spinner(event.currentTarget);
 			notify_error('MOD_KMM_GENERIC_ERR');
 		}
 	},
@@ -333,6 +337,7 @@ const state = ui.createStore({
 		show_button_spinner(event.currentTarget);
 
 		const res = await api_post('/api/trade/cancel', { trade_id });
+		hide_button_spinner(event.currentTarget);
 
 		if (res?.success === true) {
 			for (const item of trade.data.items)
@@ -340,7 +345,6 @@ const state = ui.createStore({
 			
 			state.trades = state.trades.filter(trade => trade.trade_id !== trade_id);
 		} else {
-			hide_button_spinner(event.currentTarget);
 			notify_error('MOD_KMM_GENERIC_ERR');
 		}
 	},
@@ -371,12 +375,12 @@ const state = ui.createStore({
 		show_button_spinner($button);
 		const friend_id = state.gifting_friend.friend_id;
 
-		try {
-			const res = await api_post('/api/gift/send', {
-				friend_id,
-				items: state.transfer_inventory
-			});
+		const res = await api_post('/api/gift/send', {
+			friend_id,
+			items: state.transfer_inventory
+		});
 
+		try {
 			if (res === null)
 				throw new Error('MOD_KMM_GENERIC_ERR');
 
@@ -386,6 +390,8 @@ const state = ui.createStore({
 			hide_button_spinner($button);
 			return show_modal_error(getLangString(e.message));
 		}
+
+		hide_button_spinner($button);
 
 		state.transfer_inventory = [];
 
@@ -468,6 +474,8 @@ const state = ui.createStore({
 			hide_button_spinner($button);
 			return show_modal_error(getLangString(e.message));
 		}
+
+		hide_button_spinner($button);
 
 		notify('MOD_KMM_NOTIF_FRIEND_REQ_SENT');
 		state.close_modal();
