@@ -38,6 +38,7 @@ const display_name_cache = new Map<number, string>();
 
 const trade_cache = new Map<number, ActiveTrade>(); // trade_id to ActiveTrade
 const trade_player_cache = new Map<number, number[]>(); // client_id to trade_id[]
+const resolved_trade_cache = new Map<number, number[]>(); // client_id to trade_id[]
 
 type ActiveTrade = {
 	trade_id: number;
@@ -345,6 +346,15 @@ async function get_trade_items(trade_id: number) {
 	return await db_get_all('SELECT `id`, `item_id`, `qty`, `counter` FROM `trade_items` WHERE `trade_id` = ?', [trade_id]) as db_row_gift_items[];
 }
 
+async function create_resolved_trade(trade_id: number, client_id: number, sender_id: number) {
+	await db_execute(
+		'INSERT INTO `resolved_trade_offers` (trade_id, client_id, sender_id) VALUES(?, ?, ?)',
+		[trade_id, client_id, sender_id]
+	);
+
+	resolved_trade_cache.get(client_id)?.push(trade_id);
+}
+
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
 	return async (req: Request, url: URL) => {
 		let json = null;
@@ -445,12 +455,33 @@ session_post_route('/api/trade/cancel', async (req, url, client_id, json) => {
 
 	trade_cache.delete(trade_id);
 
-	remove_player_cache_entry(trade_player_cache, client_id, trade_id);
+	remove_player_cache_entry(trade_player_cache, trade.sender_id, trade_id);
 	remove_player_cache_entry(trade_player_cache, trade.recipient_id, trade_id);
 
 	// todo: check if the other player had made a counter offer (state check)
 	// todo: create a resolved_trade_offer memory cache
 	// todo: add this trade_id into the resolved_trade_offer cache against the other player
+
+	return { success: true };
+});
+
+session_post_route('/api/trade/decline', async (req, url, client_id, json) => {
+	const trade_id = json.trade_id;
+	if (typeof trade_id !== 'number')
+		return 400; // Bad Request
+
+	const trade = await get_trade_offer(trade_id);
+	if (!trade || trade.recipient_id !== client_id)
+		return 400; // Bad Request
+
+	await db_execute('DELETE FROM `trade_offers` WHERE `trade_id` = ?', [trade_id]);
+	trade_cache.delete(trade_id);
+
+	remove_player_cache_entry(trade_player_cache, trade.recipient_id, trade_id);
+	remove_player_cache_entry(trade_player_cache, trade.sender_id, trade_id);
+
+	// return items to original sender
+	await create_resolved_trade(trade_id, trade.sender_id, trade.recipient_id);
 
 	return { success: true };
 });

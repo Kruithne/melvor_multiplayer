@@ -258,6 +258,24 @@ const state = ui.createStore({
 		}
 	},
 
+	async decline_trade(event, trade_id) {
+		// prevent declining a trade with no local data
+		const trade = state.trades.find(t => t.trade_id === trade_id);
+		if (!trade?.data)
+			return;
+
+		show_button_spinner(event.currentTarget);
+
+		const res = await api_post('/api/trade/decline', { trade_id });
+
+		if (res?.success === true) {
+			state.trades = state.trades.filter(trade => trade.trade_id !== trade_id);
+		} else {
+			hide_button_spinner(event.currentTarget);
+			notify_error('MOD_KMM_GENERIC_ERR');
+		}
+	},
+
 	async cancel_trade(event, trade_id) {
 		// prevent cancelling a trade with no local data
 		const trade = state.trades.find(t => t.trade_id === trade_id);
