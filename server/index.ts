@@ -496,6 +496,47 @@ session_post_route('/api/trade/resolve', async (req, url, client_id, json) => {
 	return { success: true };
 });
 
+session_post_route('/api/trade/counter', async (req, url, client_id, json) => {
+	const trade_id = json.trade_id;
+	if (typeof trade_id !== 'number')
+		return 400; // Bad Request
+
+	const trade = await get_trade_offer(trade_id);
+	if (!trade || trade.recipient_id !== client_id)
+		return 400; // Bad Request
+
+	const items = json.items;
+	if (!Array.isArray(items))
+		return 400; // Bad Request
+
+	for (const item of items) {
+		if (typeof item !== 'object' || item === null || Array.isArray(item))
+			return 400; // Bad Request
+
+		// @ts-ignore
+		if (typeof item.id !== 'string' || typeof item.qty !== 'number')
+			return 400; // Bad Request
+	}
+
+	for (const item of items as TransferItem[]) {
+		await db_execute(
+			'INSERT INTO `trade_items` (trade_id, item_id, qty, counter) VALUES(?, ?, ?, 1)',
+			[trade_id, item.id, item.qty]
+		);
+	}
+
+	// sender becomes the attending player
+	await db_execute('UPDATE `trade_offers` SET `state` = 1, `attending_id` = ? WHERE `trade_id` = ? LIMIT 1', [trade.sender_id, trade_id]);
+
+	const cached_meta = trade_cache.get(trade_id);
+	if (cached_meta) {
+		cached_meta.attending_id = trade.sender_id;
+		cached_meta.state = 1;
+	}
+
+	return { success: true };
+});
+
 session_post_route('/api/trade/cancel', async (req, url, client_id, json) => {
 	const trade_id = json.trade_id;
 	if (typeof trade_id !== 'number')
@@ -572,8 +613,8 @@ session_post_route('/api/trade/offer', async (req, url, client_id, json) => {
 
 	for (const item of items as TransferItem[]) {
 		await db_execute(
-			'INSERT INTO `trade_items` (trade_id, item_id, qty, counter) VALUES(?, ?, ?, ?)',
-			[trade_id, item.id, item.qty, 0]
+			'INSERT INTO `trade_items` (trade_id, item_id, qty, counter) VALUES(?, ?, ?, 0)',
+			[trade_id, item.id, item.qty]
 		);
 	}
 

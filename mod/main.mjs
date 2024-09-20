@@ -259,6 +259,32 @@ const state = ui.createStore({
 		}
 	},
 
+	async counter_trade(event, trade_id) {
+		const trade = state.trades.find(t => t.trade_id === trade_id);
+		if (!trade)
+			return;
+
+		show_button_spinner(event.currentTarget);
+
+		const res = await api_post('/api/trade/counter', {
+			trade_id,
+			items: state.transfer_inventory
+		});
+
+		if (res?.success) {
+			state.transfer_inventory = [];
+			
+			trade.state = 1;
+			trade.attending = false;
+			trade.data = null;
+
+			update_transfer_contents();
+		} else {
+			hide_button_spinner(event.currentTarget);
+			notify_error('MOD_KMM_GENERIC_ERR');
+		}
+	},
+
 	async resolve_trade(event, trade_id) {
 		// prevent resolving a trade with no local data
 		const trade = state.resolved_trades.find(t => t.trade_id === trade_id);
