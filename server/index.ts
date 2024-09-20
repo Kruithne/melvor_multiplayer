@@ -346,10 +346,10 @@ async function get_trade_items(trade_id: number) {
 	return await db_get_all('SELECT `id`, `item_id`, `qty`, `counter` FROM `trade_items` WHERE `trade_id` = ?', [trade_id]) as db_row_gift_items[];
 }
 
-async function create_resolved_trade(trade_id: number, client_id: number, sender_id: number) {
+async function create_resolved_trade(trade_id: number, client_id: number, sender_id: number, declined: boolean) {
 	await db_execute(
-		'INSERT INTO `resolved_trade_offers` (trade_id, client_id, sender_id) VALUES(?, ?, ?)',
-		[trade_id, client_id, sender_id]
+		'INSERT INTO `resolved_trade_offers` (trade_id, client_id, sender_id, declined) VALUES(?, ?, ?, ?)',
+		[trade_id, client_id, sender_id, declined ? 1 : 0]
 	);
 
 	resolved_trade_cache.get(client_id)?.push(trade_id);
@@ -481,7 +481,7 @@ session_post_route('/api/trade/decline', async (req, url, client_id, json) => {
 	remove_player_cache_entry(trade_player_cache, trade.sender_id, trade_id);
 
 	// return items to original sender
-	await create_resolved_trade(trade_id, trade.sender_id, trade.recipient_id);
+	await create_resolved_trade(trade_id, trade.sender_id, trade.recipient_id, true);
 
 	return { success: true };
 });
