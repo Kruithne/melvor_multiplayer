@@ -8,6 +8,7 @@ import { db_row_friend_requests } from './db/types/friend_requests';
 import { db_row_gifts } from './db/types/gifts';
 import { db_row_gift_items } from './db/types/gift_items';
 import { db_row_trade_offers } from './db/types/trade_offers';
+import { db_row_resolved_trade_offers } from './db/types/resolved_trade_offers';
 
 interface ToJson {
 	toJSON(): any;
@@ -355,6 +356,19 @@ async function create_resolved_trade(trade_id: number, client_id: number, sender
 	resolved_trade_cache.get(client_id)?.push(trade_id);
 }
 
+async function get_client_resolved_trades(client_id: number) {
+	const cached_entries = resolved_trade_cache.get(client_id);
+	if (cached_entries)
+		return cached_entries;
+
+	const result = await db_get_all('SELECT `trade_id` FROM `resolved_trade_offers` WHERE `client_id` = ?', [client_id]) as db_row_resolved_trade_offers[];
+	const trade_ids = result.map(row => row?.trade_id) as number[];
+
+	resolved_trade_cache.set(client_id, trade_ids);
+
+	return trade_ids;
+}
+
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
 	return async (req: Request, url: URL) => {
 		let json = null;
@@ -618,7 +632,8 @@ session_get_route('/api/events', async (req, url, client_id) => {
 	return {
 		friend_requests: await get_friend_requests(client_id),
 		gifts: await get_client_gifts(client_id),
-		trades: trade_meta
+		trades: trade_meta,
+		resolved_trades: await get_client_resolved_trades(client_id)
 	};
 });
 
