@@ -310,10 +310,8 @@
 							<div class="col-6 col-lg-3">
 								<span class="font-w400 font-size-sm mb-0">
 									<span class="font-w600">
-										<template v-if="trade.state === 0">
-											<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_DECLINED" :lang-arg-1="trade.data.other_player" v-if="trade.declined"></lang-string-f>
-											<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_COMPLETE" :lang-arg-1="trade.data.other_player" v-else></lang-string-f>
-										</template>
+										<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_DECLINED" :lang-arg-1="trade.data.other_player" v-if="trade.declined"></lang-string-f>
+										<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_COMPLETE" :lang-arg-1="trade.data.other_player" v-else></lang-string-f>
 									</span>
 								</span>
 							</div>
