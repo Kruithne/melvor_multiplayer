@@ -343,6 +343,10 @@ async function get_trade_offer(trade_id: number) {
 	return await db_get_single('SELECT * FROM `trade_offers` WHERE `trade_id` = ? LIMIT 1', [trade_id]) as db_row_trade_offers;
 }
 
+async function get_resolved_trade_offer(trade_id: number) {
+	return await db_get_single('SELECT * FROM `resolved_trade_offers` WHERE `trade_id` = ? LIMIT 1', [trade_id]) as db_row_resolved_trade_offers;
+}
+
 async function get_trade_items(trade_id: number) {
 	return await db_get_all('SELECT `id`, `item_id`, `qty`, `counter` FROM `trade_items` WHERE `trade_id` = ?', [trade_id]) as db_row_gift_items[];
 }
@@ -449,10 +453,47 @@ session_post_route('/api/transfers/get_contents', async (req, url, client_id, js
 		};
 	}
 
+	const resolved_trade_ids = json.resolved_trade_ids;
+	if (!Array.isArray(resolved_trade_ids))
+		return 400; // Bad Request
+
+	for (const trade_id of resolved_trade_ids)
+		if (typeof trade_id !== 'number')
+			return 400; // Bad Request
+
+	const resolved_trade_results = {} as Record<number, object>;
+	for (const trade_id of resolved_trade_ids as number[]) {
+		const trade_offer = await get_resolved_trade_offer(trade_id);
+		if (!trade_offer || trade_offer.client_id !== client_id)
+			continue;
+
+		resolved_trade_results[trade_id] = {
+			items: await get_trade_items(trade_id) ?? [],
+			declined: trade_offer.declined === 1,
+			other_player: await get_client_display_name(trade_offer.sender_id)
+		};
+	}
+
 	return {
 		gifts: gift_results,
-		trades: trade_results
+		trades: trade_results,
+		resolved_trades: resolved_trade_results
 	} as JsonSerializable;
+});
+
+session_post_route('/api/trade/resolve', async (req, url, client_id, json) => {
+	const trade_id = json.trade_id;
+	if (typeof trade_id !== 'number')
+		return 400; // Bad Request
+
+	const trade = await get_resolved_trade_offer(trade_id);
+	if (!trade || trade.client_id !== client_id)
+		return 400; // Bad Request
+
+	await db_execute('DELETE FROM `resolved_trade_offers` WHERE `client_id` = ?', [client_id]);
+	await db_execute('DELETE FROM `trade_offer_items WHERE `trade_id` = ?', [trade_id]);
+
+	return { success: true };
 });
 
 session_post_route('/api/trade/cancel', async (req, url, client_id, json) => {

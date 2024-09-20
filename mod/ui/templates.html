@@ -303,6 +303,60 @@
 					</div>
 				</div>
 			</template>
+			<template v-for="trade in state.resolved_trades"></template>
+				<div class="block tabbable w-100 kmm-col" v-if="trade.data">
+					<div class="pl-3 pt-1 pb-1 bg-dark-bank-info text-center">
+						<div class="row gutters-tiny">
+							<div class="col-6 col-lg-3">
+								<span class="font-w400 font-size-sm mb-0">
+									<span class="font-w600">
+										<template v-if="trade.state === 0">
+											<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_DECLINED" :lang-arg-1="trade.data.other_player" v-if="trade.declined"></lang-string-f>
+											<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_COMPLETE" :lang-arg-1="trade.data.other_player" v-else></lang-string-f>
+										</template>
+									</span>
+								</span>
+							</div>
+							<div class="col-6 col-lg-3">
+								<span class="font-w400 font-size-sm mb-0 ml-3">
+									<span class="font-w600">
+										<lang-string lang-id="MOD_KMM_TRANSFER_VALUE"></lang-string>
+										<span>
+											<span class="mr-2">
+												<img class="skill-icon-xxs mr-1" src="assets/media/main/coins.svg">
+												<span class="font-w400">{{ state.get_transfer_value(trade) }}</span>
+											</span>
+										</span>
+									</span>
+								</span>
+							</div>
+						</div>
+					</div>
+					<div class="block-content">
+						<div class="pb-4 row">
+							<kmm-item-icon v-for="item of trade.data.items" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id">
+								<a role="button">
+									<img class="bank-img p-3" :src="state.get_item_icon(item.item_id)">
+									<div class="font-size-sm text-white text-center in-bank">
+										<small class="badge-pill bg-secondary">{{ formatNumber(item.qty) }}</small>
+									</div>
+								</a>
+							</kmm-item-icon>
+						</div>
+					</div>
+					<div class="p-3 kmm-transfer-buttons">
+						<button type="button" class="btn btn-success m-1" @click="state.resolve_trade($event, trade.trade_id)">
+							<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+							<lang-string lang-id="MOD_KMM_BUTTON_TAKE_ITEMS"></lang-string>
+						</button>
+					</div>
+				</div>
+				<div class="block tabbable w-100 kmm-col" v-else>
+					<div class="p-4">
+						<lang-string lang-id="MOD_KMM_TRANSFER_LOADING_TRADE"></lang-string>
+					</div>
+				</div>
+			</template>
 			<template v-for="trade in state.trades">
 				<div class="block tabbable w-100 kmm-col" v-if="trade.data">
 					<div class="pl-3 pt-1 pb-1 bg-dark-bank-info text-center">

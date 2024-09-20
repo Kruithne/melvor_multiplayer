@@ -75,6 +75,8 @@
 	"MOD_KMM_TRANSFER_LOADING_TRADE": "Loading trade contents...",
 	"MOD_KMM_TRANSFER_TRADE_FROM": "Trade Offer From %s",
 	"MOD_KMM_TRANSFER_TRADE_SENT": "Trade Offer Sent To %s",
+	"MOD_KMM_TRANSFER_TRADE_COMPLETE": "Completed Trade From %s",
+	"MOD_KMM_TRANSFER_TRADE_DECLINED": "Declined Trade Items From %s",
 
 	"MOD_KMM_NOTIF_FRIEND_REQ_SENT": "Friend request sent!",
 	"MOD_KMM_NOTIF_FRIEND_REMOVED": "Friend removed",

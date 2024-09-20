@@ -46,6 +46,7 @@ const state = ui.createStore({
 
 	trades: [],
 	gifts: [],
+	resolved_trades: [],
 
 	available_icons: [],
 
@@ -252,6 +253,27 @@ const state = ui.createStore({
 
 		if (res?.success === true) {
 			state.events.friend_requests.splice(state.events.friend_requests.indexOf(request), 1);
+		} else {
+			hide_button_spinner(event.currentTarget);
+			notify_error('MOD_KMM_GENERIC_ERR');
+		}
+	},
+
+	async resolve_trade(event, trade_id) {
+		// prevent resolving a trade with no local data
+		const trade = state.resolved_trades.find(t => e.trade_id === trade_id);
+		if (!trade?.data)
+			return;
+
+		show_button_spinner(event.currentTarget);
+
+		const res = await api_post('/api/trade/resolve', { trade_id });
+
+		if (res?.success === true) {
+			for (const item of trade.data.items)
+				game.bank.addItemByID(item.item_id, item.qty, false, false, true);
+
+			state.resolved_trades = state.resolved_trades.filter(trade => trade.trade_id !== trade_id);
 		} else {
 			hide_button_spinner(event.currentTarget);
 			notify_error('MOD_KMM_GENERIC_ERR');
@@ -618,11 +640,13 @@ async function update_transfer_contents() {
 
 	const missing_gifts = state.gifts.filter(gift => gift.data === null).map(gift => gift.id);
 	const missing_trades = state.trades.filter(trade => trade.data === null).map(trade => trade.trade_id);
+	const missing_resolved_trades = state.resolved_trades.filter(trade => trade.data === null).map(trade => trade.trade_id);
 
-	if (missing_gifts.length > 0 || missing_trades.length > 0) {
+	if (missing_gifts.length > 0 || missing_trades.length > 0 || missing_resolved_trades.length > 0) {
 		const res = await api_post('/api/transfers/get_contents', {
 			gift_ids: missing_gifts,
-			trade_ids: missing_trades
+			trade_ids: missing_trades,
+			resolved_trade_ids: missing_resolved_trades
 		});
 
 		if (res !== null) {
@@ -634,6 +658,12 @@ async function update_transfer_contents() {
 
 			for (const trade of state.trades) {
 				const trade_data = res.trades[trade.trade_id];
+				if (trade_data)
+					trade.data = trade_data;
+			}
+
+			for (const trade of state.resolved_trades) {
+				const trade_data = res.resolved_trades[trade.trade_id];
 				if (trade_data)
 					trade.data = trade_data;
 			}
@@ -778,6 +808,11 @@ async function get_client_events() {
 				console.log('got new trade meta %d, adding to cache', trade.trade_id);
 				state.trades.push(Object.assign({ data: null }, trade));
 			}
+		}
+
+		for (const trade_id of res.resolved_trades) {
+			if (!state.resolved_trades.some(e => e.trade_id === trade_id))
+				state.resolved_trades.push({ trade_id, data: null });
 		}
 		
 		for (const gift_id of res.gifts) {
