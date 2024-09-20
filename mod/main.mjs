@@ -261,7 +261,7 @@ const state = ui.createStore({
 
 	async resolve_trade(event, trade_id) {
 		// prevent resolving a trade with no local data
-		const trade = state.resolved_trades.find(t => e.trade_id === trade_id);
+		const trade = state.resolved_trades.find(t => t.trade_id === trade_id);
 		if (!trade?.data)
 			return;
 
