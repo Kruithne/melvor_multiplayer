@@ -258,6 +258,27 @@ const state = ui.createStore({
 		}
 	},
 
+	async cancel_trade(event, trade_id) {
+		// prevent cancelling a trade with no local data
+		const trade = state.trades.find(t => t.trade_id === trade_id);
+		if (!trade?.data)
+			return;
+
+		show_button_spinner(event.currentTarget);
+
+		const res = await api_post('/api/trade/cancel', { trade_id });
+
+		if (res?.success === true) {
+			for (const item of trade.data.items)
+				game.bank.addItemByID(item.item_id, item.qty, false, false, true);
+			
+			state.trades = state.trades.filter(trade => trade.trade_id !== trade_id);
+		} else {
+			hide_button_spinner(event.currentTarget);
+			notify_error('MOD_KMM_GENERIC_ERR');
+		}
+	},
+
 	gift_friend() {
 		if (state.transfer_inventory.length > 0) {
 			queue_modal('MOD_KMM_TITLE_SEND_GIFT', 'gift-friend-modal', 'assets/media/bank/present.png', {
