@@ -491,7 +491,7 @@ session_post_route('/api/trade/resolve', async (req, url, client_id, json) => {
 		return 400; // Bad Request
 
 	await db_execute('DELETE FROM `resolved_trade_offers` WHERE `client_id` = ?', [client_id]);
-	await db_execute('DELETE FROM `trade_offer_items WHERE `trade_id` = ?', [trade_id]);
+	await db_execute('DELETE FROM `trade_items` WHERE `trade_id` = ?', [trade_id]);
 
 	return { success: true };
 });
