@@ -193,7 +193,7 @@
 				<div class="row row-deck gutters-tiny">
 					<div class="p-3">
 						<button type="button" class="btn btn-success m-1" @click="state.create_trade()">
-							<lang-string lang-id="MOD_KMM_BUTTON_CREATE_TRADE"></lang-string>
+							<lang-string-f lang-id="MOD_KMM_BUTTON_CREATE_TRADE" :lang-arg-1="state.transfer_inventory.length"></lang-string-f>
 						</button>
 						<button type="button" class="btn btn-success m-1" @click="state.gift_friend()">
 							<lang-string lang-id="MOD_KMM_BUTTON_GIFT_ITEMS"></lang-string>
@@ -401,7 +401,7 @@
 							<template v-if="trade.attending">
 								<button type="button" class="btn btn-success m-1" @click="state.counter_trade($event, trade.trade_id)">
 									<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
-									<lang-string lang-id="MOD_KMM_BUTTON_COUNTER_TRADE"></lang-string>
+									<lang-string-f lang-id="MOD_KMM_BUTTON_COUNTER_TRADE" :lang-arg-1="state.transfer_inventory.length"></lang-string-f>
 								</button>
 								<button type="button" class="btn btn-danger m-1" @click="state.decline_trade($event, trade.trade_id)">
 									<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
