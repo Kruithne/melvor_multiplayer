@@ -104,3 +104,30 @@
 .kmm-transfer-buttons {
 	padding-top: 0 !important;
 }
+
+.kmm-dual-trade {
+	display: grid;
+	grid-template-columns: 1fr 1px 1fr;
+}
+
+.kmm-dual-trade-panel h5 {
+	text-align: center;
+	margin-bottom: 0;
+}
+
+.kmm-dual-trade-header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+.kmm-dual-trade-items {
+	display: flex;
+}
+
+.kmm-dual-trade-divider {
+	border-right: 1px dashed #ffffff38;
+	width: 1px;
+	height: 100%;
+}

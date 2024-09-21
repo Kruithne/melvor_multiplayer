@@ -362,14 +362,12 @@
 							<div class="col-6 col-lg-3">
 								<span class="font-w400 font-size-sm mb-0">
 									<span class="font-w600">
-										<template v-if="trade.state === 0">
-											<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_FROM" :lang-arg-1="trade.data.other_player" v-if="trade.attending"></lang-string-f>
-											<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_SENT" :lang-arg-1="trade.data.other_player" v-else></lang-string-f>
-										</template>
+										<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_FROM" :lang-arg-1="trade.data.other_player" v-if="trade.attending"></lang-string-f>
+										<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_SENT" :lang-arg-1="trade.data.other_player" v-else></lang-string-f>
 									</span>
 								</span>
 							</div>
-							<div class="col-6 col-lg-3">
+							<div class="col-6 col-lg-3" v-if="trade.state === 0">
 								<span class="font-w400 font-size-sm mb-0 ml-3">
 									<span class="font-w600">
 										<lang-string lang-id="MOD_KMM_TRANSFER_VALUE"></lang-string>
@@ -385,7 +383,62 @@
 						</div>
 					</div>
 					<div class="block-content">
-						<div class="pb-4 row">
+						<div class="pb-4 kmm-dual-trade" v-if="trade.state === 1">
+							<div class="kmm-dual-trade-panel">
+								<div class="kmm-dual-trade-header">
+									<h5>
+										<lang-string lang-id="MOD_KMM_TRANSFER_HEADER_HOME"></lang-string>
+									</h5>
+									<span class="font-w600">
+										<lang-string lang-id="MOD_KMM_TRANSFER_VALUE"></lang-string>
+										<span>
+											<span class="mr-2">
+												<img class="skill-icon-xxs mr-1" src="assets/media/main/coins.svg">
+												<span class="font-w400">{{ state.get_trade_items_value(state.filter_trade_items_home(trade)) }}</span>
+											</span>
+										</span>
+									</span>
+								</div>
+								<div class="kmm-dual-trade-items">
+									<kmm-item-icon v-for="item of state.filter_trade_items_home(trade)" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id">
+										<a role="button">
+											<img class="bank-img p-3" :src="state.get_item_icon(item.item_id)">
+											<div class="font-size-sm text-white text-center in-bank">
+												<small class="badge-pill bg-secondary">{{ formatNumber(item.qty) }}</small>
+											</div>
+										</a>
+									</kmm-item-icon>
+								</div>
+							</div>
+							<div class="kmm-dual-trade-divider"></div>
+							<div class="kmm-dual-trade-panel">
+								<div class="kmm-dual-trade-header">
+									<h5>
+										<lang-string-f lang-id="MOD_KMM_TRANSFER_HEADER_AWAY" :lang-arg-1="trade.data.other_player"></lang-string-f>
+									</h5>
+									<span class="font-w600">
+										<lang-string lang-id="MOD_KMM_TRANSFER_VALUE"></lang-string>
+										<span>
+											<span class="mr-2">
+												<img class="skill-icon-xxs mr-1" src="assets/media/main/coins.svg">
+												<span class="font-w400">{{ state.get_trade_items_value(state.filter_trade_items_away(trade)) }}</span>
+											</span>
+										</span>
+									</span>
+								</div>
+								<div class="kmm-dual-trade-items">
+									<kmm-item-icon v-for="item of state.filter_trade_items_away(trade)" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id">
+										<a role="button">
+											<img class="bank-img p-3" :src="state.get_item_icon(item.item_id)">
+											<div class="font-size-sm text-white text-center in-bank">
+												<small class="badge-pill bg-secondary">{{ formatNumber(item.qty) }}</small>
+											</div>
+										</a>
+									</kmm-item-icon>
+								</div>
+							</div>
+						</div>
+						<div class="pb-4 row" v-else>
 							<kmm-item-icon v-for="item of trade.data.items" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id">
 								<a role="button">
 									<img class="bank-img p-3" :src="state.get_item_icon(item.item_id)">
@@ -397,23 +450,25 @@
 						</div>
 					</div>
 					<div class="p-3 kmm-transfer-buttons">
-						<template v-if="trade.state === 0">
-							<template v-if="trade.attending">
-								<button type="button" class="btn btn-success m-1" @click="state.counter_trade($event, trade.trade_id)">
-									<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
-									<lang-string-f lang-id="MOD_KMM_BUTTON_COUNTER_TRADE" :lang-arg-1="state.transfer_inventory.length"></lang-string-f>
-								</button>
-								<button type="button" class="btn btn-danger m-1" @click="state.decline_trade($event, trade.trade_id)">
-									<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
-									<lang-string lang-id="MOD_KMM_BUTTON_DECLINE_TRADE"></lang-string>
-								</button>
-							</template>
-							<template v-else>
-								<button type="button" class="btn btn-danger m-1" @click="state.cancel_trade($event, trade.trade_id)">
-									<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
-									<lang-string lang-id="MOD_KMM_BUTTON_CANCEL_TRADE"></lang-string>
-								</button>
-							</template>
+						<template v-if="trade.attending">
+							<button v-if="trade.state === 0" type="button" class="btn btn-success m-1" @click="state.counter_trade($event, trade.trade_id)"></button>
+								<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+								<lang-string-f lang-id="MOD_KMM_BUTTON_COUNTER_TRADE" :lang-arg-1="state.transfer_inventory.length"></lang-string-f>
+							</button>
+							<button v-else-if="trade.state === 1" type="button" class="btn btn-success m-1" @click="state.accept_trade($event, trade.trade_id)"></button>
+								<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+								<lang-string lang-id="MOD_KMM_BUTTON_ACCEPT_TRADE"></lang-string>
+							</button>
+							<button type="button" class="btn btn-danger m-1" @click="state.decline_trade($event, trade.trade_id)">
+								<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+								<lang-string lang-id="MOD_KMM_BUTTON_DECLINE_TRADE"></lang-string>
+							</button>
+						</template>
+						<template v-else>
+							<button type="button" class="btn btn-danger m-1" @click="state.cancel_trade($event, trade.trade_id)">
+								<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+								<lang-string lang-id="MOD_KMM_BUTTON_CANCEL_TRADE"></lang-string>
+							</button>
 						</template>
 					</div>
 				</div>

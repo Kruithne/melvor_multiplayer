@@ -265,6 +265,26 @@ const state = ui.createStore({
 		}
 	},
 
+	get_trade_items_value(items) {
+		let total_value = 0;
+
+		for (const entry of items) {
+			const item = game.items.getObjectByID(entry.item_id);
+			if (item?.sellsFor.currency === game.gp)
+				total_value += game.bank.getItemSalePrice(item, entry.qty);
+		}
+
+		return game.gp.formatAmount(numberWithCommas(total_value));
+	},
+
+	filter_trade_items_home(trade) {
+		return trade.data.items.filter(item => item.counter === (trade.attending ? 0 : 1));
+	},
+
+	filter_trade_items_away(trade) {
+		return trade.data.items.filter(item => item.counter === (trade.attending ? 1 : 0));
+	},
+
 	async counter_trade(event, trade_id) {
 		const trade = state.trades.find(t => t.trade_id === trade_id);
 		if (!trade)
