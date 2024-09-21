@@ -282,12 +282,22 @@ const state = ui.createStore({
 
 		if (res?.success) {
 			state.transfer_inventory = [];
-			
-			trade.state = 1;
-			trade.attending = false;
-			trade.data = null;
 
-			update_transfer_contents();
+			state.trades = state.trades.filter(t => t.trade_id !== trade_id);
+
+			// this needs to happen on the next tick to prevent petite-vue breaking
+			// bug: https://github.com/vuejs/core/issues/5657 (element hoisting is not a good solution)
+			setTimeout(() => {
+				state.trades.push({
+					trade_id,
+					state: 1,
+					attending: false,
+					data: null
+				});
+
+				update_transfer_contents();
+			}, 1);
+
 		} else {
 			notify_error('MOD_KMM_GENERIC_ERR');
 		}
@@ -839,9 +849,17 @@ async function get_client_events() {
 			const cache_trade = state.trades.find(e => e.trade_id === trade.trade_id);
 			if (cache_trade) {
 				if (cache_trade.state !== trade.state) {
-					cache_trade.data = null;
-					cache_trade.state = trade.state;
-					cache_trade.attending = trade.attending;
+					// remove the existing trade from trades
+					state.trades = state.trades.filter(e => e.trade_id !== trade.trade_id);
+
+					setTimeout(() => {
+						state.trades.push({
+							trade_id: cache_trade.trade_id,
+							state: trade.state,
+							attending: trade.attending,
+							data: null
+						});
+					}, 1);
 					console.log('got existing trade %d with different state (wiping data)', trade.trade_id);
 				} else {
 					console.log('got existing trade %d, no different', trade.trade_id);
@@ -863,7 +881,7 @@ async function get_client_events() {
 		}
 
 		if (state.is_transfer_page_visible)
-			update_transfer_contents();
+			setTimeout(() => update_transfer_contents(), 1);
 	}
 
 	setTimeout(get_client_events, 60000);
