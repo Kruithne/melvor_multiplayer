@@ -102,6 +102,10 @@
 	border-color: #179CD8 !important;
 }
 
+.kmm-exchange-border {
+	border-color: #17d873 !important;
+}
+
 .kmm-transfer-buttons {
 	padding-top: 0 !important;
 }
@@ -139,4 +143,10 @@
 
 #bank-item-box {
 	height: unset;
+}
+
+.kmm-transfer-info {
+	display: flex;
+	align-items: center !important;
+	gap: 5px;
 }

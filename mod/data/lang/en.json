@@ -81,6 +81,10 @@
 	"MOD_KMM_TRANSFER_HEADER_HOME": "Your Offer",
 	"MOD_KMM_TRANSFER_HEADER_AWAY": "%s's Offer",
 
+	"MOD_KMM_TRANSFER_WINDOW_HEADER": "Transfer Inventory",
+	"MOD_KMM_TRANSFER_WINDOW_INFO": "Your transfer inventory contains items you've added from your bank. From here, you can gift these items to another player, start a trade offer, or return them to your bank.",
+	"MOD_KMM_EXCHANGE_WINDOW_INFO": "Below you will find trade offers between you and other players, as well as gifts other players have sent to you.",
+
 	"MOD_KMM_NOTIF_FRIEND_REQ_SENT": "Friend request sent!",
 	"MOD_KMM_NOTIF_FRIEND_REMOVED": "Friend removed",
 	"MOD_KMM_NOTIF_GIFT_SENT": "Gift sent!"

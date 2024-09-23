@@ -193,25 +193,22 @@
 		<div class="row row-deck gutters-tiny">
 			<div class="block block-rounded block-link-pop border-top kmm-transfer-border border-4x w-100">
 				<div class="row row-deck gutters-tiny">
-					<div class="p-3">
-						<button type="button" class="btn btn-success m-1" @click="state.create_trade()">
-							<lang-string-f lang-id="MOD_KMM_BUTTON_CREATE_TRADE" :lang-arg-1="state.transfer_inventory.length"></lang-string-f>
-						</button>
-						<button type="button" class="btn btn-success m-1" @click="state.gift_friend()">
-							<lang-string-f lang-id="MOD_KMM_BUTTON_GIFT_ITEMS" :lang-arg-1="state.transfer_inventory.length"></lang-string-f>
-						</button>
-						<button type="button" class="btn btn-danger m-1" @click="state.transfer_return_selected()">
-							<lang-string lang-id="MOD_KMM_BUTTON_RETURN_SELECTED"></lang-string>
-						</button>
-						<button type="button" class="btn btn-danger m-1" @click="state.transfer_return_all()">
-							<lang-string lang-id="MOD_KMM_BUTTON_RETURN_ALL"></lang-string>
-						</button>
+					<div class="p-3 kmm-transfer-info">
+						<img class="skill-icon-xxs mr-1" :src="state.get_svg('transfer_bag')">
+						<lang-string lang-id="MOD_KMM_TRANSFER_WINDOW_INFO"></lang-string>
 					</div>
 				</div>
 			</div>
 			<div class="block tabbable w-100 kmm-col">
 				<div class="pl-3 pt-1 pb-1 bg-dark-bank-info text-center">
 					<div class="row gutters-tiny">
+						<div class="col-6 col-lg-3">
+							<span class="font-w400 font-size-sm mb-0">
+								<span class="font-w600">
+									<lang-string lang-id="MOD_KMM_TRANSFER_WINDOW_HEADER"></lang-string>
+								</span>
+							</span>
+						</div>
 						<div class="col-6 col-lg-3">
 							<span class="font-w400 font-size-sm mb-0">
 								<span class="font-w600">Space: </span><span>{{ state.transfer_inventory.length + ' / ' + state.TRANSFER_INVENTORY_MAX_LIMIT }}</span>
@@ -232,20 +229,44 @@
 						</div>
 					</div>
 				</div>
-				<div class="block-content" v-if="state.transfer_inventory.length > 0">
-					<div class="pb-4 row">
-						<kmm-item-icon v-for="item of state.transfer_inventory" class="bank-item pointer-enabled m-2" :data-item-id="item.id">
-							<a role="button" @click="state.selected_transfer_item_id = item.id">
-								<img class="bank-img p-3" :src="state.get_item_icon(item.id)" :class="{ 'border border-4x border-success': state.selected_transfer_item_id === item.id }">
-								<div class="font-size-sm text-white text-center in-bank">
-									<small class="badge-pill bg-secondary">{{ formatNumber(item.qty) }}</small>
-								</div>
-							</a>
-						</kmm-item-icon>
+				<template v-if="state.transfer_inventory.length > 0">
+					<div class="block-content">
+						<div class="pb-4 row">
+							<kmm-item-icon v-for="item of state.transfer_inventory" class="bank-item pointer-enabled m-2" :data-item-id="item.id">
+								<a role="button" @click="state.selected_transfer_item_id = item.id">
+									<img class="bank-img p-3" :src="state.get_item_icon(item.id)" :class="{ 'border border-4x border-success': state.selected_transfer_item_id === item.id }">
+									<div class="font-size-sm text-white text-center in-bank">
+										<small class="badge-pill bg-secondary">{{ formatNumber(item.qty) }}</small>
+									</div>
+								</a>
+							</kmm-item-icon>
+						</div>
 					</div>
-				</div>
+					<div class="p-3 kmm-transfer-buttons">
+						<button type="button" class="btn btn-success m-1" @click="state.create_trade()">
+							<lang-string-f lang-id="MOD_KMM_BUTTON_CREATE_TRADE" :lang-arg-1="state.transfer_inventory.length"></lang-string-f>
+						</button>
+						<button type="button" class="btn btn-success m-1" @click="state.gift_friend()">
+							<lang-string-f lang-id="MOD_KMM_BUTTON_GIFT_ITEMS" :lang-arg-1="state.transfer_inventory.length"></lang-string-f>
+						</button>
+						<button type="button" class="btn btn-danger m-1" @click="state.transfer_return_selected()">
+							<lang-string lang-id="MOD_KMM_BUTTON_RETURN_SELECTED"></lang-string>
+						</button>
+						<button type="button" class="btn btn-danger m-1" @click="state.transfer_return_all()">
+							<lang-string lang-id="MOD_KMM_BUTTON_RETURN_ALL"></lang-string>
+						</button>
+					</div>
+				</template>
 				<div class="p-4" v-else>
 					<lang-string lang-id="MOD_KMM_TRANSFER_NO_ITEMS"></lang-string>
+				</div>
+			</div>
+			<div class="block block-rounded block-link-pop border-top kmm-exchange-border border-4x w-100 mt-5">
+				<div class="row row-deck gutters-tiny">
+					<div class="p-3 kmm-transfer-info">
+						<img class="skill-icon-xxs mr-1" :src="state.get_svg('multiplayer')">
+						<lang-string lang-id="MOD_KMM_EXCHANGE_WINDOW_INFO"></lang-string>
+					</div>
 				</div>
 			</div>
 			<template v-for="gift in state.gifts">
