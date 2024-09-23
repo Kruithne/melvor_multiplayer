@@ -383,7 +383,7 @@ const state = ui.createStore({
 			if (trade.state === 1)
 				items = items.filter(item => item.counter === 1);
 
-			for (const item of trade.data.items)
+			for (const item of items)
 				game.bank.addItemByID(item.item_id, item.qty, false, false, true);
 			
 			state.trades = state.trades.filter(trade => trade.trade_id !== trade_id);
