@@ -37,6 +37,8 @@ const state = ui.createStore({
 	picked_icon: '',
 	profile_icon: 'melvorF:Fire_Acolyte_Wizard_Hat',
 
+	add_gp_value: 0,
+
 	transfer_inventory: [],
 	selected_transfer_item_id: '',
 
@@ -66,6 +68,10 @@ const state = ui.createStore({
 		}
 
 		return game.gp.formatAmount(numberWithCommas(total_value));
+	},
+
+	get add_gp_value_formatted() {
+		return formatNumber(this.add_gp_value);
 	},
 
 	get filtered_icons() {
@@ -143,6 +149,11 @@ const state = ui.createStore({
 		return game.gp.formatAmount(numberWithCommas(total_value));
 	},
 
+	async add_gp_to_transfer() {
+		add_gp_to_transfer(state.add_gp_value);
+		this.close_modal();
+	},
+
 	async resolve_gift(event, gift_id, accept) {
 		const $button = event.currentTarget;
 
@@ -160,7 +171,7 @@ const state = ui.createStore({
 				for (const item of gift.data.items) {
 					const check_item = game.items.getObjectByID(item.item_id);
 					if (check_item)
-						game.bank.addItemByID(item.item_id, item.qty, false, false, true);
+						add_bank_item(item.item_id, item.qty);
 				}
 			}
 
@@ -179,6 +190,9 @@ const state = ui.createStore({
 	},
 
 	get_item_icon(id) {
+		if (id === 'melvorD:GP')
+			return game.gp.media;
+
 		const item = game.items.getObjectByID(id);
 		return item?.media ?? 'assets/media/main/question.png';
 	},
@@ -223,6 +237,12 @@ const state = ui.createStore({
 	reconnect() {
 		state.hide_online_dropdown();
 		start_multiplayer_session();
+	},
+
+	show_add_gp_modal() {
+		queue_modal('MOD_KMM_TITLE_ADD_GP', 'add-gp-modal', 'assets/media/main/coins.png', {
+			showConfirmButton: false
+		}, true, false);
 	},
 
 	show_icon_modal() {
@@ -346,7 +366,7 @@ const state = ui.createStore({
 
 		if (res?.success === true) {
 			for (const item of trade.data.items)
-				game.bank.addItemByID(item.item_id, item.qty, false, false, true);
+				add_bank_item(item.item_id, item.qty);
 
 			state.resolved_trades = state.resolved_trades.filter(trade => trade.trade_id !== trade_id);
 		} else {
@@ -388,7 +408,7 @@ const state = ui.createStore({
 		if (res?.success === true) {
 			const items = trade.data.items.filter(item => item.counter === 1);
 			for (const item of items)
-				game.bank.addItemByID(item.item_id, item.qty, false, false, true);
+				add_bank_item(item.item_id, item.qty);
 
 			state.trades = state.trades.filter(trade => trade.trade_id !== trade_id);
 		} else {
@@ -415,7 +435,7 @@ const state = ui.createStore({
 				items = items.filter(item => item.counter === 1);
 
 			for (const item of items)
-				game.bank.addItemByID(item.item_id, item.qty, false, false, true);
+				add_bank_item(item.item_id, item.qty);
 			
 			state.trades = state.trades.filter(trade => trade.trade_id !== trade_id);
 		} else {
@@ -783,7 +803,7 @@ async function update_transfer_contents() {
 
 function return_all_transfer_inventory() {
 	for (const entry of state.transfer_inventory)
-		game.bank.addItemByID(entry.id, entry.qty, false, false, true);
+		add_bank_item(entry.id, entry.qty);
 
 	state.transfer_inventory = [];
 	update_transfer_inventory_nav();
@@ -794,7 +814,7 @@ function return_selected_transfer_inventory() {
 	if (selected_id.length > 0) {
 		const entry = state.transfer_inventory.find(e => e.id === selected_id);
 		if (entry) {
-			game.bank.addItemByID(selected_id, entry.qty, false, false, true);
+			add_bank_item(selected_id, entry.qty);
 			state.transfer_inventory = state.transfer_inventory.filter(e => e.id !== selected_id);
 
 			update_transfer_inventory_nav();
@@ -808,6 +828,35 @@ function update_transfer_inventory_nav() {
 	const aside = document.querySelector('.kmm-transfer-nav');
 	aside.textContent = state.transfer_inventory.length + ' / ' + TRANSFER_INVENTORY_MAX_LIMIT;
 	aside.classList.toggle('text-danger', state.transfer_inventory.length >= TRANSFER_INVENTORY_MAX_LIMIT);
+}
+
+function add_bank_item(item_id, amount) {
+	if (item_id === 'melvorD:GP')
+		game.gp.add(amount);
+	else
+		game.bank.addItemByID(item_id, amount, false, false, true);
+}
+
+function add_gp_to_transfer(amount) {
+	if (game.gp.amount < amount)
+		return notify_error('MOD_KMM_INSUFFICIENT_GP_ERR');
+
+	const existing_entry = state.transfer_inventory.find(e => e.id === 'melvorD:GP');
+	if (existing_entry) {
+		existing_entry.qty += amount;
+	} else {
+		if (state.transfer_inventory.length >= TRANSFER_INVENTORY_MAX_LIMIT)
+			return notify_error('MOD_KMM_TRANSFER_INVENTORY_FULL');
+
+		state.transfer_inventory.push({
+			id: 'melvorD:GP',
+			qty: amount
+		});
+	}
+
+	game.gp.remove(amount);
+	update_transfer_inventory_nav();
+	persist_transfer_inventory();
 }
 
 function add_item_to_transfer_inventory(item, qty) {
@@ -1094,6 +1143,21 @@ class KMMItemIcon extends HTMLElement {
 		</div>`;
 	}
 
+	createGPTooltip() {
+		return `<div class="text-center">
+				<div class="media d-flex align-items-center push">
+					<div class="mr-3">
+						<img class="bank-img m-1" src="assets/media/main/coins.png">
+					</div>
+					<div class="media-body">
+						<div class="font-w600">Gold (GP)</div>
+						<div role="separator" class="dropdown-divider m-0 mb-1"></div>
+						<small class="text-info">The currency of Melvor!</small>
+					</div>
+				</div>
+		</div>`;
+	}
+
 	connectedCallback() {
 		const item_id = this.getAttribute('data-item-id');
 		this.item = game.items.getObjectByID(item_id);
@@ -1105,8 +1169,10 @@ class KMMItemIcon extends HTMLElement {
 			interactive: false,
 			animation: false,
 			touch: 'hold',
-			onShow: (instance)=>{
-				if (this.item !== undefined)
+			onShow: (instance) => {
+				if (item_id === 'melvorD:GP')
+					instance.setContent(this.createGPTooltip());
+				else if (this.item !== undefined)
 					instance.setContent(createItemInformationTooltip(this.item));
 				else
 					instance.setContent(this.createUnsupportedItemTooltip());
@@ -1115,6 +1181,43 @@ class KMMItemIcon extends HTMLElement {
 	}
 }
 
+class KMMGPSlider extends HTMLElement {
+	constructor() {
+		super();
+
+		state.add_gp_value = 1;
+
+		const $input = document.createElement('input');
+		$input.type = 'text';
+
+		this.appendChild($input);
+
+		this.slider = new BankRangeSlider($input);
+
+		this.slider.sliderMax = game.gp.amount;
+		this.slider.sliderMin = 1;
+
+		this.slider.sliderInstance.update({
+			min: 1,
+			max: game.gp.amount
+		});
+
+		const $value = document.createElement('input');
+		$value.classList.add('form-control', 'mt-2');
+		$value.type = 'number';
+		$value.value = 1;
+
+		$value.addEventListener('input', () => this.slider.setSliderPosition($value.value));
+		this.slider.customOnChange = (amount) => {
+			$value.value = amount;
+			state.add_gp_value = amount;
+		};
+
+		this.appendChild($value);
+	}
+}
+
 window.customElements.define('lang-string-f', LangStringFormattedElement);
 window.customElements.define('kmm-modal-component', KMMModalComponent);
 window.customElements.define('kmm-item-icon', KMMItemIcon);
+window.customElements.define('kmm-gp-slider', KMMGPSlider);

@@ -10,6 +10,7 @@
 	"MOD_KMM_TRADE_EXISTS": "You already have a trade pending with that player.",
 	"MOD_KMM_TOO_MANY_ITEMS": "Too many items!",
 	"MOD_KMM_PENDING_GIFT": "You've already sent them a gift recently.",
+	"MOD_KMM_INSUFFICIENT_GP_ERR": "You don't have enough money!",
 
 	"MOD_KMM_TITLE_FRIEND_CODE": "Your Friend Code",
 	"MOD_KMM_TITLE_ADD_FRIEND": "Add Friend",
@@ -20,6 +21,7 @@
 	"MOD_KMM_TITLE_CONFIRM_GIFT_RECIPIENT": "Confirm Gift",
 	"MOD_KMM_TITLE_SEND_GIFT": "Send Gift",
 	"MOD_KMM_TITLE_SEND_TRADE_OFFER": "Send Trade Offer",
+	"MOD_KMM_TITLE_ADD_GP": "Add GP To Transfer",
 
 	"MOD_KMM_BUTTON_ACCEPT_FRIEND": "Accept",
 	"MOD_KMM_BUTTON_IGNORE_FRIEND": "Ignore",
@@ -42,6 +44,8 @@
 	"MOD_KMM_BUTTON_DECLINE_TRADE": "Decline Trade",
 	"MOD_KMM_BUTTON_ACCEPT_TRADE": "Accept Trade",
 	"MOD_KMM_BUTTON_COUNTER_TRADE": "Send Offer (%s Items)",
+	"MOD_KMM_BUTTON_ADD_GP": "Add GP",
+	"MOD_KMM_BUTTON_ADD_GP_F": "Add %s GP",
 
 	"MOD_KMM_MENU_HEADER": "Multiplayer",
 	"MOD_KMM_MENU_HEADER_FRIENDS": "Friends",
