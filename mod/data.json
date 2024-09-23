@@ -12,7 +12,7 @@
 				"canBeDefault": false,
 				"sidebarItem": {
 					"categoryID": "",
-					"icon": "assets/multiplayer.svg",
+					"icon": "assets/transfer_bag.svg",
 					"asideClass": "kmm-transfer-nav",
 					"aside": "?? / ??"
 				}
