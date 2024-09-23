@@ -11,7 +11,7 @@
 				"hasGameGuide": false,
 				"canBeDefault": false,
 				"sidebarItem": {
-					"categoryID": "",
+					"categoryID": "Multiplayer",
 					"icon": "assets/transfer_bag.svg",
 					"asideClass": "kmm-transfer-nav",
 					"aside": "?? / ??"

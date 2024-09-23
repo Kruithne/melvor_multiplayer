@@ -1054,6 +1054,8 @@ export async function setup(ctx) {
 		start_multiplayer_session();
 		load_transfer_inventory();
 	});
+
+	sidebar.category('Multiplayer', { before: 'Combat' });
 	
 	ctx.onInterfaceReady(() => {
 		const $button_tray = document.getElementById('header-theme').querySelector('.align-items-right');
