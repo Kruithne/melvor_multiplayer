@@ -15,3 +15,6 @@ ALTER TABLE `clients` ADD COLUMN `display_name` VARCHAR(20) NOT NULL;
 
 -- [4] add icon_id column
 ALTER TABLE `clients` ADD COLUMN `icon_id` VARCHAR(60) NOT NULL;
+
+-- [5] add last_charity column
+ALTER TABLE `clients` ADD COLUMN `last_charity` BIGINT NOT NULL DEFAULT 0;

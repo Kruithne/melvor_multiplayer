@@ -4,5 +4,6 @@ export type db_row_clients = {
 	client_key: string,
 	friend_code: string,
 	display_name: string,
-	icon_id: string
+	icon_id: string,
+	last_charity: number
 } | null;

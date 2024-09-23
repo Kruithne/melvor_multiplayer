@@ -154,3 +154,11 @@
 .kmm-gp-group {
 	padding: 0 40px;
 }
+
+.kmm-charity-bg {
+	background-color: #2B9546 !important;
+}
+
+.kmm-transfer-border {
+	border-color: #2B9546 !important;
+}

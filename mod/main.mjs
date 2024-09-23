@@ -18,8 +18,12 @@ const TRANSFER_INVENTORY_MAX_LIMIT = 32;
 
 const GIFT_FLAG_RETURNED = 1 << 0;
 
+// time between players taking charity items
+const CHARITY_TIMEOUT = 1000 * 60 * 60 * 24; // 24 hours
+
 let session_token = null;
 let is_connecting = false;
+let is_updating_charity_tree = false;
 
 const ctx = mod.getContext(import.meta);
 const state = ui.createStore({
@@ -41,6 +45,11 @@ const state = ui.createStore({
 
 	transfer_inventory: [],
 	selected_transfer_item_id: '',
+
+	charity_tree_inventory: [],
+	selected_charity_item_id: '',
+	charity_timeout: 0,
+	charity_update_time: Date.now(),
 
 	events: {
 		friend_requests: []
@@ -97,6 +106,35 @@ const state = ui.createStore({
 
 	get num_active_transfers() {
 		return this.gifts.length + this.resolved_trades.length + this.trades.length;
+	},
+
+	get can_take_charity() {
+		return state.charity_timeout + CHARITY_TIMEOUT < state.charity_update_time;
+	},
+
+	async charity_take_item(event) {
+		const item = this.charity_tree_inventory.find(e => e.id === state.selected_transfer_item_id);
+		if (!item)
+			return notify_error('MOD_KMM_CHARITY_INVALID_ITEM');
+
+		const $button = event.currentTarget;
+		show_button_spinner($button);
+
+		const res = await api_post('/api/charity/take', {
+			item_id: state.selected_transfer_item_id
+		});
+
+		if (res?.success)
+			add_bank_item(item.id, res.item_qty);
+		else
+			notify_error(res?.error_lang ?? 'MOD_KMM_CHARITY_TAKEN');
+
+		if (res?.timeout !== undefined) {
+			state.charity_timeout = res.timeout;
+			set_character_storage_item('charity_timeout', res.timeout);
+		}
+
+		hide_button_spinner($button);
 	},
 
 	create_trade() {
@@ -688,6 +726,38 @@ async function patch_localization(ctx) {
 		await fetch_mod_localization(setLang);
 }
 
+async function request_charity_tree_contents() {
+	if (is_updating_charity_tree)
+		return;
+
+	is_updating_charity_tree = true;
+
+	const res = await api_get('/api/charity/contents');
+	if (res !== null)
+		state.charity_tree_inventory = res.items;
+
+	is_updating_charity_tree = false;
+}
+
+function setup_charity_tree() {
+	const $charity_page = $('kru-multiplayer-charity-page');
+
+	const observer = new MutationObserver(() => {
+		const is_visible = !$charity_page.classList.contains('d-none');
+		state.is_transfer_page_visible = is_visible;
+		
+		if (is_visible) {
+			state.charity_update_time = Date.now();
+			request_charity_tree_contents();
+		}
+	});
+
+	observer.observe($charity_page, {
+		attributes: true,
+		attributeFilter: ['class']
+	});
+}
+
 function patch_bank() {
 	const $bank_item_menu = document.querySelector('bank-selected-item-menu');
 	const $gutter = $bank_item_menu.querySelector('.gutters-tiny');
@@ -1053,6 +1123,8 @@ export async function setup(ctx) {
 	ctx.onCharacterLoaded(() => {
 		start_multiplayer_session();
 		load_transfer_inventory();
+
+		state.charity_timeout = get_character_storage_item('charity_timeout') ?? 0;
 	});
 
 	sidebar.category('Multiplayer', { before: 'Combat' });
@@ -1068,6 +1140,7 @@ export async function setup(ctx) {
 		make_template('transfer-page', $('main-container'));
 
 		patch_bank();
+		setup_charity_tree();
 	});
 }
 

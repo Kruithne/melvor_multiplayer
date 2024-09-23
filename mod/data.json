@@ -16,6 +16,19 @@
 					"asideClass": "kmm-transfer-nav",
 					"aside": "?? / ??"
 				}
+			},
+			{
+				"id": "Charity_Tree",
+				"customName": "Charitree",
+				"media": "assets/charity_tree.svg",
+				"containerID": "kru-multiplayer-charity-page",
+				"headerBgClass": "kmm-charity-bg",
+				"hasGameGuide": false,
+				"canBeDefault": false,
+				"sidebarItem": {
+					"categoryID": "Multiplayer",
+					"icon": "assets/charity_tree.svg"
+				}
 			}
 		]
 	}

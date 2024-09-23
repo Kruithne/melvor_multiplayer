@@ -201,6 +201,45 @@
 		</a>
 	</li>
 </template>
+<template id="template-kru-multiplayer-charity-page">
+	<div class="content d-none" id="kru-multiplayer-charity-page">
+		<div class="row row-deck gutters-tiny">
+			<div class="block block-rounded block-link-pop border-top kmm-charity-border border-4x w-100">
+				<div class="row row-deck gutters-tiny">
+					<div class="p-3 kmm-transfer-info">
+						<img class="skill-icon-xxs mr-1" :src="state.get_svg('charity_tree')">
+						<lang-string lang-id="MOD_KMM_CHARITY_WINDOW_INFO"></lang-string>
+					</div>
+				</div>
+			</div>
+			<div class="block tabbable w-100 kmm-col">
+				<template v-if="state.charity_tree_inventory.length > 0">
+					<div class="block-content">
+						<div class="pb-4 row">
+							<kmm-item-icon v-for="item of state.transfer_inventory" class="bank-item pointer-enabled m-2" :data-item-id="item.id">
+								<a role="button" @click="state.selected_charity_item_id = item.id">
+									<img class="bank-img p-3" :src="state.get_item_icon(item.id)" :class="{ 'border border-4x border-success': state.selected_charity_item_id === item.id }">
+									<div class="font-size-sm text-white text-center in-bank">
+										<small class="badge-pill bg-secondary">{{ formatNumber(item.qty) }}</small>
+									</div>
+								</a>
+							</kmm-item-icon>
+						</div>
+					</div>
+					<div class="p-3 kmm-transfer-buttons" v-if="state.can_take_charity">
+						<button type="button" class="btn btn-success m-1" @click="state.charity_take_item($event)">
+							<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+							<lang-string lang-id="MOD_KMM_BUTTON_TAKE_SELECTED"></lang-string>
+						</button>
+					</div>
+				</template>
+				<div class="p-4" v-else>
+					<lang-string lang-id="MOD_KMM_CHARITY_NO_ITEMS"></lang-string>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
 <template id="template-kru-multiplayer-transfer-page">
 	<div class="content d-none" id="kru-multiplayer-transfer-page">
 		<div class="row row-deck gutters-tiny">

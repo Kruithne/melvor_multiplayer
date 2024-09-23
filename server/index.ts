@@ -9,6 +9,7 @@ import { db_row_gifts } from './db/types/gifts';
 import { db_row_gift_items } from './db/types/gift_items';
 import { db_row_trade_offers } from './db/types/trade_offers';
 import { db_row_resolved_trade_offers } from './db/types/resolved_trade_offers';
+import { db_row_charity_items } from './db/types/charity_items';
 
 interface ToJson {
 	toJSON(): any;
@@ -32,6 +33,9 @@ const CACHE_SESSION_LIFETIME = 1000 * 60 * 60; // 1 hour
 
 // time between data cache sweeps
 const CACHE_RESET_INTERVAL = 1000 * 60 * 60 * 24; // 24 hours
+
+// time between players taking charity items
+const CHARITY_TIMEOUT = 1000 * 60 * 60 * 24; // 24 hours
 
 type CachedSession = { client_id: number, last_access: number };
 const client_session_cache = new Map<string, CachedSession>();
@@ -416,6 +420,40 @@ function session_get_route(route: string, handler: SessionRequestHandler) {
 function session_post_route(route: string, handler: SessionRequestHandler) {
 	server.route(route, validate_session_request(handler, true), 'POST');
 }
+
+session_get_route('/api/charity/contents', async (req, url, client_id) => {
+	return {
+		items: await db_get_all('SELECT `item_id`, `qty` FROM `charity_items` LIMIT 78')
+	};
+});
+
+session_post_route('/api/charity/take', async (req, url, client_id, json) => {
+	const item_id = json.item_id;
+	if (typeof item_id !== 'string')
+		return 400; // Bad Request
+
+	const current_time = Date.now();
+	const client_row = await db_get_single('SELECT `last_charity` FROM `clients` WHERE `id` = ?', [client_id]) as db_row_clients;
+	if (client_row === null)
+		return 400; // Bad Request
+
+	if (client_row.last_charity + CHARITY_TIMEOUT > current_time)
+		return { error_lang: 'MOD_KMM_CHARITY_TIMEOUT', timeout: client_row.last_charity };
+
+	const item_entry = await db_get_single('SELECT `qty` FROM `charity_items` WHERE `item_id` = ?', [item_id]) as db_row_charity_items;
+	if (item_entry === null)
+		return { error_lang: 'MOD_KMM_CHARITY_TAKEN' };
+
+	await db_execute('UPDATE `clients` SET `last_charity` = ? WHERE `id` = ?', [current_time, client_id]);
+	await db_execute('DELETE FROM `charity_items` WHERE `item_id` = ?', [item_id]);
+
+	return { success: true, timeout: current_time, item_qty: item_entry.qty } as JsonSerializable;
+});
+
+session_post_route('/api/charity/donate', async (req, url, client_id, json) => {
+	// todo: allow the player to donate items.
+	return { success: true };
+});
 
 session_post_route('/api/transfers/get_contents', async (req, url, client_id, json) => {
 	const gift_ids = json.gift_ids;
