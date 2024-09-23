@@ -912,12 +912,8 @@ async function get_client_events() {
 							data: null
 						});
 					}, 1);
-					console.log('got existing trade %d with different state (wiping data)', trade.trade_id);
-				} else {
-					console.log('got existing trade %d, no different', trade.trade_id);
 				}
 			} else {
-				console.log('got new trade meta %d, adding to cache', trade.trade_id);
 				state.trades.push(Object.assign({ data: null }, trade));
 			}
 		}

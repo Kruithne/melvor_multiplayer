@@ -307,12 +307,8 @@ async function trade_exists(sender_id: number, recipient_id: number) {
 
 async function get_client_trades(client_id: number) {
 	const cached_entries = trade_player_cache.get(client_id);
-	if (cached_entries) {
-		console.log('get_client_trades(): cache hit for client_id %d', client_id);
+	if (cached_entries)
 		return cached_entries;
-	}
-
-	console.log('get_client_trades(): cache miss for client_id %d', client_id);
 
 	const result = await db_get_all('SELECT `trade_id` FROM `trade_offers` WHERE `sender_id` = ? OR `recipient_id` = ?', [client_id, client_id]) as db_row_trade_offers[];
 	const trade_ids = result.map(row => row?.trade_id) as number[];
@@ -324,12 +320,8 @@ async function get_client_trades(client_id: number) {
 
 async function get_trade_offer_meta(trade_id: number) {
 	const cached = trade_cache.get(trade_id);
-	if (cached) {
-		console.log('get_trade_offer_meta(): cache hit for trade_id %d', trade_id);
+	if (cached)
 		return cached;
-	}
-
-	console.log('get_trade_offer_meta(): cache miss for trade_id %d', trade_id);
 
 	const result = await db_get_single('SELECT `attending_id`, `state` FROM `trade_offers` WHERE `trade_id` = ?', [trade_id]) as db_row_trade_offers;
 
