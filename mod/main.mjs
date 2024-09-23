@@ -91,9 +91,9 @@ const state = ui.createStore({
 
 	create_trade() {
 		if (state.transfer_inventory.length > 0) {
-			queue_modal('MOD_KMM_TITLE_SEND_TRADE_OFFER', 'create-trade-modal', 'assets/media/bank/fine_coinpurse.png', {
+			queue_modal('MOD_KMM_TITLE_SEND_TRADE_OFFER', 'create-trade-modal', 'assets/transfer_bag.svg', {
 				showConfirmButton: false
-			}, true, false);
+			}, true);
 		} else {
 			notify_error('MOD_KMM_TRANSFER_NO_ITEMS_ERR');
 		}
