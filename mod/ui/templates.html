@@ -451,11 +451,11 @@
 					</div>
 					<div class="p-3 kmm-transfer-buttons">
 						<template v-if="trade.attending">
-							<button v-if="trade.state === 0" type="button" class="btn btn-success m-1" @click="state.counter_trade($event, trade.trade_id)"></button>
+							<button v-if="trade.state === 0" type="button" class="btn btn-success m-1" @click="state.counter_trade($event, trade.trade_id)">
 								<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 								<lang-string-f lang-id="MOD_KMM_BUTTON_COUNTER_TRADE" :lang-arg-1="state.transfer_inventory.length"></lang-string-f>
 							</button>
-							<button v-else-if="trade.state === 1" type="button" class="btn btn-success m-1" @click="state.accept_trade($event, trade.trade_id)"></button>
+							<button v-else-if="trade.state === 1" type="button" class="btn btn-success m-1" @click="state.accept_trade($event, trade.trade_id)">
 								<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 								<lang-string lang-id="MOD_KMM_BUTTON_ACCEPT_TRADE"></lang-string>
 							</button>
