@@ -136,3 +136,7 @@
 .kmm-button-tray {
 	height: 50px;
 }
+
+#bank-item-box {
+	height: unset;
+}
