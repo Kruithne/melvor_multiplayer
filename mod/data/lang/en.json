@@ -66,6 +66,7 @@
 	"MOD_KMM_MODAL_NO_ICONS": "No matches found",
 	
 	"MOD_KMM_TRANSFER_NO_ITEMS": "No items to transfer! Chooses items from your bank to gift or trade.",
+	"MOD_KMM_NO_EXCHANGES": "No outstanding gifts or trades.",
 	"MOD_KMM_TRANSFER_INVENTORY_FULL": "Transfer inventory is full!",
 	"MOD_KMM_TRANSFER_NO_ITEM_SELECTED": "No item selected to return",
 	"MOD_KMM_TRANSFER_VALUE": "Value:",

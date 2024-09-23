@@ -269,6 +269,9 @@
 					</div>
 				</div>
 			</div>
+			<div class="p-4" v-if="state.num_active_transfers === 0">
+				<lang-string lang-id="MOD_KMM_NO_EXCHANGES"></lang-string>
+			</div>
 			<template v-for="gift in state.gifts">
 				<div class="block tabbable w-100 kmm-col" v-if="!!gift.data">
 					<div class="pl-3 pt-1 pb-1 bg-dark-bank-info text-center">

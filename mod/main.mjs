@@ -89,6 +89,10 @@ const state = ui.createStore({
 		return this.events.friend_requests.length;
 	},
 
+	get num_active_transfers() {
+		return this.gifts.length + this.resolved_trades.length + this.trades.length;
+	},
+
 	create_trade() {
 		if (state.transfer_inventory.length > 0) {
 			queue_modal('MOD_KMM_TITLE_SEND_TRADE_OFFER', 'create-trade-modal', 'assets/transfer_bag.svg', {
