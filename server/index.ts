@@ -537,6 +537,27 @@ session_post_route('/api/trade/counter', async (req, url, client_id, json) => {
 	return { success: true };
 });
 
+session_post_route('/api/trade/accept', async (req, url, client_id, json) => {
+	const trade_id = json.trade_id;
+	if (typeof trade_id !== 'number')
+		return 400; // Bad Request
+
+	const trade = await get_trade_offer(trade_id);
+	if (!trade || trade.state !== 1 || trade.sender_id !== client_id)
+		return 400; // Bad Request
+
+	await db_execute('DELETE FROM `trade_items` WHERE `trade_id` = ? AND `counter` = 1', [trade_id]);
+	await db_execute('DELETE FROM `trade_offers` WHERE `trade_id` = ?', [trade_id]);
+	trade_cache.delete(trade_id);
+
+	remove_player_cache_entry(trade_player_cache, trade.sender_id, trade_id);
+	remove_player_cache_entry(trade_player_cache, trade.recipient_id, trade_id);
+
+	await create_resolved_trade(trade_id, trade.recipient_id, trade.sender_id, false);
+
+	return { success: true };
+});
+
 session_post_route('/api/trade/cancel', async (req, url, client_id, json) => {
 	const trade_id = json.trade_id;
 	if (typeof trade_id !== 'number')

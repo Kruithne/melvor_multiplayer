@@ -365,6 +365,29 @@ const state = ui.createStore({
 		}
 	},
 
+	async accept_trade(event, trade_id) {
+		// prevent accepting a trade with no local data
+		const trade = state.trades.find(t => t.trade_id === trade_id);
+		if (!trade?.data)
+			return;
+
+		const $button = event.currentTarget;
+		show_button_spinner($button);
+
+		const res = await api_post('/api/trade/accept', { trade_id });
+		hide_button_spinner($button);
+
+		if (res?.success === true) {
+			const items = trade.data.items.filter(item => item.counter === 1);
+			for (const item of items)
+				game.bank.addItemByID(item.item_id, item.qty, false, false, true);
+
+			state.trades = state.trades.filter(trade => trade.trade_id !== trade_id);
+		} else {
+			notify_error('MOD_KMM_GENERIC_ERR');
+		}
+	},
+
 	async cancel_trade(event, trade_id) {
 		// prevent cancelling a trade with no local data
 		const trade = state.trades.find(t => t.trade_id === trade_id);
