@@ -52,6 +52,10 @@ const state = ui.createStore({
 
 	friends: [],
 
+	get sorted_trades() {
+		return this.trades.sort((a, b) => a.attending === b.attending ? 0 : a.attending ? -1 : 1);
+	},
+
 	get transfer_inventory_value() {
 		let total_value = 0;
 
