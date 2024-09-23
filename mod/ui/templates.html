@@ -128,13 +128,15 @@
 	<div class="kmm-modal-text mt-3" v-else>
 		<lang-string lang-id="MOD_KMM_MODAL_NO_ICONS"></lang-string>
 	</div>
-	<button type="button" class="btn btn-success" @click="state.confirm_icon_pick($event)">
-		<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
-		<lang-string lang-id="MOD_KMM_BUTTON_USE_ICON"></lang-string>
-	</button>
-	<button type="button" class="btn btn-danger" @click="state.close_modal()">
-		<lang-string lang-id="MOD_KMM_BUTTON_CANCEL"></lang-string>
-	</button>
+	<div class="kmm-button-tray">
+		<button type="button" class="btn btn-success" @click="state.confirm_icon_pick($event)">
+			<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+			<lang-string lang-id="MOD_KMM_BUTTON_USE_ICON"></lang-string>
+		</button>
+		<button type="button" class="btn btn-danger" @click="state.close_modal()">
+			<lang-string lang-id="MOD_KMM_BUTTON_CANCEL"></lang-string>
+		</button>
+	</div>
 </template>
 <template id="template-kru-multiplayer-bank-container">
 	<div class="col-12">

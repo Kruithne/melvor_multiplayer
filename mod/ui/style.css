@@ -82,6 +82,7 @@
 	align-items: center;
 	justify-content: center;
 	gap: 10px;
+	height: 50px;
 }
 
 .swal2-title {
@@ -130,4 +131,8 @@
 	border-right: 1px dashed #ffffff38;
 	width: 1px;
 	height: 100%;
+}
+
+.kmm-button-tray {
+	height: 50px;
 }
