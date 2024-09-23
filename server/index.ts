@@ -30,6 +30,9 @@ const MAX_TRANSFER_ITEM_COUNT = 32;
 // maximum cache life is X * 2, minimum is X.
 const CACHE_SESSION_LIFETIME = 1000 * 60 * 60; // 1 hour
 
+// time between data cache sweeps
+const CACHE_RESET_INTERVAL = 1000 * 60 * 60 * 24; // 24 hours
+
 type CachedSession = { client_id: number, last_access: number };
 const client_session_cache = new Map<string, CachedSession>();
 
@@ -60,6 +63,21 @@ type TransferItem = {
 	id: string;
 	qty: number;
 }
+
+function sweep_data_caches() {
+
+	friend_request_cache.clear();
+	gift_cache.clear();
+	display_name_cache.clear();
+
+	trade_cache.clear();
+	trade_player_cache.clear();
+	resolved_trade_cache.clear();
+
+	setTimeout(sweep_data_caches, CACHE_RESET_INTERVAL);
+}
+
+setTimeout(sweep_data_caches, CACHE_RESET_INTERVAL);
 
 function log(prefix: string, message: string, ...args: unknown[]): void {
 	let formatted_message = format('[{' + prefix + '}] ' + message, ...args);
