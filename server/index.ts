@@ -543,20 +543,28 @@ session_post_route('/api/trade/cancel', async (req, url, client_id, json) => {
 		return 400; // Bad Request
 
 	const trade = await get_trade_offer(trade_id);
-	if (!trade || trade.sender_id !== client_id)
+	if (!trade)
 		return 400; // Bad Request
 
-	await db_execute('DELETE FROM `trade_items` WHERE `trade_id` = ? AND `counter` = 0', [trade_id]);
+	if (trade.state === 0 && trade.sender_id !== client_id)
+		return 400; // Bad Request
+
+	if (trade.state === 1 && trade.recipient_id !== client_id)
+		return 400; // Bad Request
+
+	await db_execute('DELETE FROM `trade_items` WHERE `trade_id` = ? AND `counter` = ?', [trade_id, trade.state]);
+
+	if (trade.state === 1) {
+		await db_execute('DELETE FROM `trade_items` WHERE `trade_id` = ? AND `counter` = 1', [trade_id]);
+		await create_resolved_trade(trade_id, trade.sender_id, trade.recipient_id, true);
+	}
+
 	await db_execute('DELETE FROM `trade_offers` WHERE `trade_id` = ?', [trade_id]);
 
 	trade_cache.delete(trade_id);
 
 	remove_player_cache_entry(trade_player_cache, trade.sender_id, trade_id);
 	remove_player_cache_entry(trade_player_cache, trade.recipient_id, trade_id);
-
-	// todo: check if the other player had made a counter offer (state check)
-	// todo: create a resolved_trade_offer memory cache
-	// todo: add this trade_id into the resolved_trade_offer cache against the other player
 
 	return { success: true };
 });

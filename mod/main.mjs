@@ -378,6 +378,11 @@ const state = ui.createStore({
 		hide_button_spinner($button);
 
 		if (res?.success === true) {
+			let items = trade.data.items;
+
+			if (trade.state === 1)
+				items = items.filter(item => item.counter === 1);
+
 			for (const item of trade.data.items)
 				game.bank.addItemByID(item.item_id, item.qty, false, false, true);
 			
