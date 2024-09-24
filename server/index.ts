@@ -387,7 +387,7 @@ async function get_client_resolved_trades(client_id: number) {
 	return trade_ids;
 }
 
-function validate_item_array(items: unknown) {
+function validate_item_array(items: unknown, allow_modded = true) {
 	if (!Array.isArray(items))
 		return false;
 
@@ -397,6 +397,9 @@ function validate_item_array(items: unknown) {
 
 		// @ts-ignore
 		if (typeof item.id !== 'string' || typeof item.qty !== 'number')
+			return false;
+
+		if (!allow_modded && !item.id.startsWith('melvor'))
 			return false;
 	}
 
@@ -468,7 +471,7 @@ session_post_route('/api/charity/take', async (req, url, client_id, json) => {
 
 session_post_route('/api/charity/donate', async (req, url, client_id, json) => {
 	const items = json.items as TransferItem[];
-	if (!validate_item_array(items))
+	if (!validate_item_array(items, false))
 		return 400; // Bad Request
 
 	for (const item of items)
