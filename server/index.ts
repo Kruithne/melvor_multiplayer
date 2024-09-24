@@ -467,7 +467,13 @@ session_post_route('/api/charity/take', async (req, url, client_id, json) => {
 });
 
 session_post_route('/api/charity/donate', async (req, url, client_id, json) => {
-	// todo: allow the player to donate items.
+	const items = json.items as TransferItem[];
+	if (!validate_item_array(items))
+		return 400; // Bad Request
+
+	for (const item of items)
+		await db_execute('INSERT INTO `charity_items` (`item_id`, `qty`) VALUES(?, ?) ON DUPLICATE KEY UPDATE `qty` = `qty` + ?', [item.id, item.qty, item.qty]);
+
 	return { success: true };
 });
 
