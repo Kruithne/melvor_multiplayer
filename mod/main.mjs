@@ -181,7 +181,7 @@ const state = ui.createStore({
 	reconnect() {
 		state.hide_online_dropdown();
 		start_multiplayer_session();
-	},
+	}
 	// #endregion
 
 	// #region CHARITY ACTIONS
@@ -804,6 +804,21 @@ function set_character_storage_item(key, value) {
 	else
 		ctx.characterStorage.setItem(key, value);
 }
+
+function on_page_toggle(id, callback, visible_only) {
+	const $element = $(id);
+	const observer = new MutationObserver(() => {
+		const is_visible = !$element.classList.contains('d-none');
+
+		if (!visible_only || is_visible)
+			callback(is_visible);
+	});
+
+	observer.observe($element, {
+		attributes: true,
+		attributeFilter: ['class']
+	});
+}
 // #endregion
 
 // #region CAMPAIGN FUNCTIONS
@@ -832,22 +847,6 @@ async function update_campaign_info() {
 
 		state.campaign_loading = false;
 	}
-}
-
-function setup_campaign_page() {
-	const $campaign_page = $('kru-multiplayer-campaign-page');
-
-	const observer = new MutationObserver(() => {
-		const is_visible = !$campaign_page.classList.contains('d-none');
-		
-		if (is_visible)
-			update_campaign_info();
-	});
-
-	observer.observe($campaign_page, {
-		attributes: true,
-		attributeFilter: ['class']
-	});
 }
 // #endregion
 
@@ -894,24 +893,6 @@ async function request_charity_tree_contents() {
 		state.charity_tree_inventory = res.items;
 
 	is_updating_charity_tree = false;
-}
-
-function setup_charity_tree() {
-	const $charity_page = $('kru-multiplayer-charity-page');
-
-	const observer = new MutationObserver(() => {
-		const is_visible = !$charity_page.classList.contains('d-none');
-		
-		if (is_visible) {
-			state.charity_update_time = Date.now();
-			request_charity_tree_contents();
-		}
-	});
-
-	observer.observe($charity_page, {
-		attributes: true,
-		attributeFilter: ['class']
-	});
 }
 // #endregion
 
@@ -1170,7 +1151,9 @@ export async function setup(ctx) {
 		make_template('campaign-page', $main_container);
 
 		patch_bank();
-		setup_charity_tree();
+		
+		on_page_toggle('kru-multiplayer-charity-page', () => request_charity_tree_contents(), true);
+		on_page_toggle('kru-multiplayer-campaign-page', () => update_campaign_info(), true);
 	});
 }
 
@@ -1240,19 +1223,10 @@ function patch_bank() {
 	});
 
 	// detect data page open
-	const $transfer_page = $('kru-multiplayer-transfer-page');
-
-	const observer = new MutationObserver(() => {
-		const is_visible = !$transfer_page.classList.contains('d-none');
+	on_page_toggle('kru-multiplayer-transfer-page', is_visible => {
 		state.is_transfer_page_visible = is_visible;
-		
 		if (is_visible)
 			update_transfer_contents();
-	});
-
-	observer.observe($transfer_page, {
-		attributes: true,
-		attributeFilter: ['class']
 	});
 }
 
