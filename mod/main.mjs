@@ -901,7 +901,6 @@ function setup_charity_tree() {
 
 	const observer = new MutationObserver(() => {
 		const is_visible = !$charity_page.classList.contains('d-none');
-		state.is_transfer_page_visible = is_visible;
 		
 		if (is_visible) {
 			state.charity_update_time = Date.now();
