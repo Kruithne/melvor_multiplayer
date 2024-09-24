@@ -79,7 +79,7 @@ const state = ui.createStore({
 		return this.trades.sort((a, b) => a.attending === b.attending ? 0 : a.attending ? -1 : 1);
 	},
 
-	get transfer_inventory_value() {
+	get transfer_inventory_value_raw() {
 		let total_value = 0;
 
 		for (const entry of this.transfer_inventory) {
@@ -88,7 +88,11 @@ const state = ui.createStore({
 				total_value += game.bank.getItemSalePrice(item, entry.qty);
 		}
 
-		return game.gp.formatAmount(numberWithCommas(total_value));
+		return total_value;
+	},
+
+	get transfer_inventory_value() {
+		return game.gp.formatAmount(numberWithCommas(this.transfer_inventory_value_raw));
 	},
 
 	get add_gp_value_formatted() {
@@ -218,13 +222,19 @@ const state = ui.createStore({
 
 		const res = await api_post('/api/charity/donate', { items });
 		if (res?.success) {
+			const donation_value = state.transfer_inventory_value_raw;
+
 			state.transfer_inventory = [];
 			last_charity_check = 0;
 
 			notify('MOD_KMM_CHARITY_DONATED');
 
-			// todo: move this behind a % chance
-			game.petManager.unlockPetByID('Multiplayer_Pet_Charity');
+			// 0.1% + for every 10,000,000 worth of donation, % to get pet is +1%, capped at 10%
+			const pet_pct = Math.min(0.1 + Math.floor(donation_value / 10000000) / 100, 0.1);
+			if (Math.random() < pet_pct) {
+				state.charity_bonus_unlocked = true;
+				game.petManager.unlockPetByID('kru_melvor_multiplayer:Multiplayer_Pet_Charity');
+			}
 		}
 
 		hide_button_spinner($button);
