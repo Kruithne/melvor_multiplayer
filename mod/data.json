@@ -32,7 +32,7 @@
 			},
 			{
 				"id": "Campaign_Effort",
-				"customName": "Campaign Effort",
+				"customName": "Campaign",
 				"media": "assets/campaigns.svg",
 				"containerID": "kru-multiplayer-campaign-page",
 				"headerBgClass": "kmm-campaign-bg",
@@ -40,7 +40,9 @@
 				"canBeDefault": false,
 				"sidebarItem": {
 					"categoryID": "Multiplayer",
-					"icon": "assets/campaigns.svg"
+					"icon": "assets/campaigns.svg",
+					"asideClass": "kmm-campaign-nav",
+					"aside": "Inactive"
 				}
 			}
 		]

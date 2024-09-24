@@ -892,6 +892,15 @@ async function update_campaign_info() {
 async function load_campaign_data(ctx) {
 	campaign_data = await ctx.loadData('data/campaigns.json');
 }
+
+function update_campaign_nav() {
+	const aside = document.querySelector('.kmm-campaign-nav');
+
+	if (state.campaign_active)
+		aside.textContent = Math.round(state.campaign_pct) + '%';
+	else
+		aside.textContent = 'Inactive';
+}
 // #endregion
 
 // #region PET FUNCTIONS
@@ -1152,6 +1161,8 @@ async function get_client_events() {
 
 		state.campaign_pct = res.campaign.pct;
 		state.campaign_active = res.campaign.active;
+
+		update_campaign_nav();
 
 		if (state.is_transfer_page_visible)
 			setTimeout(() => update_transfer_contents(), 1);
