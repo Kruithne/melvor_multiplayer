@@ -118,7 +118,7 @@ const state = ui.createStore({
 	},
 
 	async charity_take_item(event) {
-		const item = this.charity_tree_inventory.find(e => e.id === state.selected_transfer_item_id);
+		const item = this.charity_tree_inventory.find(e => e.id === state.selected_charity_item_id);
 		if (!item)
 			return notify_error('MOD_KMM_CHARITY_INVALID_ITEM');
 
@@ -126,7 +126,7 @@ const state = ui.createStore({
 		show_button_spinner($button);
 
 		const res = await api_post('/api/charity/take', {
-			item_id: state.selected_transfer_item_id
+			item_id: state.selected_charity_item_id
 		});
 
 		if (res?.success)
