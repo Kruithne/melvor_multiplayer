@@ -97,6 +97,11 @@
 	"MOD_KMM_CHARITY_DONATED": "Donation sent!",
 	"MOD_KMM_CHARITY_NAME": "The Charitree",
 
+	"MOD_KMM_CAMPAIGN_CURRENT": "Active Campaign: %s",
+	"MOD_KMM_CAMPAIGN_LOADING": "Loading Campaign Information...",
+	"MOD_KMM_CAMPAIGN_NONE": "No Active Campaign",
+	"MOD_KMM_CAMPAIGN_NEXT": "Next Campaign Starts In %s",
+
 	"MOD_KMM_PET_NAME_CHARITY": "Spirit of Charity",
 
 	"MOD_KMM_PET_DESC_CHARITY": "Take 1 extra item per day from The Charitree",

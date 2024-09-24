@@ -170,3 +170,28 @@
 .kmm-campaign-border {
 	border-color: #4A2670 !important;
 }
+
+.kmm-campaign-active {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+}
+
+.kmm-campaign-active img {
+	border-radius: 10px;
+	height: 120px;
+}
+
+.kmm-campaign-active h4 {
+	margin: 0;
+}
+
+.kmm-grayscale {
+	filter: grayscale(1);
+}
+
+.kmm-campaign-active-text {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
