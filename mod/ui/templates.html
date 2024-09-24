@@ -255,7 +255,7 @@
 									<lang-string-f lang-id="MOD_KMM_CAMPAIGN_CURRENT" :lang-arg-1="state.get_current_campaign_title()"></lang-string-f>
 								</h4>
 								<div class="kmm-campaign-bar">
-									<div class="kmm-campaign-bar-fill" :style="{ 'background-color': state.get_current_campaign_color() }"></div>
+									<div class="kmm-campaign-bar-fill" :style="{ 'background-color': state.get_current_campaign_color(), width: (state.campaign_pct * 100) + '%' }"></div>
 								</div>
 								<div class="kmm-campaign-info">
 									<div>
