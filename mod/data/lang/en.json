@@ -95,6 +95,11 @@
 	"MOD_KMM_CHARITY_NO_SELECTION": "No items to donate! Choose items from your bank to donate.",
 	"MOD_KMM_CHARITY_MODDED_ITEM": "Items from mods cannot be donated to the Charitree.",
 	"MOD_KMM_CHARITY_DONATED": "Donation sent!",
+	"MOD_KMM_CHARITY_NAME": "The Charitree",
+
+	"MOD_KMM_PET_NAME_CHARITY": "Spirit of Charity",
+
+	"MOD_KMM_PET_DESC_CHARITY": "Take 1 extra item per day from The Charitree",
 
 	"MOD_KMM_TRANSFER_WINDOW_HEADER": "Transfer Inventory",
 	"MOD_KMM_TRANSFER_WINDOW_INFO": "Your transfer inventory contains items you've added from your bank. From here, you can gift these items to another player, start a trade offer, or return them to your bank.",

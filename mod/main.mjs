@@ -30,6 +30,8 @@ const CHARITY_CHECK_TIMEOUT = 10 * 1000; // 10 seconds
 let is_updating_charity_tree = false;
 let last_charity_check = 0;
 
+const skill_pets = new Map();
+
 const ctx = mod.getContext(import.meta);
 const state = ui.createStore({
 	TRANSFER_INVENTORY_MAX_LIMIT,
@@ -653,6 +655,10 @@ const state = ui.createStore({
 	}
 });
 
+function has_pet_by_id(pet_id) {
+	return game.petManager.unlocked.has(skill_pets.get(pet_id));
+}
+
 function setup_icons() {
 	if (state.available_icons.length === 0) {
 		const namespace_maps = game.items.namespaceMaps;
@@ -1150,10 +1156,31 @@ async function start_multiplayer_session() {
 	is_connecting = false;
 }
 
+async function load_pets(ctx) {
+	const pets = await ctx.loadData('data/pets.json');
+	
+	ctx.gameData.buildPackage(pkg => {
+		for (const pet of pets) {
+			pet.name = getLangString(pet.name);
+			pet.hint = getLangString(pet.hint);
+
+			pkg.pets.add(pet);
+		}
+	}).add();
+
+	// Providing customDescription to pets does not appear to work, so we hack it in.
+	for (const pet of pets) {
+		const pet_obj = game.pets.getObjectByID('kru_melvor_multiplayer:' + pet.id);
+		pet_obj._customDescription = getLangString(pet.customDescription);
+		skill_pets.set(pet.id, pet_obj);
+	}
+}
+
 export async function setup(ctx) {
 	await patch_localization(ctx);
 	await ctx.loadTemplates('ui/templates.html');
 
+	await load_pets(ctx);
 	await ctx.gameData.addPackage('data.json');
 
 	ctx.onCharacterLoaded(() => {

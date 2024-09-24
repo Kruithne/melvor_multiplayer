@@ -1,0 +1,13 @@
+[
+	{
+		"id": "Multiplayer_Pet_Charity",
+		"media": "assets/pet_charity_spirit.svg",
+		"name": "MOD_KMM_PET_NAME_CHARITY",
+		"scaleChanceWithMasteryPool": false,
+		"ignoreCompletion": false,
+		"modifiers": {},
+		"activeInRaid": false,
+		"hint": "MOD_KMM_CHARITY_NAME",
+		"customDescription": "MOD_KMM_PET_DESC_CHARITY"
+	}
+]
