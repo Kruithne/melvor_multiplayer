@@ -175,8 +175,6 @@ async function start_new_campaign() {
 
 	log('campaign', 'started new campaign {%s} {%s} {%s}', campaign_active_campaign_id, campaign_active_item, campaign_item_total);
 
-	await db_execute('DELETE FROM `campaign_state`');
-
 	campaign_active_id = await db_insert(
 		'INSERT INTO `campaign_state` (campaign_id, item_id, item_amount) VALUES(?, ?, ?)',
 		[campaign_active_campaign_id, campaign_active_item, campaign_item_total]
@@ -198,7 +196,7 @@ async function finalize_campaign() {
 }
 
 async function load_campaign_state() {
-	const state = await db_get_single('SELECT * FROM `campaign_state` LIMIT 1') as db_row.campaign_state;
+	const state = await db_get_single('SELECT * FROM `campaign_state` ORDER BY `id` DESC LIMIT 1') as db_row.campaign_state;
 	if (state === null)
 		return start_new_campaign();
 
