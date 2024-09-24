@@ -33,14 +33,14 @@
 			{
 				"id": "Campaign_Effort",
 				"customName": "Campaign Effort",
-				"media": "assets/charity_tree.svg",
+				"media": "assets/campaigns.svg",
 				"containerID": "kru-multiplayer-campaign-page",
 				"headerBgClass": "kmm-campaign-bg",
 				"hasGameGuide": false,
 				"canBeDefault": false,
 				"sidebarItem": {
 					"categoryID": "Multiplayer",
-					"icon": "assets/charity_tree.svg"
+					"icon": "assets/campaigns.svg"
 				}
 			}
 		]
