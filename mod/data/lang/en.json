@@ -48,6 +48,7 @@
 	"MOD_KMM_BUTTON_ADD_GP": "Add GP",
 	"MOD_KMM_BUTTON_ADD_GP_F": "Add %s GP",
 	"MOD_KMM_BUTTON_TAKE_SELECTED": "Take Selected",
+	"MOD_KMM_BUTTON_CONTRIBUTE": "Contribute",
 
 	"MOD_KMM_MENU_HEADER": "Multiplayer",
 	"MOD_KMM_MENU_HEADER_FRIENDS": "Friends",
@@ -101,6 +102,8 @@
 	"MOD_KMM_CAMPAIGN_LOADING": "Loading Campaign Information...",
 	"MOD_KMM_CAMPAIGN_NONE": "No Active Campaign",
 	"MOD_KMM_CAMPAIGN_NEXT": "Next Campaign Starts In %s",
+	"MOD_KMM_CAMPAIGN_PROGRESS": "%s: %s / %s",
+	"MOD_KMM_CAMPAIGN_CONTRIB_AMOUNT": "Your Contribution: %s",
 
 	"MOD_KMM_CAMPAIGN_NAME_JUNGLE": "The Jungle Expedition",
 	"MOD_KMM_CAMPAIGN_NAME_DESERT": "Plunder of the Sands",

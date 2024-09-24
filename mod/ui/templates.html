@@ -245,14 +245,32 @@
 			</div>
 		</div>
 		<div class="row row-deck gutters-tiny" v-else>
-			<div class="block block-rounded block-link-pop w-100 kmm-campaign-border" :style="{ 'border-color': state.get_current_campaign_color() }">
-				<div class="row row-deck gutters-tiny">
-					<div class="p-3">
-						<div class="kmm-campaign-active">
+			<div class="block block-rounded block-link-pop w-100">
+				<div class="row row-deck gutters-tiny w-100">
+					<div class="p-3 w-100">
+						<div class="kmm-campaign-active w-100">
 							<img class="mr-1" :src="state.get_current_campaign_svg()">
-							<h4 class="font-w600">
-								<lang-string-f lang-id="MOD_KMM_CAMPAIGN_CURRENT" :lang-arg-1="state.get_current_campaign_title()"></lang-string-f>
-							</h4>
+							<div class="kmm-campaign-active-info w-100">
+								<h4 class="font-w600 mb-1">
+									<lang-string-f lang-id="MOD_KMM_CAMPAIGN_CURRENT" :lang-arg-1="state.get_current_campaign_title()"></lang-string-f>
+								</h4>
+								<div class="kmm-campaign-bar">
+									<div class="kmm-campaign-bar-fill" :style="{ 'background-color': state.get_current_campaign_color() }"></div>
+								</div>
+								<div class="kmm-campaign-info">
+									<div>
+										<lang-string-f lang-id="MOD_KMM_CAMPAIGN_PROGRESS" lang-arg-1="Oak Logs" lang-arg-2="4,000,000" lang-arg-3="10,000,000"></lang-string-f>
+										<img class="skill-icon-xxs ml-1 mr-1" src="assets/media/main/coins.svg">
+									</div>
+									<div>
+										<lang-string-f lang-id="MOD_KMM_CAMPAIGN_CONTRIB_AMOUNT" lang-arg-1="1,000,000"></lang-string-f>
+										<img class="skill-icon-xxs ml-1 mr-1" src="assets/media/main/coins.svg">
+									</div>
+									<button type="button" class="btn btn-success m-1" @click="state.show_campaign_contribute_modal()">
+										<lang-string lang-id="MOD_KMM_BUTTON_CONTRIBUTE"></lang-string>
+									</button>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
