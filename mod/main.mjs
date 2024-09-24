@@ -897,7 +897,7 @@ function update_campaign_nav() {
 	const aside = document.querySelector('.kmm-campaign-nav');
 
 	if (state.campaign_active)
-		aside.textContent = Math.round(state.campaign_pct) + '%';
+		aside.textContent = Math.round(state.campaign_pct * 100) + '%';
 	else
 		aside.textContent = 'Inactive';
 }
