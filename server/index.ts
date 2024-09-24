@@ -11,6 +11,9 @@ import { db_row_gift_items } from './db/types/gift_items';
 import { db_row_trade_offers } from './db/types/trade_offers';
 import { db_row_resolved_trade_offers } from './db/types/resolved_trade_offers';
 import { db_row_charity_items } from './db/types/charity_items';
+import { AVAILABLE_CAMPAIGNS } from './campaign_data';
+import type { CampaignData } from './campaign_data';
+import { db_row_campaign_state } from './db/types/campaign_state';
 // #endregion
 
 // #region TYPES
@@ -60,6 +63,12 @@ const CACHE_RESET_INTERVAL = 1000 * 60 * 60 * 24; // 24 hours
 
 // time between players taking charity items
 const CHARITY_TIMEOUT = 1000 * 60 * 60 * 24; // 24 hours
+
+const CAMPAIGN_MAX_SOLO_CONTRIB_FAC = 0.25;
+const CAMPAIGN_ITEM_MIN = 10;
+const CAMPAIGN_ITEM_MAX = 50;
+const CAMPAIGN_ITEM_SCALE = 1000000;
+const CAMPAIGN_RESTART_TIMER = 1000 * 60 * 60 * 12; // 12 hours
 // #endregion
 
 // #region GLOBALS
@@ -74,6 +83,14 @@ const display_name_cache = new Map<number, string>();
 const trade_cache = new Map<number, ActiveTrade>(); // trade_id to ActiveTrade
 const trade_player_cache = new Map<number, number[]>(); // client_id to trade_id[]
 const resolved_trade_cache = new Map<number, number[]>(); // client_id to trade_id[]
+
+let campaign_active_id: number = 0;
+let campaign_active_campaign_id: string = '';
+let campaign_active_item: string = '';
+let campaign_item_total: number = 0;
+let campaign_item_current: number = 0;
+let campaign_current_pct: number = 0;
+let campaign_next_active_timestamp: number = 0;
 // #endregion
 
 // #region COMMON FN
@@ -119,6 +136,10 @@ function validate_item_array(items: unknown, allow_modded = true) {
 
 	return true;
 }
+
+function array_random(arr: Array<unknown>) {
+	return arr[Math.floor(Math.random() * arr.length)];
+}
 // #endregion
 
 // #region MAINTENANCE
@@ -146,6 +167,78 @@ function sweep_client_session_cache() {
 
 setTimeout(sweep_client_session_cache, CACHE_SESSION_LIFETIME);
 setTimeout(sweep_data_caches, CACHE_RESET_INTERVAL);
+// #endregion
+
+// #region CAMPAIGN
+async function start_new_campaign() {
+	const campaign_data = array_random(AVAILABLE_CAMPAIGNS) as CampaignData;
+
+	campaign_active_campaign_id = campaign_data.id;
+	campaign_active_item = array_random(campaign_data.items) as string;
+	campaign_next_active_timestamp = 0;
+
+	campaign_item_total = Math.floor(Math.random() * (CAMPAIGN_ITEM_MAX - CAMPAIGN_ITEM_MIN) + CAMPAIGN_ITEM_MIN) * CAMPAIGN_ITEM_SCALE;
+	campaign_item_current = 0;
+	campaign_current_pct = 0;
+
+	log('campaign', 'started new campaign {%s} {%s} {%s}', campaign_active_campaign_id, campaign_active_item, campaign_item_total);
+
+	await db_execute('DELETE FROM `campaign_state`');
+
+	campaign_active_id = await db_insert(
+		'INSERT INTO `campaign_state` (campaign_id, item_id, item_amount) VALUES(?, ?, ?)',
+		[campaign_active_campaign_id, campaign_active_item, campaign_active_item]
+	);
+}
+
+async function update_campaign_progress() {
+	campaign_current_pct = campaign_item_current / campaign_item_total;
+
+	if (campaign_item_current >= campaign_item_total)
+		return finalize_campaign();
+}
+
+async function finalize_campaign() {
+	campaign_active_id = 0;
+	campaign_next_active_timestamp = Date.now() + CAMPAIGN_RESTART_TIMER;
+
+	await db_execute('UPDATE `campaign_state` SET `complete` = 1, `campaign_next` = ?', [campaign_next_active_timestamp]);
+}
+
+async function load_campaign_state() {
+	const state = await db_get_single('SELECT * FROM `campaign_state` LIMIT 1') as db_row_campaign_state;
+	if (state === null)
+		return start_new_campaign();
+
+	if (state.complete === 1) {
+		campaign_next_active_timestamp = state.campaign_next;
+		return check_campaign_timestamp();
+	}
+
+	campaign_active_id = state.id;
+	campaign_active_campaign_id = state.campaign_id;
+	campaign_active_item = state.item_id;
+	campaign_item_total = state.item_amount;
+	campaign_item_current = state.item_current;
+
+	update_campaign_progress();
+
+	log('campaign', 'loaded campaign state: {%s} {%s} {%s}/{%s}', campaign_active_campaign_id, campaign_active_item, campaign_item_current, campaign_item_total);
+}
+
+async function check_campaign_timestamp() {
+	if (Date.now() >= campaign_next_active_timestamp)
+		return start_new_campaign();
+}
+
+function get_campaign_progress() {
+	return {
+		active: campaign_active_id > 0,
+		pct: campaign_current_pct
+	};
+}
+
+load_campaign_state();
 // #endregion
 
 // #region FRIEND CODE
@@ -461,6 +554,26 @@ function session_get_route(route: string, handler: SessionRequestHandler) {
 function session_post_route(route: string, handler: SessionRequestHandler) {
 	server.route(route, validate_session_request(handler, true), 'POST');
 }
+// #endregion
+
+// #region ROUTES CAMPAIGN
+session_get_route('/api/campaign/info', async (req, url, client_id) => {
+	// todo: include campaign history in this endpoint.
+
+	if (campaign_active_id > 0) {
+		return {
+			active: true,
+			campaign_id: campaign_active_campaign_id,
+			item_id: campaign_active_item,
+			item_total: campaign_item_total
+		} as JsonSerializable;
+	} else {
+		return {
+			active: false,
+			next_campaign: campaign_next_active_timestamp
+		} as JsonSerializable;
+	}
+});
 // #endregion
 
 // #region ROUTES CHARITY
@@ -915,7 +1028,8 @@ session_get_route('/api/events', async (req, url, client_id) => {
 		friend_requests: await get_friend_requests(client_id),
 		gifts: await get_client_gifts(client_id),
 		trades: trade_meta,
-		resolved_trades: await get_client_resolved_trades(client_id)
+		resolved_trades: await get_client_resolved_trades(client_id),
+		campaign: get_campaign_progress()
 	};
 });
 

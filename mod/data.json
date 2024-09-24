@@ -29,6 +29,15 @@
 					"categoryID": "Multiplayer",
 					"icon": "assets/charity_tree.svg"
 				}
+			},
+			{
+				"id": "Campaign_Effort",
+				"customName": "Campaign Effort",
+				"media": "assets/charity_tree.svg",
+				"containerID": "kru-multiplayer-campaign-page",
+				"headerBgClass": "kmm-campaign-bg",
+				"hasGameGuide": false,
+				"canBeDefault": false
 			}
 		]
 	}

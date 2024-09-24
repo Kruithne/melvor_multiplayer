@@ -30,6 +30,8 @@ let is_connecting = false;
 let is_updating_charity_tree = false;
 let last_charity_check = 0;
 
+let last_campaign_check = 0;
+
 const skill_pets = new Map();
 // #endregion
 
@@ -60,6 +62,15 @@ const state = ui.createStore({
 	charity_bonus_timeout: 0,
 	charity_bonus_unlocked: false,
 	charity_update_time: Date.now(),
+
+	campaign_active: false,
+	campaign_id: '',
+	campaign_next_timestamp: 0,
+	campaign_item_id: '',
+	campaign_pct: 0,
+	campaign_item_total: 0,
+	campaign_loading: false,
+	campaign_has_data: false,
 
 	events: {
 		friend_requests: []
@@ -795,6 +806,51 @@ function set_character_storage_item(key, value) {
 }
 // #endregion
 
+// #region CAMPAIGN FUNCTIONS
+async function update_campaign_info() {
+	if (state.campaign_loading || state.campaign_has_data)
+		return;
+
+	if (state.campaign_active) {
+		state.campaign_loading = true;
+
+		const res = await api_get('/api/campaign/info');
+
+		if (res !== null) {
+			state.campaign_has_data = true;
+
+			if (res.active) {
+				state.campaign_id = res.campaign_id;
+				state.campaign_item_id = res.item_id;
+				state.campaign_item_total = res.item_total;
+			} else {
+				state.campaign_next_timestamp = res.next_campaign;
+			}
+		} else {
+			notify_error('MOD_KMM_GENERIC_ERR');
+		}
+
+		state.campaign_loading = false;
+	}
+}
+
+function setup_campaign_page() {
+	const $campaign_page = $('kru-multiplayer-campaign-page');
+
+	const observer = new MutationObserver(() => {
+		const is_visible = !$campaign_page.classList.contains('d-none');
+		
+		if (is_visible)
+			update_campaign_info();
+	});
+
+	observer.observe($campaign_page, {
+		attributes: true,
+		attributeFilter: ['class']
+	});
+}
+// #endregion
+
 // #region PET FUNCTIONS
 async function load_pets(ctx) {
 	const pets = await ctx.loadData('data/pets.json');
@@ -1063,6 +1119,16 @@ async function get_client_events() {
 				state.gifts.push({ id: gift_id, data: null });
 		}
 
+		if (state.campaign_active && !res.campaign.active) {
+			// campaign no longer active, ditch known data client-side
+			state.campaign_id = '';
+			state.campaign_item_id = '';
+			state.campaign_item_total = 0;
+		}
+
+		state.campaign_pct = res.campaign.pct;
+		state.campaign_active = res.campaign.active;
+
 		if (state.is_transfer_page_visible)
 			setTimeout(() => update_transfer_contents(), 1);
 	}
@@ -1102,6 +1168,7 @@ export async function setup(ctx) {
 		const $main_container = $('main-container');
 		make_template('transfer-page', $main_container);
 		make_template('charity-page', $main_container);
+		make_template('campaign-page', $main_container);
 
 		patch_bank();
 		setup_charity_tree();

@@ -106,6 +106,7 @@
 	"MOD_KMM_EXCHANGE_WINDOW_INFO": "Below you will find trade offers between you and other players, as well as gifts other players have sent to you.",
 	"MOD_KMM_CHARITY_WINDOW_INFO": "Once per day, you may take something of your choosing from the tree. Donate items from your bank to the tree to help other players.",
 	"MOD_KMM_CHARITY_PET_INFO": "The Spirit of Charity pet is allowing you to take one extra item per day!",
+	"MOD_KMM_CAMPAIGN_WINDOW_INFO": "Campaigns are a combined effort from all players to reach a goal for a share in the victory and rewards.",
 
 	"MOD_KMM_NOTIF_FRIEND_REQ_SENT": "Friend request sent!",
 	"MOD_KMM_NOTIF_FRIEND_REMOVED": "Friend removed",
