@@ -18,12 +18,17 @@ const TRANSFER_INVENTORY_MAX_LIMIT = 32;
 
 const GIFT_FLAG_RETURNED = 1 << 0;
 
+let session_token = null;
+let is_connecting = false;
+
 // time between players taking charity items
 const CHARITY_TIMEOUT = 1000 * 60 * 60 * 24; // 24 hours
 
-let session_token = null;
-let is_connecting = false;
+// time between charity content checks.
+const CHARITY_CHECK_TIMEOUT = 10 * 1000; // 10 seconds
+
 let is_updating_charity_tree = false;
+let last_charity_check = 0;
 
 const ctx = mod.getContext(import.meta);
 const state = ui.createStore({
@@ -348,6 +353,7 @@ const state = ui.createStore({
 		const res = await api_post('/api/charity/donate', { items });
 		if (res?.success) {
 			state.transfer_inventory = [];
+			last_charity_check = 0;
 			notify('MOD_KMM_CHARITY_DONATED');
 		}
 
@@ -753,6 +759,11 @@ async function request_charity_tree_contents() {
 	if (is_updating_charity_tree)
 		return;
 
+	const current_time = Date.now();
+	if (current_time < last_charity_check + CHARITY_CHECK_TIMEOUT)
+		return;
+
+	last_charity_check = current_time;
 	is_updating_charity_tree = true;
 
 	const res = await api_get('/api/charity/contents');
