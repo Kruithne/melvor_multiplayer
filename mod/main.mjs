@@ -331,6 +331,29 @@ const state = ui.createStore({
 		}
 	},
 
+	async donate_items(event) {
+		const items = state.transfer_inventory;
+
+		if (items.length === 0)
+			return notify_error('MOD_KMM_CHARITY_NO_SELECTION');
+
+		for (const item of items) {
+			if (!item.id.startsWith('melvor'))
+				return notify_error('MOD_KMM_CHARITY_MODDED_ITEM');
+		}
+
+		const $button = event.currentTarget;
+		show_button_spinner($button);
+
+		const res = await api_post('/api/charity/donate', { items });
+		if (res?.success) {
+			state.transfer_inventory = [];
+			notify('MOD_KMM_CHARITY_DONATED');
+		}
+
+		hide_button_spinner($button);
+	},
+
 	get_trade_items_value(items) {
 		let total_value = 0;
 

@@ -304,6 +304,10 @@
 						<button type="button" class="btn btn-success m-1" @click="state.gift_friend()">
 							<lang-string-f lang-id="MOD_KMM_BUTTON_GIFT_ITEMS" :lang-arg-1="state.transfer_inventory.length"></lang-string-f>
 						</button>
+						<button type="button" class="btn btn-success m-1" @click="state.donate_items($event)">
+							<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+							<lang-string-f lang-id="MOD_KMM_BUTTON_DONATE_ITEMS" :lang-arg-1="state.transfer_inventory.length"></lang-string-f>
+						</button>
 						<button type="button" class="btn btn-danger m-1" @click="state.transfer_return_selected()">
 							<lang-string lang-id="MOD_KMM_BUTTON_RETURN_SELECTED"></lang-string>
 						</button>
