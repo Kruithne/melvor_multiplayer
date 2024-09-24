@@ -30,8 +30,6 @@ let is_connecting = false;
 let is_updating_charity_tree = false;
 let last_charity_check = 0;
 
-let last_campaign_check = 0;
-
 const skill_pets = new Map();
 // #endregion
 
