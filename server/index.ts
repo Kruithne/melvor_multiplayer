@@ -473,21 +473,36 @@ session_post_route('/api/charity/take', async (req, url, client_id, json) => {
 		return 400; // Bad Request
 
 	const current_time = Date.now();
-	const client_row = await db_get_single('SELECT `last_charity` FROM `clients` WHERE `id` = ?', [client_id]) as db_row_clients;
+	const client_row = await db_get_single('SELECT `last_charity`, `last_bonus_charity` FROM `clients` WHERE `id` = ?', [client_id]) as db_row_clients;
 	if (client_row === null)
 		return 400; // Bad Request
 
-	if (client_row.last_charity + CHARITY_TIMEOUT > current_time)
-		return { error_lang: 'MOD_KMM_CHARITY_TIMEOUT', timeout: client_row.last_charity };
+	const last_charity_cooling_down = client_row.last_charity + CHARITY_TIMEOUT > current_time;
+	const last_charity_bonus_cooling_down = client_row.last_bonus_charity + CHARITY_TIMEOUT > current_time;
+
+	if (last_charity_cooling_down && last_charity_bonus_cooling_down)
+		return { error_lang: 'MOD_KMM_CHARITY_TIMEOUT', timeout: client_row.last_charity, timeout_bonus: client_row.last_bonus_charity };
 
 	const item_entry = await db_get_single('SELECT `qty` FROM `charity_items` WHERE `item_id` = ?', [item_id]) as db_row_charity_items;
 	if (item_entry === null)
 		return { error_lang: 'MOD_KMM_CHARITY_TAKEN' };
 
-	await db_execute('UPDATE `clients` SET `last_charity` = ? WHERE `id` = ?', [current_time, client_id]);
+	if (last_charity_cooling_down) {
+		await db_execute('UPDATE `clients` SET `last_bonus_charity` = ? WHERE `id` = ?', [current_time, client_id]);
+		client_row.last_bonus_charity = current_time;
+	} else {
+		await db_execute('UPDATE `clients` SET `last_charity` = ? WHERE `id` = ?', [current_time, client_id]);
+		client_row.last_charity = current_time;
+	}
+
 	await db_execute('DELETE FROM `charity_items` WHERE `item_id` = ?', [item_id]);
 
-	return { success: true, timeout: current_time, item_qty: item_entry.qty } as JsonSerializable;
+	return {
+		success: true,
+		item_qty: item_entry.qty,
+		timeout: client_row.last_charity,
+		timeout_bonus: client_row.last_bonus_charity
+	} as JsonSerializable;
 });
 
 session_post_route('/api/charity/donate', async (req, url, client_id, json) => {

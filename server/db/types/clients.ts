@@ -5,5 +5,6 @@ export type db_row_clients = {
 	friend_code: string,
 	display_name: string,
 	icon_id: string,
-	last_charity: number
+	last_charity: number,
+	last_bonus_charity: number
 } | null;

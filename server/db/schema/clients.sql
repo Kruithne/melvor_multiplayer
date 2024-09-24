@@ -18,3 +18,6 @@ ALTER TABLE `clients` ADD COLUMN `icon_id` VARCHAR(60) NOT NULL;
 
 -- [5] add last_charity column
 ALTER TABLE `clients` ADD COLUMN `last_charity` BIGINT NOT NULL DEFAULT 0;
+
+-- [6] add last_bonus_charity column
+ALTER TABLE `clients` ADD COLUMN `last_bonus_charity` BIGINT NOT NULL DEFAULT 0;

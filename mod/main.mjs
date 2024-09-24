@@ -57,6 +57,8 @@ const state = ui.createStore({
 	charity_tree_inventory: [],
 	selected_charity_item_id: '',
 	charity_timeout: 0,
+	charity_bonus_timeout: 0,
+	charity_bonus_unlocked: false,
 	charity_update_time: Date.now(),
 
 	events: {
@@ -118,8 +120,16 @@ const state = ui.createStore({
 		return this.gifts.length + this.resolved_trades.length + this.trades.length;
 	},
 
-	get can_take_charity() {
+	get is_charity_ready() {
 		return state.charity_timeout + CHARITY_TIMEOUT < state.charity_update_time;
+	},
+
+	get is_charity_bonus_ready() {
+		return state.charity_bonus_timeout + CHARITY_TIMEOUT < state.charity_update_time;
+	},
+
+	get can_take_charity() {
+		return this.is_charity_ready || (this.charity_bonus_unlocked && this.is_charity_bonus_ready);
 	},
 	// #endregion
 
@@ -184,6 +194,11 @@ const state = ui.createStore({
 			set_character_storage_item('charity_timeout', res.timeout);
 		}
 
+		if (res?.timeout_bonus !== undefined) {
+			state.charity_bonus_timeout = res.timeout_bonus;
+			set_character_storage_item('charity_bonus_timeout', res.timeout_bonus);
+		}
+
 		hide_button_spinner($button);
 	},
 
@@ -205,7 +220,11 @@ const state = ui.createStore({
 		if (res?.success) {
 			state.transfer_inventory = [];
 			last_charity_check = 0;
+
 			notify('MOD_KMM_CHARITY_DONATED');
+
+			// todo: move this behind a % chance
+			game.petManager.unlockPetByID('Multiplayer_Pet_Charity');
 		}
 
 		hide_button_spinner($button);
@@ -1055,6 +1074,9 @@ export async function setup(ctx) {
 		load_transfer_inventory();
 
 		state.charity_timeout = get_character_storage_item('charity_timeout') ?? 0;
+		state.charity_bonus_timeout = get_character_storage_item('charity_bonus_timeout') ?? 0;
+
+		state.charity_bonus_unlocked = has_pet_by_id('Multiplayer_Pet_Charity');
 	});
 
 	sidebar.category('Multiplayer', { before: 'Combat' });
