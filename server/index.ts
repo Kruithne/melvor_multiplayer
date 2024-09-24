@@ -187,7 +187,7 @@ async function start_new_campaign() {
 
 	campaign_active_id = await db_insert(
 		'INSERT INTO `campaign_state` (campaign_id, item_id, item_amount) VALUES(?, ?, ?)',
-		[campaign_active_campaign_id, campaign_active_item, campaign_active_item]
+		[campaign_active_campaign_id, campaign_active_item, campaign_item_total]
 	);
 }
 
