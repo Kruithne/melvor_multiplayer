@@ -1137,7 +1137,9 @@ export async function setup(ctx) {
 
 		state.$dropdown_menu = $('kru-mm-online-dropdown');
 
-		make_template('transfer-page', $('main-container'));
+		const $main_container = $('main-container');
+		make_template('transfer-page', $main_container);
+		make_template('charity-page', $main_container);
 
 		patch_bank();
 		setup_charity_tree();
