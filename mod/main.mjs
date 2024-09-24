@@ -954,7 +954,7 @@ function add_gp_to_transfer(amount) {
 		if (state.transfer_inventory.length >= TRANSFER_INVENTORY_MAX_LIMIT)
 			return notify_error('MOD_KMM_TRANSFER_INVENTORY_FULL');
 
-		state.transfer_inventory.push({
+		state.transfer_inventory.unshift({
 			id: 'melvorD:GP',
 			qty: amount
 		});
