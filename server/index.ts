@@ -110,6 +110,9 @@ function validate_item_array(items: unknown, allow_modded = true) {
 		if (typeof item.id !== 'string' || typeof item.qty !== 'number')
 			return false;
 
+		if (item.qty <= 0)
+			return false;
+
 		if (!allow_modded && !item.id.startsWith('melvor'))
 			return false;
 	}
