@@ -146,6 +146,19 @@ const state = ui.createStore({
 	get can_take_charity() {
 		return this.is_charity_ready || (this.charity_bonus_unlocked && this.is_charity_bonus_ready);
 	},
+
+	get campaign_item_current() {
+		return Math.round(this.campaign_item_total * (this.campaign_pct / 100));
+	},
+
+	get campaign_item_name() {
+		const item = game.items.getObjectByID(state.campaign_item_id);
+		return item?.name ?? 'Unknown Item';
+	},
+
+	get campaign_item_icon() {
+		return this.get_item_icon(state.campaign_item_id);
+	},
 	// #endregion
 
 	// #region COMMON ACTIONS

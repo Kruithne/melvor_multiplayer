@@ -259,12 +259,12 @@
 								</div>
 								<div class="kmm-campaign-info">
 									<div>
-										<lang-string-f lang-id="MOD_KMM_CAMPAIGN_PROGRESS" lang-arg-1="Oak Logs" lang-arg-2="4,000,000" lang-arg-3="10,000,000"></lang-string-f>
-										<img class="skill-icon-xxs ml-1 mr-1" src="assets/media/main/coins.svg">
+										<lang-string-f lang-id="MOD_KMM_CAMPAIGN_PROGRESS" :lang-arg-1="state.campaign_item_name" :lang-arg-2="numberWithCommas(state.campaign_item_current)" :lang-arg-3="numberWithCommas(state.campaign_item_total)"></lang-string-f>
+										<img class="skill-icon-xxs ml-1 mr-1" :src="state.campaign_item_icon">
 									</div>
 									<div>
 										<lang-string-f lang-id="MOD_KMM_CAMPAIGN_CONTRIB_AMOUNT" lang-arg-1="1,000,000"></lang-string-f>
-										<img class="skill-icon-xxs ml-1 mr-1" src="assets/media/main/coins.svg">
+										<img class="skill-icon-xxs ml-1 mr-1" :src="state.campaign_item_icon">
 									</div>
 									<button type="button" class="btn btn-success m-1" @click="state.show_campaign_contribute_modal()">
 										<lang-string lang-id="MOD_KMM_BUTTON_CONTRIBUTE"></lang-string>
