@@ -212,6 +212,14 @@
 					</div>
 				</div>
 			</div>
+			<div class="block block-rounded block-link-pop w-100" v-if="state.charity_bonus_unlocked">
+				<div class="row row-deck gutters-tiny">
+					<div class="p-3 kmm-transfer-info">
+						<img class="skill-icon-xxs mr-1" :src="state.get_svg('pet_charity_spirit')">
+						<lang-string lang-id="MOD_KMM_CHARITY_PET_INFO"></lang-string>
+					</div>
+				</div>
+			</div>
 			<div class="block tabbable w-100 kmm-col">
 				<template v-if="state.charity_tree_inventory.length > 0">
 					<div class="block-content">
