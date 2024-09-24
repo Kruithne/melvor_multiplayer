@@ -129,10 +129,12 @@ const state = ui.createStore({
 			item_id: state.selected_charity_item_id
 		});
 
-		if (res?.success)
+		if (res?.success) {
 			add_bank_item(item.id, res.item_qty);
-		else
+			state.charity_tree_inventory = state.charity_tree_inventory.filter(e => e.id !== item.id);
+		} else {
 			notify_error(res?.error_lang ?? 'MOD_KMM_CHARITY_TAKEN');
+		}
 
 		if (res?.timeout !== undefined) {
 			state.charity_timeout = res.timeout;
