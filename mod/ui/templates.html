@@ -216,7 +216,7 @@
 				<template v-if="state.charity_tree_inventory.length > 0">
 					<div class="block-content">
 						<div class="pb-4 row">
-							<kmm-item-icon v-for="item of state.charity_tree_inventory" class="bank-item pointer-enabled m-2" :data-item-id="item.id">
+							<kmm-item-icon v-for="item of state.charity_tree_inventory" class="bank-item pointer-enabled m-2" :data-item-id="item.id" :key="item.id">
 								<a role="button" @click="state.selected_charity_item_id = item.id">
 									<img class="bank-img p-3" :src="state.get_item_icon(item.id)" :class="{ 'border border-4x border-success': state.selected_charity_item_id === item.id }">
 									<div class="font-size-sm text-white text-center in-bank">
@@ -284,7 +284,7 @@
 				<template v-if="state.transfer_inventory.length > 0">
 					<div class="block-content">
 						<div class="pb-4 row">
-							<kmm-item-icon v-for="item of state.transfer_inventory" class="bank-item pointer-enabled m-2" :data-item-id="item.id">
+							<kmm-item-icon v-for="item of state.transfer_inventory" class="bank-item pointer-enabled m-2" :data-item-id="item.id" :key="item.id">
 								<a role="button" @click="state.selected_transfer_item_id = item.id">
 									<img class="bank-img p-3" :src="state.get_item_icon(item.id)" :class="{ 'border border-4x border-success': state.selected_transfer_item_id === item.id }">
 									<div class="font-size-sm text-white text-center in-bank">
@@ -360,7 +360,7 @@
 					</div>
 					<div class="block-content">
 						<div class="pb-4 row">
-							<kmm-item-icon v-for="item of gift.data.items" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id">
+							<kmm-item-icon v-for="item of gift.data.items" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id" :key="item.item_id">
 								<a role="button">
 									<img class="bank-img p-3" :src="state.get_item_icon(item.item_id)">
 									<div class="font-size-sm text-white text-center in-bank">
@@ -417,7 +417,7 @@
 					</div>
 					<div class="block-content">
 						<div class="pb-4 row">
-							<kmm-item-icon v-for="item of trade.data.items" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id">
+							<kmm-item-icon v-for="item of trade.data.items" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id" :key="item.item_id">
 								<a role="button">
 									<img class="bank-img p-3" :src="state.get_item_icon(item.item_id)">
 									<div class="font-size-sm text-white text-center in-bank">
@@ -485,7 +485,7 @@
 									</span>
 								</div>
 								<div class="kmm-dual-trade-items">
-									<kmm-item-icon v-for="item of state.filter_trade_items_home(trade)" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id">
+									<kmm-item-icon v-for="item of state.filter_trade_items_home(trade)" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id" :key="item.item_id">
 										<a role="button">
 											<img class="bank-img p-3" :src="state.get_item_icon(item.item_id)">
 											<div class="font-size-sm text-white text-center in-bank">
@@ -512,7 +512,7 @@
 									</span>
 								</div>
 								<div class="kmm-dual-trade-items">
-									<kmm-item-icon v-for="item of state.filter_trade_items_away(trade)" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id">
+									<kmm-item-icon v-for="item of state.filter_trade_items_away(trade)" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id" :key="item.item_id">
 										<a role="button">
 											<img class="bank-img p-3" :src="state.get_item_icon(item.item_id)">
 											<div class="font-size-sm text-white text-center in-bank">
@@ -524,7 +524,7 @@
 							</div>
 						</div>
 						<div class="pb-4 row" v-else>
-							<kmm-item-icon v-for="item of trade.data.items" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id">
+							<kmm-item-icon v-for="item of trade.data.items" class="bank-item pointer-enabled m-2" :data-item-id="item.item_id" :key="item.item_id">
 								<a role="button">
 									<img class="bank-img p-3" :src="state.get_item_icon(item.item_id)">
 									<div class="font-size-sm text-white text-center in-bank">
