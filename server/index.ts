@@ -442,7 +442,7 @@ function session_post_route(route: string, handler: SessionRequestHandler) {
 
 session_get_route('/api/charity/contents', async (req, url, client_id) => {
 	return {
-		items: await db_get_all('SELECT `item_id`, `qty` FROM `charity_items` LIMIT 78')
+		items: await db_get_all('SELECT `item_id` as `id`, `qty` FROM `charity_items` LIMIT 78')
 	};
 });
 
