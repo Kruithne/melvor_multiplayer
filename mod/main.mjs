@@ -181,7 +181,7 @@ const state = ui.createStore({
 	reconnect() {
 		state.hide_online_dropdown();
 		start_multiplayer_session();
-	}
+	},
 	// #endregion
 
 	// #region CHARITY ACTIONS
