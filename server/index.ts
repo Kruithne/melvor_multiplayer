@@ -387,6 +387,22 @@ async function get_client_resolved_trades(client_id: number) {
 	return trade_ids;
 }
 
+function validate_item_array(items: unknown) {
+	if (!Array.isArray(items))
+		return false;
+
+	for (const item of items) {
+		if (typeof item !== 'object' || item === null || Array.isArray(item))
+			return false;
+
+		// @ts-ignore
+		if (typeof item.id !== 'string' || typeof item.qty !== 'number')
+			return false;
+	}
+
+	return true;
+}
+
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
 	return async (req: Request, url: URL) => {
 		let json = null;
@@ -553,20 +569,11 @@ session_post_route('/api/trade/counter', async (req, url, client_id, json) => {
 	if (!trade || trade.recipient_id !== client_id)
 		return 400; // Bad Request
 
-	const items = json.items;
-	if (!Array.isArray(items))
-		return 400; // Bad Request
+	const items = json.items as TransferItem[];
+	if (!validate_item_array(items))
+		return 400; // Bad Request;
 
 	for (const item of items) {
-		if (typeof item !== 'object' || item === null || Array.isArray(item))
-			return 400; // Bad Request
-
-		// @ts-ignore
-		if (typeof item.id !== 'string' || typeof item.qty !== 'number')
-			return 400; // Bad Request
-	}
-
-	for (const item of items as TransferItem[]) {
 		await db_execute(
 			'INSERT INTO `trade_items` (trade_id, item_id, qty, counter) VALUES(?, ?, ?, 1)',
 			[trade_id, item.id, item.qty]
@@ -664,18 +671,9 @@ session_post_route('/api/trade/offer', async (req, url, client_id, json) => {
 	if (typeof recipient_id !== 'number')
 		return 400; // Bad Request
 
-	const items = json.items;
-	if (!Array.isArray(items))
+	const items = json.items as TransferItem[];
+	if (!validate_item_array(items))
 		return 400; // Bad Request
-
-	for (const item of items) {
-		if (typeof item !== 'object' || item === null || Array.isArray(item))
-			return 400; // Bad Request
-
-		// @ts-ignore
-		if (typeof item.id !== 'string' || typeof item.qty !== 'number')
-			return 400; // Bad Request
-	}
 
 	if (!(await friendship_exists(client_id, recipient_id)))
 		return { error_lang: 'MOD_KMM_FRIENDSHIP_MISSING' };
@@ -688,7 +686,7 @@ session_post_route('/api/trade/offer', async (req, url, client_id, json) => {
 		[client_id, recipient_id, recipient_id]
 	);
 
-	for (const item of items as TransferItem[]) {
+	for (const item of items) {
 		await db_execute(
 			'INSERT INTO `trade_items` (trade_id, item_id, qty, counter) VALUES(?, ?, ?, 0)',
 			[trade_id, item.id, item.qty]
@@ -744,18 +742,9 @@ session_post_route('/api/gift/send', async (req, url, client_id, json) => {
 	if (typeof friend_id !== 'number')
 		return 400; // Bad Request
 
-	const items = json.items;
-	if (!Array.isArray(items))
+	const items = json.items as TransferItem[];
+	if (!validate_item_array(items))
 		return 400; // Bad Request
-
-	for (const item of items) {
-		if (typeof item !== 'object' || item === null || Array.isArray(item))
-			return 400; // Bad Request
-
-		// @ts-ignore
-		if (typeof item.id !== 'string' || typeof item.qty !== 'number')
-			return 400; // Bad Request
-	}
 
 	if (!(await friendship_exists(client_id, friend_id)))
 		return { error_lang: 'MOD_KMM_FRIENDSHIP_MISSING' };
@@ -766,7 +755,7 @@ session_post_route('/api/gift/send', async (req, url, client_id, json) => {
 	if (await has_pending_gift(client_id, friend_id))
 		return { error_lang: 'MOD_KMM_PENDING_GIFT' };
 
-	await send_gift(client_id, friend_id, items as TransferItem[]);
+	await send_gift(client_id, friend_id, items);
 
 
 	return { success: true } as JsonSerializable;
