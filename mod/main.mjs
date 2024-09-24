@@ -148,7 +148,7 @@ const state = ui.createStore({
 	},
 
 	get campaign_item_current() {
-		return Math.round(this.campaign_item_total * (this.campaign_pct / 100));
+		return Math.round(this.campaign_item_total * this.campaign_pct);
 	},
 
 	get campaign_item_name() {
