@@ -1,3 +1,4 @@
+// #region IMPORTS
 import { caution, serve, validate_req_json, HTTP_STATUS_CODE } from 'spooder';
 import { format } from 'node:util';
 import { db_get_single, db_execute, db_insert, db_exists, db_get_all } from './db';
@@ -10,7 +11,9 @@ import { db_row_gift_items } from './db/types/gift_items';
 import { db_row_trade_offers } from './db/types/trade_offers';
 import { db_row_resolved_trade_offers } from './db/types/resolved_trade_offers';
 import { db_row_charity_items } from './db/types/charity_items';
+// #endregion
 
+// #region TYPES
 interface ToJson {
 	toJSON(): any;
 }
@@ -22,31 +25,7 @@ type BunFile = ReturnType<typeof Bun.file>;
 type HandlerReturnType = Resolvable<string | number | BunFile | Response | JsonSerializable | Blob>;
 
 type SessionRequestHandler = (req: Request, url: URL, client_id: number, json: JsonObject) => HandlerReturnType;
-
-const server = serve(Number(process.env.SERVER_PORT));
-
-const DEFAULT_USER_ICON_ID = 'melvorF:Fire_Acolyte_Wizard_Hat';
-const MAX_TRANSFER_ITEM_COUNT = 32;
-
-// maximum cache life is X * 2, minimum is X.
-const CACHE_SESSION_LIFETIME = 1000 * 60 * 60; // 1 hour
-
-// time between data cache sweeps
-const CACHE_RESET_INTERVAL = 1000 * 60 * 60 * 24; // 24 hours
-
-// time between players taking charity items
-const CHARITY_TIMEOUT = 1000 * 60 * 60 * 24; // 24 hours
-
 type CachedSession = { client_id: number, last_access: number };
-const client_session_cache = new Map<string, CachedSession>();
-
-const friend_request_cache = new Map<number, FriendRequest[]>();
-const gift_cache = new Map<number, number[]>();
-const display_name_cache = new Map<number, string>();
-
-const trade_cache = new Map<number, ActiveTrade>(); // trade_id to ActiveTrade
-const trade_player_cache = new Map<number, number[]>(); // client_id to trade_id[]
-const resolved_trade_cache = new Map<number, number[]>(); // client_id to trade_id[]
 
 type ActiveTrade = {
 	trade_id: number;
@@ -67,22 +46,37 @@ type TransferItem = {
 	id: string;
 	qty: number;
 }
+// #endregion
 
-function sweep_data_caches() {
+// #region CONSTANTS
+const DEFAULT_USER_ICON_ID = 'melvorF:Fire_Acolyte_Wizard_Hat';
+const MAX_TRANSFER_ITEM_COUNT = 32;
 
-	friend_request_cache.clear();
-	gift_cache.clear();
-	display_name_cache.clear();
+// maximum cache life is X * 2, minimum is X.
+const CACHE_SESSION_LIFETIME = 1000 * 60 * 60; // 1 hour
 
-	trade_cache.clear();
-	trade_player_cache.clear();
-	resolved_trade_cache.clear();
+// time between data cache sweeps
+const CACHE_RESET_INTERVAL = 1000 * 60 * 60 * 24; // 24 hours
 
-	setTimeout(sweep_data_caches, CACHE_RESET_INTERVAL);
-}
+// time between players taking charity items
+const CHARITY_TIMEOUT = 1000 * 60 * 60 * 24; // 24 hours
+// #endregion
 
-setTimeout(sweep_data_caches, CACHE_RESET_INTERVAL);
+// #region GLOBALS
+const server = serve(Number(process.env.SERVER_PORT));
 
+const client_session_cache = new Map<string, CachedSession>();
+
+const friend_request_cache = new Map<number, FriendRequest[]>();
+const gift_cache = new Map<number, number[]>();
+const display_name_cache = new Map<number, string>();
+
+const trade_cache = new Map<number, ActiveTrade>(); // trade_id to ActiveTrade
+const trade_player_cache = new Map<number, number[]>(); // client_id to trade_id[]
+const resolved_trade_cache = new Map<number, number[]>(); // client_id to trade_id[]
+// #endregion
+
+// #region COMMON FN
 function log(prefix: string, message: string, ...args: unknown[]): void {
 	let formatted_message = format('[{' + prefix + '}] ' + message, ...args);
 	formatted_message = formatted_message.replace(/\{([^}]+)\}/g, '\x1b[38;5;13m$1\x1b[0m');
@@ -98,69 +92,43 @@ function is_valid_uuid(uuid: string): boolean {
 	return uuid.length === 36 && /^[0-9a-f-]+$/.test(uuid);
 }
 
-async function is_friend_code_taken(friend_code: string): Promise<boolean> {
-	return db_exists('SELECT 1 FROM `clients` WHERE `friend_code` = ? LIMIT 1', [friend_code]);
+function remove_player_cache_entry(cache: Map<number, number[]>, client_id: number, item_id: number) {
+	const cached_entries = cache.get(client_id);
+	if (cached_entries)
+		cache.set(client_id, cached_entries.filter(e => e !== item_id));
 }
 
-function is_valid_friend_code(friend_code: string): boolean {
-	return /^[0-9]{3}-[0-9]{3}-[0-9]{3}$/.test(friend_code);
-}
+function validate_item_array(items: unknown, allow_modded = true) {
+	if (!Array.isArray(items))
+		return false;
 
-function validate_display_name(display_name: unknown): string {
-	if (typeof display_name === 'string') {
-		const trimmed = display_name.trim();
-		if (trimmed.length > 0 && trimmed.length <= 20)
-			return trimmed;
-	}
-	return 'Unknown Idler';
-}
+	for (const item of items) {
+		if (typeof item !== 'object' || item === null || Array.isArray(item))
+			return false;
 
-async function generate_friend_code(): Promise<string> {
-	const chunk = () => Math.floor(Math.random() * 900) + 100;
-	const code = () => chunk() + '-' + chunk() + '-' + chunk();
+		// @ts-ignore
+		if (typeof item.id !== 'string' || typeof item.qty !== 'number')
+			return false;
 
-	let generated_code = code();
-	while (await is_friend_code_taken(generated_code))
-		generated_code = code();
-
-	return generated_code;
-}
-
-async function generate_session_token(client_id: number): Promise<string> {
-	await db_execute('DELETE FROM `client_sessions` WHERE `client_id` = ?', [client_id]);
-
-	const session_token = crypto.randomUUID();
-	await db_execute('INSERT INTO `client_sessions` (`session_token`, `client_id`) VALUES(?, ?)', [session_token, client_id]);
-
-	return session_token;
-}
-
-async function get_user_id_from_friend_code(friend_code: string): Promise<number> {
-	const user_row = await db_get_single('SELECT `id` FROM `clients` WHERE `friend_code` = ?', [friend_code]) as db_row_clients;
-	return user_row?.id ?? -1;
-}
-
-async function get_session_client_id(session_token: unknown): Promise<number> {
-	if (typeof session_token !== 'string')
-		return -1;
-
-	const cached_session = client_session_cache.get(session_token);
-	if (cached_session !== undefined) {		
-		cached_session.last_access = Date.now();
-		return cached_session.client_id;
+		if (!allow_modded && !item.id.startsWith('melvor'))
+			return false;
 	}
 
-	const session_row = await db_get_single('SELECT `client_id` FROM `client_sessions` WHERE `session_token` = ?', [session_token]) as db_row_client_sessions;
-	const client_id = session_row?.client_id ?? -1;
+	return true;
+}
+// #endregion
 
-	if (client_id > -1) {
-		client_session_cache.set(session_token, {
-			client_id,
-			last_access: Date.now()
-		});
-	}
+// #region MAINTENANCE
+function sweep_data_caches() {
+	friend_request_cache.clear();
+	gift_cache.clear();
+	display_name_cache.clear();
 
-	return client_id;
+	trade_cache.clear();
+	trade_player_cache.clear();
+	resolved_trade_cache.clear();
+
+	setTimeout(sweep_data_caches, CACHE_RESET_INTERVAL);
 }
 
 function sweep_client_session_cache() {
@@ -174,6 +142,44 @@ function sweep_client_session_cache() {
 }
 
 setTimeout(sweep_client_session_cache, CACHE_SESSION_LIFETIME);
+setTimeout(sweep_data_caches, CACHE_RESET_INTERVAL);
+// #endregion
+
+// #region FRIEND CODE
+async function is_friend_code_taken(friend_code: string): Promise<boolean> {
+	return db_exists('SELECT 1 FROM `clients` WHERE `friend_code` = ? LIMIT 1', [friend_code]);
+}
+
+function is_valid_friend_code(friend_code: string): boolean {
+	return /^[0-9]{3}-[0-9]{3}-[0-9]{3}$/.test(friend_code);
+}
+
+async function generate_friend_code(): Promise<string> {
+	const chunk = () => Math.floor(Math.random() * 900) + 100;
+	const code = () => chunk() + '-' + chunk() + '-' + chunk();
+
+	let generated_code = code();
+	while (await is_friend_code_taken(generated_code))
+		generated_code = code();
+
+	return generated_code;
+}
+
+async function get_user_id_from_friend_code(friend_code: string): Promise<number> {
+	const user_row = await db_get_single('SELECT `id` FROM `clients` WHERE `friend_code` = ?', [friend_code]) as db_row_clients;
+	return user_row?.id ?? -1;
+}
+// #endregion
+
+// #region DISPLAY NAME FN
+function validate_display_name(display_name: unknown): string {
+	if (typeof display_name === 'string') {
+		const trimmed = display_name.trim();
+		if (trimmed.length > 0 && trimmed.length <= 20)
+			return trimmed;
+	}
+	return 'Unknown Idler';
+}
 
 async function get_client_display_name(client_id: number): Promise<string> {
 	const cached = display_name_cache.get(client_id);
@@ -188,7 +194,9 @@ async function get_client_display_name(client_id: number): Promise<string> {
 
 	return 'Unknown Idler';
 }
+// #endregion
 
+// #region FRIEND REQUESTS
 async function get_friend_requests(client_id: number): Promise<FriendRequest[]> {
 	const cached_entries = friend_request_cache.get(client_id);
 	if (cached_entries)
@@ -239,7 +247,9 @@ async function delete_friend_request(request: db_row_friend_requests) {
 
 	await db_execute('DELETE FROM `friend_requests` WHERE `request_id` = ?', [request.request_id]);
 }
+// #endregion
 
+// #region FRIENDS
 async function friendship_exists(client_id_a: number, client_id_b: number): Promise<boolean> {
 	return await db_exists('SELECT 1 FROM `friends` WHERE (`client_id_a` = ? AND `client_id_b` = ?) OR (`client_id_a` = ? AND `client_id_b` = ?)', [client_id_a, client_id_b, client_id_b, client_id_a]);
 }
@@ -255,19 +265,11 @@ async function get_friends(client_id: number) {
 async function delete_friend(client_id: number, friend_id: number) {
 	await db_execute('DELETE FROM `friends` WHERE (`client_id_a` = ? AND `client_id_b` = ?) OR (`client_id_a` = ? AND `client_id_b` = ?)', [client_id, friend_id, friend_id, client_id]);
 }
+// #endregion
 
-async function set_user_icon(client_id: number, icon_id: string) {
-	await db_execute('UPDATE `clients` SET `icon_id` = ? WHERE `id` = ?', [icon_id, client_id]);
-}
-
+// #region GIFT FN
 async function has_pending_gift(client_id: number, recipient_id: number) {
 	return await db_exists('SELECT 1 FROM `gifts` WHERE `client_id` = ? AND `sender_id` = ? LIMIT 1', [recipient_id, client_id]);
-}
-
-function remove_player_cache_entry(cache: Map<number, number[]>, client_id: number, item_id: number) {
-	const cached_entries = cache.get(client_id);
-	if (cached_entries)
-		cache.set(client_id, cached_entries.filter(e => e !== item_id));
 }
 
 async function send_gift(client_id: number, recipient_id: number, items: TransferItem[]) {
@@ -322,7 +324,9 @@ async function return_gift(gift: db_row_gifts) {
 		[gift.sender_id, gift.client_id, GiftFlags.Returned, gift.gift_id]
 	);
 }
+// #endregion
 
+// #region TRADE FN
 async function trade_exists(sender_id: number, recipient_id: number) {
 	return await db_exists('SELECT 1 FROM `trade_offers` WHERE `sender_id` = ? AND `recipient_id` = ? LIMIT 1', [sender_id, recipient_id]);
 }
@@ -386,24 +390,39 @@ async function get_client_resolved_trades(client_id: number) {
 
 	return trade_ids;
 }
+// #endregion
 
-function validate_item_array(items: unknown, allow_modded = true) {
-	if (!Array.isArray(items))
-		return false;
+// #region SESSIONS
+async function generate_session_token(client_id: number): Promise<string> {
+	await db_execute('DELETE FROM `client_sessions` WHERE `client_id` = ?', [client_id]);
 
-	for (const item of items) {
-		if (typeof item !== 'object' || item === null || Array.isArray(item))
-			return false;
+	const session_token = crypto.randomUUID();
+	await db_execute('INSERT INTO `client_sessions` (`session_token`, `client_id`) VALUES(?, ?)', [session_token, client_id]);
 
-		// @ts-ignore
-		if (typeof item.id !== 'string' || typeof item.qty !== 'number')
-			return false;
+	return session_token;
+}
 
-		if (!allow_modded && !item.id.startsWith('melvor'))
-			return false;
+async function get_session_client_id(session_token: unknown): Promise<number> {
+	if (typeof session_token !== 'string')
+		return -1;
+
+	const cached_session = client_session_cache.get(session_token);
+	if (cached_session !== undefined) {		
+		cached_session.last_access = Date.now();
+		return cached_session.client_id;
 	}
 
-	return true;
+	const session_row = await db_get_single('SELECT `client_id` FROM `client_sessions` WHERE `session_token` = ?', [session_token]) as db_row_client_sessions;
+	const client_id = session_row?.client_id ?? -1;
+
+	if (client_id > -1) {
+		client_session_cache.set(session_token, {
+			client_id,
+			last_access: Date.now()
+		});
+	}
+
+	return client_id;
 }
 
 function validate_session_request(handler: SessionRequestHandler, json_body: boolean = false) {
@@ -439,7 +458,9 @@ function session_get_route(route: string, handler: SessionRequestHandler) {
 function session_post_route(route: string, handler: SessionRequestHandler) {
 	server.route(route, validate_session_request(handler, true), 'POST');
 }
+// #endregion
 
+// #region ROUTES CHARITY
 session_get_route('/api/charity/contents', async (req, url, client_id) => {
 	return {
 		items: await db_get_all('SELECT `item_id` as `id`, `qty` FROM `charity_items` LIMIT 78')
@@ -479,7 +500,9 @@ session_post_route('/api/charity/donate', async (req, url, client_id, json) => {
 
 	return { success: true };
 });
+// #endregion
 
+// #region ROUTES TRANSFER
 session_post_route('/api/transfers/get_contents', async (req, url, client_id, json) => {
 	const gift_ids = json.gift_ids;
 	if (!Array.isArray(gift_ids))
@@ -553,7 +576,9 @@ session_post_route('/api/transfers/get_contents', async (req, url, client_id, js
 		resolved_trades: resolved_trade_results
 	} as JsonSerializable;
 });
+// #endregion
 
+// #region ROUTES TRADE
 session_post_route('/api/trade/resolve', async (req, url, client_id, json) => {
 	const trade_id = json.trade_id;
 	if (typeof trade_id !== 'number')
@@ -710,7 +735,9 @@ session_post_route('/api/trade/offer', async (req, url, client_id, json) => {
 	
 	return { success: true, trade_id } as JsonSerializable;
 });
+// #endregion
 
+// #region ROUTES GIFTING
 session_post_route('/api/gift/accept', async (req, url, client_id, json) => {
 	const gift_id = json.gift_id;
 	if (typeof gift_id !== 'number')
@@ -769,31 +796,9 @@ session_post_route('/api/gift/send', async (req, url, client_id, json) => {
 
 	return { success: true } as JsonSerializable;
 });
+// #endregion
 
-session_get_route('/api/events', async (req, url, client_id) => {
-	const trade_ids = await get_client_trades(client_id);
-	const trade_meta = [];
-
-	for (const trade_id of trade_ids) {
-		const meta = await get_trade_offer_meta(trade_id);
-		if (!meta)
-			continue;
-
-		trade_meta.push({
-			trade_id,
-			attending: meta.attending_id === client_id,
-			state: meta.state
-		});
-	}
-
-	return {
-		friend_requests: await get_friend_requests(client_id),
-		gifts: await get_client_gifts(client_id),
-		trades: trade_meta,
-		resolved_trades: await get_client_resolved_trades(client_id)
-	};
-});
-
+// #region ROUTES FRIENDS
 session_post_route('/api/friends/remove', async (req, url, client_id, json) => {
 	const friend_id = json.friend_id;
 	if (typeof friend_id !== 'number')
@@ -869,6 +874,32 @@ session_post_route('/api/friends/add', async (req, url, client_id, json) => {
 
 	return { success: true } as JsonSerializable;
 });
+// #endregion
+
+// #region ROUTES GENERAL
+session_get_route('/api/events', async (req, url, client_id) => {
+	const trade_ids = await get_client_trades(client_id);
+	const trade_meta = [];
+
+	for (const trade_id of trade_ids) {
+		const meta = await get_trade_offer_meta(trade_id);
+		if (!meta)
+			continue;
+
+		trade_meta.push({
+			trade_id,
+			attending: meta.attending_id === client_id,
+			state: meta.state
+		});
+	}
+
+	return {
+		friend_requests: await get_friend_requests(client_id),
+		gifts: await get_client_gifts(client_id),
+		trades: trade_meta,
+		resolved_trades: await get_client_resolved_trades(client_id)
+	};
+});
 
 session_post_route('/api/client/set_icon', async (req, url, client_id, json) => {
 	const icon_id = json.icon_id;
@@ -878,11 +909,13 @@ session_post_route('/api/client/set_icon', async (req, url, client_id, json) => 
 	if (!icon_id.startsWith('melvorF:') && !icon_id.startsWith('melvorD:'))
 		return 400; // Bad Request
 
-	await set_user_icon(client_id, icon_id);
+	await db_execute('UPDATE `clients` SET `icon_id` = ? WHERE `id` = ?', [icon_id, client_id]);
 
 	return { success: true };
 });
+// #endregion
 
+// #region ROUTES AUTH
 server.route('/api/authenticate', validate_req_json(async (req, url, json) => {
 	await Bun.sleep(1000);
 
@@ -930,7 +963,9 @@ server.route('/api/register', validate_req_json(async (req, url, json) => {
 	const session_token = await generate_session_token(client_id);
 	return { session_token, client_identifier, friend_code, icon_id: DEFAULT_USER_ICON_ID };
 }), 'POST');
+// #endregion
 
+// #region SERVER CONTROL
 // unhandled exceptions and rejections
 server.error((err: Error) => {
 	caution(err?.message ?? err);
@@ -952,3 +987,4 @@ if (typeof process.env.GH_WEBHOOK_SECRET === 'string') {
 } else {
 	caution('GH_WEBHOOK_SECRET environment variable not configured');
 }
+// #endregion
