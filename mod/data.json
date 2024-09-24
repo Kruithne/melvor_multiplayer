@@ -19,7 +19,7 @@
 			},
 			{
 				"id": "Charity_Tree",
-				"customName": "Charitree",
+				"customName": "The Charitree",
 				"media": "assets/charity_tree.svg",
 				"containerID": "kru-multiplayer-charity-page",
 				"headerBgClass": "kmm-charity-bg",
