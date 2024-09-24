@@ -2,18 +2,10 @@
 import { caution, serve, validate_req_json, HTTP_STATUS_CODE } from 'spooder';
 import { format } from 'node:util';
 import { db_get_single, db_execute, db_insert, db_exists, db_get_all } from './db';
-import { db_row_clients } from './db/types/clients';
-import { db_row_client_sessions } from './db/types/client_sessions';
 import type { JsonPrimitive, JsonArray, JsonObject } from 'spooder';
-import { db_row_friend_requests } from './db/types/friend_requests';
-import { db_row_gifts } from './db/types/gifts';
-import { db_row_gift_items } from './db/types/gift_items';
-import { db_row_trade_offers } from './db/types/trade_offers';
-import { db_row_resolved_trade_offers } from './db/types/resolved_trade_offers';
-import { db_row_charity_items } from './db/types/charity_items';
 import { AVAILABLE_CAMPAIGNS } from './campaign_data';
 import type { CampaignData } from './campaign_data';
-import { db_row_campaign_state } from './db/types/campaign_state';
+import type * as db_row from './db/types/db_types';
 // #endregion
 
 // #region TYPES
@@ -206,7 +198,7 @@ async function finalize_campaign() {
 }
 
 async function load_campaign_state() {
-	const state = await db_get_single('SELECT * FROM `campaign_state` LIMIT 1') as db_row_campaign_state;
+	const state = await db_get_single('SELECT * FROM `campaign_state` LIMIT 1') as db_row.campaign_state;
 	if (state === null)
 		return start_new_campaign();
 
@@ -262,7 +254,7 @@ async function generate_friend_code(): Promise<string> {
 }
 
 async function get_user_id_from_friend_code(friend_code: string): Promise<number> {
-	const user_row = await db_get_single('SELECT `id` FROM `clients` WHERE `friend_code` = ?', [friend_code]) as db_row_clients;
+	const user_row = await db_get_single('SELECT `id` FROM `clients` WHERE `friend_code` = ?', [friend_code]) as db_row.clients;
 	return user_row?.id ?? -1;
 }
 // #endregion
@@ -282,7 +274,7 @@ async function get_client_display_name(client_id: number): Promise<string> {
 	if (cached !== undefined)
 		return cached;
 
-	const client = await db_get_single('SELECT `display_name` FROM `clients` WHERE `id` = ?', [client_id]) as db_row_clients;
+	const client = await db_get_single('SELECT `display_name` FROM `clients` WHERE `id` = ?', [client_id]) as db_row.clients;
 	if (client !== null) {
 		display_name_cache.set(client_id, client.display_name);
 		return client.display_name;
@@ -298,7 +290,7 @@ async function get_friend_requests(client_id: number): Promise<FriendRequest[]> 
 	if (cached_entries)
 		return cached_entries;
 
-	const result = await db_get_all('SELECT `request_id`, `friend_id` FROM `friend_requests` WHERE `client_id` = ?', [client_id]) as db_row_friend_requests[];
+	const result = await db_get_all('SELECT `request_id`, `friend_id` FROM `friend_requests` WHERE `client_id` = ?', [client_id]) as db_row.friend_requests[];
 	const requests = [];
 
 	for (const row of result) {
@@ -326,11 +318,11 @@ async function create_friend_request(client_id: number, friend_id: number) {
 	});
 }
 
-async function get_friend_request(request_id: number): Promise<db_row_friend_requests> {
-	return await db_get_single('SELECT `request_id`, `client_id`, `friend_id` FROM `friend_requests` WHERE `request_id` = ?', [request_id]) as db_row_friend_requests;
+async function get_friend_request(request_id: number): Promise<db_row.friend_requests> {
+	return await db_get_single('SELECT `request_id`, `client_id`, `friend_id` FROM `friend_requests` WHERE `request_id` = ?', [request_id]) as db_row.friend_requests;
 }
 
-async function delete_friend_request(request: db_row_friend_requests) {
+async function delete_friend_request(request: db_row.friend_requests) {
 	if (request === null)
 		return;
 
@@ -378,11 +370,11 @@ async function send_gift(client_id: number, recipient_id: number, items: Transfe
 }
 
 async function get_gift(gift_id: number) {
-	return await db_get_single('SELECT * FROM `gifts` WHERE `gift_id` = ? LIMIT 1', [gift_id]) as db_row_gifts;
+	return await db_get_single('SELECT * FROM `gifts` WHERE `gift_id` = ? LIMIT 1', [gift_id]) as db_row.gifts;
 }
 
 async function get_gift_items(gift_id: number) {
-	return await db_get_all('SELECT `id`, `item_id`, `qty` FROM `gift_items` WHERE `gift_id` = ?', [gift_id]) as db_row_gift_items[];
+	return await db_get_all('SELECT `id`, `item_id`, `qty` FROM `gift_items` WHERE `gift_id` = ?', [gift_id]) as db_row.gift_items[];
 }
 
 async function get_client_gifts(client_id: number) {
@@ -390,7 +382,7 @@ async function get_client_gifts(client_id: number) {
 	if (cached_entries)
 		return cached_entries;
 
-	const result = await db_get_all('SELECT `gift_id` FROM `gifts` WHERE `client_id` = ?', [client_id]) as db_row_gifts[];
+	const result = await db_get_all('SELECT `gift_id` FROM `gifts` WHERE `client_id` = ?', [client_id]) as db_row.gifts[];
 	const gift_ids = result.map(row => row?.gift_id) as number[];
 
 	gift_cache.set(client_id, gift_ids);
@@ -398,7 +390,7 @@ async function get_client_gifts(client_id: number) {
 	return gift_ids;
 }
 
-async function delete_gift(gift: db_row_gifts) {
+async function delete_gift(gift: db_row.gifts) {
 	if (!gift)
 		return;
 
@@ -408,7 +400,7 @@ async function delete_gift(gift: db_row_gifts) {
 	await db_execute('DELETE FROM `gift_items` WHERE `gift_id` = ?', [gift.gift_id]);
 }
 
-async function return_gift(gift: db_row_gifts) {
+async function return_gift(gift: db_row.gifts) {
 	if (!gift)
 		return;
 
@@ -432,7 +424,7 @@ async function get_client_trades(client_id: number) {
 	if (cached_entries)
 		return cached_entries;
 
-	const result = await db_get_all('SELECT `trade_id` FROM `trade_offers` WHERE `sender_id` = ? OR `recipient_id` = ?', [client_id, client_id]) as db_row_trade_offers[];
+	const result = await db_get_all('SELECT `trade_id` FROM `trade_offers` WHERE `sender_id` = ? OR `recipient_id` = ?', [client_id, client_id]) as db_row.trade_offers[];
 	const trade_ids = result.map(row => row?.trade_id) as number[];
 
 	trade_player_cache.set(client_id, trade_ids);
@@ -445,7 +437,7 @@ async function get_trade_offer_meta(trade_id: number) {
 	if (cached)
 		return cached;
 
-	const result = await db_get_single('SELECT `attending_id`, `state` FROM `trade_offers` WHERE `trade_id` = ?', [trade_id]) as db_row_trade_offers;
+	const result = await db_get_single('SELECT `attending_id`, `state` FROM `trade_offers` WHERE `trade_id` = ?', [trade_id]) as db_row.trade_offers;
 
 	if (result)
 		trade_cache.set(trade_id, result as ActiveTrade);
@@ -454,15 +446,15 @@ async function get_trade_offer_meta(trade_id: number) {
 }
 
 async function get_trade_offer(trade_id: number) {
-	return await db_get_single('SELECT * FROM `trade_offers` WHERE `trade_id` = ? LIMIT 1', [trade_id]) as db_row_trade_offers;
+	return await db_get_single('SELECT * FROM `trade_offers` WHERE `trade_id` = ? LIMIT 1', [trade_id]) as db_row.trade_offers;
 }
 
 async function get_resolved_trade_offer(trade_id: number) {
-	return await db_get_single('SELECT * FROM `resolved_trade_offers` WHERE `trade_id` = ? LIMIT 1', [trade_id]) as db_row_resolved_trade_offers;
+	return await db_get_single('SELECT * FROM `resolved_trade_offers` WHERE `trade_id` = ? LIMIT 1', [trade_id]) as db_row.resolved_trade_offers;
 }
 
 async function get_trade_items(trade_id: number) {
-	return await db_get_all('SELECT `id`, `item_id`, `qty`, `counter` FROM `trade_items` WHERE `trade_id` = ?', [trade_id]) as db_row_gift_items[];
+	return await db_get_all('SELECT `id`, `item_id`, `qty`, `counter` FROM `trade_items` WHERE `trade_id` = ?', [trade_id]) as db_row.gift_items[];
 }
 
 async function create_resolved_trade(trade_id: number, client_id: number, sender_id: number, declined: boolean) {
@@ -479,7 +471,7 @@ async function get_client_resolved_trades(client_id: number) {
 	if (cached_entries)
 		return cached_entries;
 
-	const result = await db_get_all('SELECT `trade_id` FROM `resolved_trade_offers` WHERE `client_id` = ?', [client_id]) as db_row_resolved_trade_offers[];
+	const result = await db_get_all('SELECT `trade_id` FROM `resolved_trade_offers` WHERE `client_id` = ?', [client_id]) as db_row.resolved_trade_offers[];
 	const trade_ids = result.map(row => row?.trade_id) as number[];
 
 	resolved_trade_cache.set(client_id, trade_ids);
@@ -508,7 +500,7 @@ async function get_session_client_id(session_token: unknown): Promise<number> {
 		return cached_session.client_id;
 	}
 
-	const session_row = await db_get_single('SELECT `client_id` FROM `client_sessions` WHERE `session_token` = ?', [session_token]) as db_row_client_sessions;
+	const session_row = await db_get_single('SELECT `client_id` FROM `client_sessions` WHERE `session_token` = ?', [session_token]) as db_row.client_sessions;
 	const client_id = session_row?.client_id ?? -1;
 
 	if (client_id > -1) {
@@ -589,7 +581,7 @@ session_post_route('/api/charity/take', async (req, url, client_id, json) => {
 		return 400; // Bad Request
 
 	const current_time = Date.now();
-	const client_row = await db_get_single('SELECT `last_charity`, `last_bonus_charity` FROM `clients` WHERE `id` = ?', [client_id]) as db_row_clients;
+	const client_row = await db_get_single('SELECT `last_charity`, `last_bonus_charity` FROM `clients` WHERE `id` = ?', [client_id]) as db_row.clients;
 	if (client_row === null)
 		return 400; // Bad Request
 
@@ -599,7 +591,7 @@ session_post_route('/api/charity/take', async (req, url, client_id, json) => {
 	if (last_charity_cooling_down && last_charity_bonus_cooling_down)
 		return { error_lang: 'MOD_KMM_CHARITY_TIMEOUT', timeout: client_row.last_charity, timeout_bonus: client_row.last_bonus_charity };
 
-	const item_entry = await db_get_single('SELECT `qty` FROM `charity_items` WHERE `item_id` = ?', [item_id]) as db_row_charity_items;
+	const item_entry = await db_get_single('SELECT `qty` FROM `charity_items` WHERE `item_id` = ?', [item_id]) as db_row.charity_items;
 	if (item_entry === null)
 		return { error_lang: 'MOD_KMM_CHARITY_TAKEN' };
 
@@ -1060,7 +1052,7 @@ server.route('/api/authenticate', validate_req_json(async (req, url, json) => {
 	if (!is_valid_uuid(client_identifier) || !is_valid_uuid(client_key))
 		return 400; // Bad Request
 
-	const client_row = await db_get_single('SELECT `id`, `client_key`, `icon_id` FROM `clients` WHERE `client_identifier` = ? LIMIT 1', [client_identifier]) as db_row_clients;
+	const client_row = await db_get_single('SELECT `id`, `client_key`, `icon_id` FROM `clients` WHERE `client_identifier` = ? LIMIT 1', [client_identifier]) as db_row.clients;
 	if (client_row === null || client_row.client_key !== client_key)
 		return 401; // Unauthorized
 
