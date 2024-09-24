@@ -102,6 +102,14 @@
 	"MOD_KMM_CAMPAIGN_NONE": "No Active Campaign",
 	"MOD_KMM_CAMPAIGN_NEXT": "Next Campaign Starts In %s",
 
+	"MOD_KMM_CAMPAIGN_NAME_JUNGLE": "The Jungle Expedition",
+	"MOD_KMM_CAMPAIGN_NAME_DESERT": "Plunder of the Sands",
+	"MOD_KMM_CAMPAIGN_NAME_SNOW": "The Frozen Frontier",
+	"MOD_KMM_CAMPAIGN_NAME_FORSAKEN": "The Forsaken Battlefront",
+	"MOD_KMM_CAMPAIGN_NAME_VOLCANIC": "Volcanic Plateau",
+	"MOD_KMM_CAMPAIGN_NAME_FOREST": "Woodland Encroachment",
+	"MOD_KMM_CAMPAIGN_NAME_UNKNOWN": "Into the Unknown",
+
 	"MOD_KMM_PET_NAME_CHARITY": "Spirit of Charity",
 
 	"MOD_KMM_PET_DESC_CHARITY": "Take 1 extra item per day from The Charitree",

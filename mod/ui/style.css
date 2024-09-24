@@ -195,3 +195,8 @@
 	flex-direction: column;
 	gap: 10px;
 }
+
+.kmm-campaign-border {
+	border: 5px solid #acacac;
+	border-radius: 5px;
+}

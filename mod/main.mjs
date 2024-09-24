@@ -30,6 +30,8 @@ let is_connecting = false;
 let is_updating_charity_tree = false;
 let last_charity_check = 0;
 
+let campaign_data = {};
+
 const skill_pets = new Map();
 // #endregion
 
@@ -180,6 +182,33 @@ const state = ui.createStore({
 		state.hide_online_dropdown();
 		start_multiplayer_session();
 	},
+	// #endregion
+
+	// #region CAMPAIGN ACTIONS
+	get_campaign_svg(id) {
+		return this.get_svg(campaign_data[id]?.asset ?? 'campaign_placeholder')
+	},
+
+	get_current_campaign_svg() {
+		return this.get_campaign_svg(this.campaign_id)
+	},
+
+	get_campaign_title(id) {
+		return getLangString(campaign_data[id]?.name_lang ?? 'MOD_KMM_CAMPAIGN_NAME_UNKNOWN');
+	},
+
+	get_current_campaign_title() {
+		return this.get_campaign_title(this.campaign_id);
+	},
+
+	get_campaign_color(id) {
+		return campaign_data[id]?.color_code ?? '#acacac';
+	},
+
+	get_current_campaign_color() {
+		return this.get_campaign_color(this.campaign_id);
+	},
+
 	// #endregion
 
 	// #region CHARITY ACTIONS
@@ -846,6 +875,10 @@ async function update_campaign_info() {
 		state.campaign_loading = false;
 	}
 }
+
+async function load_campaign_data(ctx) {
+	campaign_data = await ctx.loadData('data/campaigns.json');
+}
 // #endregion
 
 // #region PET FUNCTIONS
@@ -1122,6 +1155,8 @@ export async function setup(ctx) {
 
 	await load_pets(ctx);
 	await ctx.gameData.addPackage('data.json');
+
+	load_campaign_data(ctx);
 
 	ctx.onCharacterLoaded(() => {
 		start_multiplayer_session();

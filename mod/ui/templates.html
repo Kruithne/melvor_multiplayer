@@ -245,13 +245,13 @@
 			</div>
 		</div>
 		<div class="row row-deck gutters-tiny" v-else>
-			<div class="block block-rounded block-link-pop w-100">
+			<div class="block block-rounded block-link-pop w-100 kmm-campaign-border" :style="{ 'border-color': state.get_current_campaign_color() }">
 				<div class="row row-deck gutters-tiny">
 					<div class="p-3">
 						<div class="kmm-campaign-active">
-							<img class="mr-1" :src="state.get_svg('campaign_placeholder')">
+							<img class="mr-1" :src="state.get_current_campaign_svg()">
 							<h4 class="font-w600">
-								<lang-string-f lang-id="MOD_KMM_CAMPAIGN_CURRENT" :lang-arg-1="state.campaign_id"></lang-string-f>
+								<lang-string-f lang-id="MOD_KMM_CAMPAIGN_CURRENT" :lang-arg-1="state.get_current_campaign_title()"></lang-string-f>
 							</h4>
 						</div>
 					</div>
