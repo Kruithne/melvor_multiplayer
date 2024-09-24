@@ -1,3 +1,4 @@
+// #region CONSTANTS
 const SERVER_HOST = 'https://melvormultiplayer.net';
 const LOG_PREFIX = '[multiplayer] ';
 
@@ -15,25 +16,25 @@ const DEV_CHARACTER_STORAGE = {
 };
 
 const TRANSFER_INVENTORY_MAX_LIMIT = 32;
-
 const GIFT_FLAG_RETURNED = 1 << 0;
+const CHARITY_TIMEOUT = 1000 * 60 * 60 * 24; // 24 hours
+const CHARITY_CHECK_TIMEOUT = 10 * 1000; // 10 seconds
+// #endregion
+
+// #region GLOBALS
+const ctx = mod.getContext(import.meta);
 
 let session_token = null;
 let is_connecting = false;
-
-// time between players taking charity items
-const CHARITY_TIMEOUT = 1000 * 60 * 60 * 24; // 24 hours
-
-// time between charity content checks.
-const CHARITY_CHECK_TIMEOUT = 10 * 1000; // 10 seconds
 
 let is_updating_charity_tree = false;
 let last_charity_check = 0;
 
 const skill_pets = new Map();
+// #endregion
 
-const ctx = mod.getContext(import.meta);
 const state = ui.createStore({
+	// #region REACTIVE GLOBALS
 	TRANSFER_INVENTORY_MAX_LIMIT,
 
 	is_connected: false,
@@ -69,7 +70,9 @@ const state = ui.createStore({
 	available_icons: [],
 
 	friends: [],
+	// #endregion
 
+	// #region COMPUTED PROPS
 	get sorted_trades() {
 		return this.trades.sort((a, b) => a.attending === b.attending ? 0 : a.attending ? -1 : 1);
 	},
@@ -118,7 +121,45 @@ const state = ui.createStore({
 	get can_take_charity() {
 		return state.charity_timeout + CHARITY_TIMEOUT < state.charity_update_time;
 	},
+	// #endregion
 
+	// #region COMMON ACTIONS
+	get_svg(id) {
+		return ctx.getResourceUrl('assets/' + id + '.svg');
+	},
+
+	get_svg_url(id) {
+		return 'url(' + this.get_svg(id) + ')';
+	},
+
+	get_item_icon(id) {
+		if (id === 'melvorD:GP')
+			return game.gp.media;
+
+		const item = game.items.getObjectByID(id);
+		return item?.media ?? 'assets/media/main/question.png';
+	},
+
+	close_modal() {
+		Swal.close();
+	},
+
+	toggle_online_dropdown() {
+		const class_list = state.$dropdown_menu.classList;
+		class_list.toggle('show');
+	},
+
+	hide_online_dropdown() {
+		state.$dropdown_menu.classList.remove('show');
+	},
+
+	reconnect() {
+		state.hide_online_dropdown();
+		start_multiplayer_session();
+	},
+	// #endregion
+
+	// #region CHARITY ACTIONS
 	async charity_take_item(event) {
 		const item = this.charity_tree_inventory.find(e => e.id === state.selected_charity_item_id);
 		if (!item)
@@ -146,6 +187,32 @@ const state = ui.createStore({
 		hide_button_spinner($button);
 	},
 
+	async donate_items(event) {
+		const items = state.transfer_inventory;
+
+		if (items.length === 0)
+			return notify_error('MOD_KMM_CHARITY_NO_SELECTION');
+
+		for (const item of items) {
+			if (!item.id.startsWith('melvor'))
+				return notify_error('MOD_KMM_CHARITY_MODDED_ITEM');
+		}
+
+		const $button = event.currentTarget;
+		show_button_spinner($button);
+
+		const res = await api_post('/api/charity/donate', { items });
+		if (res?.success) {
+			state.transfer_inventory = [];
+			last_charity_check = 0;
+			notify('MOD_KMM_CHARITY_DONATED');
+		}
+
+		hide_button_spinner($button);
+	},
+	// #endregion
+
+	// #region TRADE ACTIONS
 	create_trade() {
 		if (state.transfer_inventory.length > 0) {
 			queue_modal('MOD_KMM_TITLE_SEND_TRADE_OFFER', 'create-trade-modal', 'assets/transfer_bag.svg', {
@@ -175,193 +242,6 @@ const state = ui.createStore({
 
 			update_transfer_contents();
 		}
-	},
-
-	is_returned_gift(gift) {
-		return (gift.data.flags & GIFT_FLAG_RETURNED) !== 0;
-	},
-
-	get_transfer_value(transfer) {
-		if (transfer.data === null)
-			return '...';
-
-		let total_value = 0;
-
-		for (const entry of transfer.data.items) {
-			const item = game.items.getObjectByID(entry.item_id);
-			if (item?.sellsFor.currency === game.gp)
-				total_value += game.bank.getItemSalePrice(item, entry.qty);
-		}
-
-		return game.gp.formatAmount(numberWithCommas(total_value));
-	},
-
-	async add_gp_to_transfer() {
-		add_gp_to_transfer(state.add_gp_value);
-		this.close_modal();
-	},
-
-	async resolve_gift(event, gift_id, accept) {
-		const $button = event.currentTarget;
-
-		const gift = this.gifts.find(g => g.id === gift_id);
-		if (gift === undefined)
-			return notify_error('MOD_KMM_GENERIC_ERR');
-
-		show_button_spinner($button);
-
-		const res = await api_post(accept ? '/api/gift/accept' : '/api/gift/decline', { gift_id });
-		hide_button_spinner($button);
-
-		if (res?.success) {
-			if (accept) {
-				for (const item of gift.data.items) {
-					const check_item = game.items.getObjectByID(item.item_id);
-					if (check_item)
-						add_bank_item(item.item_id, item.qty);
-				}
-			}
-
-			this.gifts = this.gifts.filter(g => g.id !== gift_id);
-		} else {
-			notify_error('MOD_KMM_GENERIC_ERR');
-		}
-	},
-
-	get_svg(id) {
-		return ctx.getResourceUrl('assets/' + id + '.svg');
-	},
-
-	get_svg_url(id) {
-		return 'url(' + this.get_svg(id) + ')';
-	},
-
-	get_item_icon(id) {
-		if (id === 'melvorD:GP')
-			return game.gp.media;
-
-		const item = game.items.getObjectByID(id);
-		return item?.media ?? 'assets/media/main/question.png';
-	},
-
-	close_modal() {
-		Swal.close();
-	},
-
-	pick_icon(icon) {
-		this.picked_icon = icon.id;
-
-		const $image = document.querySelector('.swal2-image');
-
-		if ($image)
-			$image.src = icon.media;
-	},
-
-	async confirm_icon_pick(event) {
-		show_button_spinner(event.currentTarget);
-
-		const res = await api_post('/api/client/set_icon', { icon_id: this.picked_icon });
-		if (res?.success)
-			this.profile_icon = this.picked_icon;
-
-		this.close_modal();
-	},
-
-	open_transfer_data_page() {
-		state.hide_online_dropdown();
-		changePage(game.pages.getObjectByID('kru_melvor_multiplayer:Transfer_Items'));
-	},
-
-	toggle_online_dropdown() {
-		const class_list = state.$dropdown_menu.classList;
-		class_list.toggle('show');
-	},
-
-	hide_online_dropdown() {
-		state.$dropdown_menu.classList.remove('show');
-	},
-
-	reconnect() {
-		state.hide_online_dropdown();
-		start_multiplayer_session();
-	},
-
-	show_add_gp_modal() {
-		queue_modal('MOD_KMM_TITLE_ADD_GP', 'add-gp-modal', 'assets/media/main/coins.png', {
-			showConfirmButton: false
-		}, true, false);
-	},
-
-	show_icon_modal() {
-		this.hide_online_dropdown();
-		setup_icons();
-
-		state.picked_icon = '';
-
-		queue_modal(game.characterName, 'change-icon-modal', game.items.getObjectByID(state.profile_icon).media, {
-			showConfirmButton: false
-		}, false, false);
-	},
-
-	async accept_friend_request(event, request) {
-		const $button = event.currentTarget;
-		show_button_spinner($button);
-
-		const res = await api_post('/api/friends/accept', {
-			request_id: request.request_id
-		});
-
-		hide_button_spinner($button);
-
-		if (res?.success === true) {
-			state.events.friend_requests.splice(state.events.friend_requests.indexOf(request), 1);
-
-			if (res.friend)
-				state.friends.push(res.friend);
-		} else {
-			notify_error('MOD_KMM_GENERIC_ERR');
-		}
-	},
-
-	async ignore_friend_request(event, request) {
-		const $button = event.currentTarget;
-		show_button_spinner($button);
-
-		const res = await api_post('/api/friends/ignore', {
-			request_id: request.request_id
-		});
-
-		hide_button_spinner($button);
-
-		if (res?.success === true) {
-			state.events.friend_requests.splice(state.events.friend_requests.indexOf(request), 1);
-		} else {
-			notify_error('MOD_KMM_GENERIC_ERR');
-		}
-	},
-
-	async donate_items(event) {
-		const items = state.transfer_inventory;
-
-		if (items.length === 0)
-			return notify_error('MOD_KMM_CHARITY_NO_SELECTION');
-
-		for (const item of items) {
-			if (!item.id.startsWith('melvor'))
-				return notify_error('MOD_KMM_CHARITY_MODDED_ITEM');
-		}
-
-		const $button = event.currentTarget;
-		show_button_spinner($button);
-
-		const res = await api_post('/api/charity/donate', { items });
-		if (res?.success) {
-			state.transfer_inventory = [];
-			last_charity_check = 0;
-			notify('MOD_KMM_CHARITY_DONATED');
-		}
-
-		hide_button_spinner($button);
 	},
 
 	get_trade_items_value(items) {
@@ -513,6 +393,39 @@ const state = ui.createStore({
 			notify_error('MOD_KMM_GENERIC_ERR');
 		}
 	},
+	// #endregion
+
+	// #region GIFT ACTIONS
+	is_returned_gift(gift) {
+		return (gift.data.flags & GIFT_FLAG_RETURNED) !== 0;
+	},
+
+	async resolve_gift(event, gift_id, accept) {
+		const $button = event.currentTarget;
+
+		const gift = this.gifts.find(g => g.id === gift_id);
+		if (gift === undefined)
+			return notify_error('MOD_KMM_GENERIC_ERR');
+
+		show_button_spinner($button);
+
+		const res = await api_post(accept ? '/api/gift/accept' : '/api/gift/decline', { gift_id });
+		hide_button_spinner($button);
+
+		if (res?.success) {
+			if (accept) {
+				for (const item of gift.data.items) {
+					const check_item = game.items.getObjectByID(item.item_id);
+					if (check_item)
+						add_bank_item(item.item_id, item.qty);
+				}
+			}
+
+			this.gifts = this.gifts.filter(g => g.id !== gift_id);
+		} else {
+			notify_error('MOD_KMM_GENERIC_ERR');
+		}
+	},
 
 	gift_friend() {
 		if (state.transfer_inventory.length > 0) {
@@ -563,7 +476,126 @@ const state = ui.createStore({
 		notify('MOD_KMM_NOTIF_GIFT_SENT');
 		state.close_modal();
 	},
+	// #endregion
 
+	// #region TRANSFER ACTIONS
+	get_transfer_value(transfer) {
+		if (transfer.data === null)
+			return '...';
+
+		let total_value = 0;
+
+		for (const entry of transfer.data.items) {
+			const item = game.items.getObjectByID(entry.item_id);
+			if (item?.sellsFor.currency === game.gp)
+				total_value += game.bank.getItemSalePrice(item, entry.qty);
+		}
+
+		return game.gp.formatAmount(numberWithCommas(total_value));
+	},
+
+	open_transfer_data_page() {
+		state.hide_online_dropdown();
+		changePage(game.pages.getObjectByID('kru_melvor_multiplayer:Transfer_Items'));
+	},
+
+	async add_gp_to_transfer() {
+		add_gp_to_transfer(state.add_gp_value);
+		this.close_modal();
+	},
+
+	show_add_gp_modal() {
+		queue_modal('MOD_KMM_TITLE_ADD_GP', 'add-gp-modal', 'assets/media/main/coins.png', {
+			showConfirmButton: false
+		}, true, false);
+	},
+
+	transfer_return_selected() {
+		return_selected_transfer_inventory();
+	},
+
+	transfer_return_all() {
+		return_all_transfer_inventory();
+	},
+	// #endregion
+
+	// #region ICON PICK ACTIONS
+	pick_icon(icon) {
+		this.picked_icon = icon.id;
+
+		const $image = document.querySelector('.swal2-image');
+
+		if ($image)
+			$image.src = icon.media;
+	},
+
+	async confirm_icon_pick(event) {
+		show_button_spinner(event.currentTarget);
+
+		const res = await api_post('/api/client/set_icon', { icon_id: this.picked_icon });
+		if (res?.success)
+			this.profile_icon = this.picked_icon;
+
+		this.close_modal();
+	},
+
+	show_icon_modal() {
+		this.hide_online_dropdown();
+		setup_icons();
+
+		state.picked_icon = '';
+
+		queue_modal(game.characterName, 'change-icon-modal', game.items.getObjectByID(state.profile_icon).media, {
+			showConfirmButton: false
+		}, false, false);
+	},
+	// #endregion
+
+	// #region FRIEND REQ ACTIONS
+	async accept_friend_request(event, request) {
+		const $button = event.currentTarget;
+		show_button_spinner($button);
+
+		const res = await api_post('/api/friends/accept', {
+			request_id: request.request_id
+		});
+
+		hide_button_spinner($button);
+
+		if (res?.success === true) {
+			state.events.friend_requests.splice(state.events.friend_requests.indexOf(request), 1);
+
+			if (res.friend)
+				state.friends.push(res.friend);
+		} else {
+			notify_error('MOD_KMM_GENERIC_ERR');
+		}
+	},
+
+	async ignore_friend_request(event, request) {
+		const $button = event.currentTarget;
+		show_button_spinner($button);
+
+		const res = await api_post('/api/friends/ignore', {
+			request_id: request.request_id
+		});
+
+		hide_button_spinner($button);
+
+		if (res?.success === true) {
+			state.events.friend_requests.splice(state.events.friend_requests.indexOf(request), 1);
+		} else {
+			notify_error('MOD_KMM_GENERIC_ERR');
+		}
+	},
+
+	show_friend_request_modal() {
+		state.hide_online_dropdown();
+		queue_modal('MOD_KMM_TITLE_FRIEND_REQUESTS', 'friend-request-modal');
+	},
+	// #endregion
+
+	// #region FRIEND LIST ACTIONS
 	remove_friend_prompt(friend) {
 		this.close_modal();
 
@@ -592,12 +624,9 @@ const state = ui.createStore({
 		state.hide_online_dropdown();
 		queue_modal('MOD_KMM_TITLE_FRIENDS', 'friends-modal');
 	},
+	// #endregion
 
-	show_friend_request_modal() {
-		state.hide_online_dropdown();
-		queue_modal('MOD_KMM_TITLE_FRIEND_REQUESTS', 'friend-request-modal');
-	},
-
+	// #region FRIEND ACTIONS
 	show_friend_code_modal() {
 		state.hide_online_dropdown();
 		state.friend_code = get_character_storage_item('friend_code');
@@ -645,30 +674,10 @@ const state = ui.createStore({
 		notify('MOD_KMM_NOTIF_FRIEND_REQ_SENT');
 		state.close_modal();
 	},
-
-	transfer_return_selected() {
-		return_selected_transfer_inventory();
-	},
-
-	transfer_return_all() {
-		return_all_transfer_inventory();
-	}
+	// #endregion
 });
 
-function has_pet_by_id(pet_id) {
-	return game.petManager.unlocked.has(skill_pets.get(pet_id));
-}
-
-function setup_icons() {
-	if (state.available_icons.length === 0) {
-		const namespace_maps = game.items.namespaceMaps;
-		state.available_icons = [...namespace_maps.get('melvorF'), ...namespace_maps.get('melvorD')].map(e => {
-			const item = e[1];
-			return {id: item.id, search_name: item.name.toLowerCase(), media: item.media };
-		});
-	}
-}
-
+// #region COMMON FUNCTIONS
 function queue_modal(title_lang, template_id, image_url = 'assets/multiplayer.svg', data = {}, localize_title = true, get_image = true) {
 	addModalToQueue(Object.assign({
 		title: localize_title ? getLangString(title_lang) : title_lang,
@@ -735,34 +744,55 @@ function error(message, ...params) {
 	console.error(LOG_PREFIX + message, ...params);
 }
 
-/** Patches the global fetchLanguageJSON() fn so we can load and inject our own
- * translations. This is a hackfix because I couldn't find a way for mods to load
- * their own translations via data. */
-async function patch_localization(ctx) {
-	const lang_supported = ['en'];
-
-	const fetch_mod_localization = async (lang) => {
-		const fetch_lang = lang_supported.includes(lang) ? lang : 'en';
-
-		try {
-			const patch_lang = await ctx.loadData('data/lang/' + fetch_lang + '.json');
-			for (const [key, value] of Object.entries(patch_lang))
-				loadedLangJson[key] = value;
-		} catch (e) {
-			error('Failed to patch localization for %s (%s)', fetch_lang, e);
-		}
-	};
-
-	const orig_fetchLanguageJSON = globalThis.fetchLanguageJSON;
-	globalThis.fetchLanguageJSON = async (lang) => {
-		await orig_fetchLanguageJSON(lang);
-		await fetch_mod_localization(lang);
-	}
-
-	if (loadedLangJson !== undefined)
-		await fetch_mod_localization(setLang);
+function add_bank_item(item_id, amount) {
+	if (item_id === 'melvorD:GP')
+		game.gp.add(amount);
+	else
+		game.bank.addItemByID(item_id, amount, false, false, true);
 }
 
+function get_character_storage_item(key) {
+	if (IS_DEV_MODE)
+		return DEV_CHARACTER_STORAGE[key];
+
+	return ctx.characterStorage.getItem(key);
+}
+
+function set_character_storage_item(key, value) {
+	if (IS_DEV_MODE)
+		DEV_CHARACTER_STORAGE[key] = value;
+	else
+		ctx.characterStorage.setItem(key, value);
+}
+// #endregion
+
+// #region PET FUNCTIONS
+async function load_pets(ctx) {
+	const pets = await ctx.loadData('data/pets.json');
+	
+	ctx.gameData.buildPackage(pkg => {
+		for (const pet of pets) {
+			pet.name = getLangString(pet.name);
+			pet.hint = getLangString(pet.hint);
+
+			pkg.pets.add(pet);
+		}
+	}).add();
+
+	// Providing customDescription to pets does not appear to work, so we hack it in.
+	for (const pet of pets) {
+		const pet_obj = game.pets.getObjectByID('kru_melvor_multiplayer:' + pet.id);
+		pet_obj._customDescription = getLangString(pet.customDescription);
+		skill_pets.set(pet.id, pet_obj);
+	}
+}
+
+function has_pet_by_id(pet_id) {
+	return game.petManager.unlocked.has(skill_pets.get(pet_id));
+}
+// #endregion
+
+// #region CHARITY FUNCTIONS
 async function request_charity_tree_contents() {
 	if (is_updating_charity_tree)
 		return;
@@ -798,6 +828,262 @@ function setup_charity_tree() {
 		attributes: true,
 		attributeFilter: ['class']
 	});
+}
+// #endregion
+
+// #region TRANSFER FUNCTIONS
+async function update_transfer_contents() {
+	if (state.is_updating_transfer_contents)
+		return;
+
+	state.is_updating_transfer_contents = true;
+
+	const missing_gifts = state.gifts.filter(gift => gift.data === null).map(gift => gift.id);
+	const missing_trades = state.trades.filter(trade => trade.data === null).map(trade => trade.trade_id);
+	const missing_resolved_trades = state.resolved_trades.filter(trade => trade.data === null).map(trade => trade.trade_id);
+
+	if (missing_gifts.length > 0 || missing_trades.length > 0 || missing_resolved_trades.length > 0) {
+		const res = await api_post('/api/transfers/get_contents', {
+			gift_ids: missing_gifts,
+			trade_ids: missing_trades,
+			resolved_trade_ids: missing_resolved_trades
+		});
+
+		if (res !== null) {
+			for (const gift of state.gifts) {
+				const gift_data = res.gifts[gift.id];
+				if (gift_data)
+					gift.data = gift_data;
+			}
+
+			for (const trade of state.trades) {
+				const trade_data = res.trades[trade.trade_id];
+				if (trade_data)
+					trade.data = trade_data;
+			}
+
+			for (const trade of state.resolved_trades) {
+				const trade_data = res.resolved_trades[trade.trade_id];
+				if (trade_data)
+					trade.data = trade_data;
+			}
+		}
+	}
+
+	state.is_updating_transfer_contents = false;
+}
+
+function return_all_transfer_inventory() {
+	for (const entry of state.transfer_inventory)
+		add_bank_item(entry.id, entry.qty);
+
+	state.transfer_inventory = [];
+	update_transfer_inventory_nav();
+}
+
+function return_selected_transfer_inventory() {
+	const selected_id = state.selected_transfer_item_id;
+	if (selected_id.length > 0) {
+		const entry = state.transfer_inventory.find(e => e.id === selected_id);
+		if (entry) {
+			add_bank_item(selected_id, entry.qty);
+			state.transfer_inventory = state.transfer_inventory.filter(e => e.id !== selected_id);
+
+			update_transfer_inventory_nav();
+		}
+	} else {
+		notify_error('MOD_KMM_TRANSFER_NO_ITEM_SELECTED');
+	}
+}
+
+function update_transfer_inventory_nav() {
+	const aside = document.querySelector('.kmm-transfer-nav');
+	aside.textContent = state.transfer_inventory.length + ' / ' + TRANSFER_INVENTORY_MAX_LIMIT;
+	aside.classList.toggle('text-danger', state.transfer_inventory.length >= TRANSFER_INVENTORY_MAX_LIMIT);
+}
+
+function add_gp_to_transfer(amount) {
+	if (game.gp.amount < amount)
+		return notify_error('MOD_KMM_INSUFFICIENT_GP_ERR');
+
+	const existing_entry = state.transfer_inventory.find(e => e.id === 'melvorD:GP');
+	if (existing_entry) {
+		existing_entry.qty += amount;
+	} else {
+		if (state.transfer_inventory.length >= TRANSFER_INVENTORY_MAX_LIMIT)
+			return notify_error('MOD_KMM_TRANSFER_INVENTORY_FULL');
+
+		state.transfer_inventory.unshift({
+			id: 'melvorD:GP',
+			qty: amount
+		});
+	}
+
+	game.gp.remove(amount);
+	update_transfer_inventory_nav();
+	persist_transfer_inventory();
+}
+
+function add_item_to_transfer_inventory(item, qty) {
+	const existing_entry = state.transfer_inventory.find(e => e.id === item.id);
+	if (existing_entry) {
+		existing_entry.qty += qty;
+	} else {
+		if (state.transfer_inventory.length >= TRANSFER_INVENTORY_MAX_LIMIT)
+			return notify_error('MOD_KMM_TRANSFER_INVENTORY_FULL');
+
+		state.transfer_inventory.push({
+			id: item.id,
+			qty: qty
+		});
+	}
+
+	game.bank.removeItemQuantity(item, qty);
+	update_transfer_inventory_nav();
+	persist_transfer_inventory();
+}
+
+function persist_transfer_inventory() {
+	set_character_storage_item('transfer_inventory', state.transfer_inventory);
+}
+
+function load_transfer_inventory() {
+	const stored = get_character_storage_item('transfer_inventory');
+	state.transfer_inventory = stored ?? [];
+	update_transfer_inventory_nav();
+}
+// #endregion
+
+// #region API FUNCTIONS
+async function api_get(endpoint) {
+	const res = await fetch(SERVER_HOST + endpoint, {
+		method: 'GET',
+		headers: {
+			'X-Session-Token': session_token ?? undefined
+		}
+	});
+
+	if (res.status === 200)
+		return res.json();
+
+	return null;
+}
+
+async function api_post(endpoint, payload) {
+	const res = await fetch(SERVER_HOST + endpoint, {
+		method: 'POST',
+		body: JSON.stringify(payload),
+		headers: {
+			'Content-Type': 'application/json',
+			'X-Session-Token': session_token ?? undefined
+		}
+	});
+
+	if (res.status === 200)
+		return res.json();
+
+	return null;
+}
+
+function set_session_token(token) {
+	session_token = token;
+	state.is_connected = true;
+	log('client session authenticated (%s)', token);
+}
+
+async function get_friends() {
+	const res = await api_get('/api/friends/get');
+	if (res !== null)
+		state.friends = res.friends;
+}
+
+async function get_client_events() {
+	const res = await api_get('/api/events');
+	if (res !== null) {
+		state.events.friend_requests = res.friend_requests;
+
+		for (const trade of res.trades) {
+			// .trade_id, .attending, .state
+			const cache_trade = state.trades.find(e => e.trade_id === trade.trade_id);
+			if (cache_trade) {
+				if (cache_trade.state !== trade.state) {
+					// remove the existing trade from trades
+					state.trades = state.trades.filter(e => e.trade_id !== trade.trade_id);
+
+					setTimeout(() => {
+						state.trades.push({
+							trade_id: cache_trade.trade_id,
+							state: trade.state,
+							attending: trade.attending,
+							data: null
+						});
+					}, 1);
+				}
+			} else {
+				state.trades.push(Object.assign({ data: null }, trade));
+			}
+		}
+
+		for (const trade_id of res.resolved_trades) {
+			if (!state.resolved_trades.some(e => e.trade_id === trade_id))
+				state.resolved_trades.push({ trade_id, data: null });
+		}
+		
+		for (const gift_id of res.gifts) {
+			if (!state.gifts.some(e => e.id === gift_id))
+				state.gifts.push({ id: gift_id, data: null });
+		}
+
+		if (state.is_transfer_page_visible)
+			setTimeout(() => update_transfer_contents(), 1);
+	}
+
+	setTimeout(get_client_events, 60000);
+}
+// #region
+
+// #region SETUP FUNCTIONS
+export async function setup(ctx) {
+	await patch_localization(ctx);
+	await ctx.loadTemplates('ui/templates.html');
+
+	await load_pets(ctx);
+	await ctx.gameData.addPackage('data.json');
+
+	ctx.onCharacterLoaded(() => {
+		start_multiplayer_session();
+		load_transfer_inventory();
+
+		state.charity_timeout = get_character_storage_item('charity_timeout') ?? 0;
+	});
+
+	sidebar.category('Multiplayer', { before: 'Combat' });
+	
+	ctx.onInterfaceReady(() => {
+		const $button_tray = document.getElementById('header-theme').querySelector('.align-items-right');
+
+		make_template('online-button', $button_tray);
+		make_template('dropdown', $('kru-mm-online-button-container'));
+
+		state.$dropdown_menu = $('kru-mm-online-dropdown');
+
+		const $main_container = $('main-container');
+		make_template('transfer-page', $main_container);
+		make_template('charity-page', $main_container);
+
+		patch_bank();
+		setup_charity_tree();
+	});
+}
+
+function setup_icons() {
+	if (state.available_icons.length === 0) {
+		const namespace_maps = game.items.namespaceMaps;
+		state.available_icons = [...namespace_maps.get('melvorF'), ...namespace_maps.get('melvorD')].map(e => {
+			const item = e[1];
+			return {id: item.id, search_name: item.name.toLowerCase(), media: item.media };
+		});
+	}
 }
 
 function patch_bank() {
@@ -872,232 +1158,32 @@ function patch_bank() {
 	});
 }
 
-async function update_transfer_contents() {
-	if (state.is_updating_transfer_contents)
-		return;
+/** Patches the global fetchLanguageJSON() fn so we can load and inject our own
+ * translations. This is a hackfix because I couldn't find a way for mods to load
+ * their own translations via data. */
+async function patch_localization(ctx) {
+	const lang_supported = ['en'];
 
-	state.is_updating_transfer_contents = true;
+	const fetch_mod_localization = async (lang) => {
+		const fetch_lang = lang_supported.includes(lang) ? lang : 'en';
 
-	const missing_gifts = state.gifts.filter(gift => gift.data === null).map(gift => gift.id);
-	const missing_trades = state.trades.filter(trade => trade.data === null).map(trade => trade.trade_id);
-	const missing_resolved_trades = state.resolved_trades.filter(trade => trade.data === null).map(trade => trade.trade_id);
-
-	if (missing_gifts.length > 0 || missing_trades.length > 0 || missing_resolved_trades.length > 0) {
-		const res = await api_post('/api/transfers/get_contents', {
-			gift_ids: missing_gifts,
-			trade_ids: missing_trades,
-			resolved_trade_ids: missing_resolved_trades
-		});
-
-		if (res !== null) {
-			for (const gift of state.gifts) {
-				const gift_data = res.gifts[gift.id];
-				if (gift_data)
-					gift.data = gift_data;
-			}
-
-			for (const trade of state.trades) {
-				const trade_data = res.trades[trade.trade_id];
-				if (trade_data)
-					trade.data = trade_data;
-			}
-
-			for (const trade of state.resolved_trades) {
-				const trade_data = res.resolved_trades[trade.trade_id];
-				if (trade_data)
-					trade.data = trade_data;
-			}
+		try {
+			const patch_lang = await ctx.loadData('data/lang/' + fetch_lang + '.json');
+			for (const [key, value] of Object.entries(patch_lang))
+				loadedLangJson[key] = value;
+		} catch (e) {
+			error('Failed to patch localization for %s (%s)', fetch_lang, e);
 		}
+	};
+
+	const orig_fetchLanguageJSON = globalThis.fetchLanguageJSON;
+	globalThis.fetchLanguageJSON = async (lang) => {
+		await orig_fetchLanguageJSON(lang);
+		await fetch_mod_localization(lang);
 	}
 
-	state.is_updating_transfer_contents = false;
-}
-
-function return_all_transfer_inventory() {
-	for (const entry of state.transfer_inventory)
-		add_bank_item(entry.id, entry.qty);
-
-	state.transfer_inventory = [];
-	update_transfer_inventory_nav();
-}
-
-function return_selected_transfer_inventory() {
-	const selected_id = state.selected_transfer_item_id;
-	if (selected_id.length > 0) {
-		const entry = state.transfer_inventory.find(e => e.id === selected_id);
-		if (entry) {
-			add_bank_item(selected_id, entry.qty);
-			state.transfer_inventory = state.transfer_inventory.filter(e => e.id !== selected_id);
-
-			update_transfer_inventory_nav();
-		}
-	} else {
-		notify_error('MOD_KMM_TRANSFER_NO_ITEM_SELECTED');
-	}
-}
-
-function update_transfer_inventory_nav() {
-	const aside = document.querySelector('.kmm-transfer-nav');
-	aside.textContent = state.transfer_inventory.length + ' / ' + TRANSFER_INVENTORY_MAX_LIMIT;
-	aside.classList.toggle('text-danger', state.transfer_inventory.length >= TRANSFER_INVENTORY_MAX_LIMIT);
-}
-
-function add_bank_item(item_id, amount) {
-	if (item_id === 'melvorD:GP')
-		game.gp.add(amount);
-	else
-		game.bank.addItemByID(item_id, amount, false, false, true);
-}
-
-function add_gp_to_transfer(amount) {
-	if (game.gp.amount < amount)
-		return notify_error('MOD_KMM_INSUFFICIENT_GP_ERR');
-
-	const existing_entry = state.transfer_inventory.find(e => e.id === 'melvorD:GP');
-	if (existing_entry) {
-		existing_entry.qty += amount;
-	} else {
-		if (state.transfer_inventory.length >= TRANSFER_INVENTORY_MAX_LIMIT)
-			return notify_error('MOD_KMM_TRANSFER_INVENTORY_FULL');
-
-		state.transfer_inventory.unshift({
-			id: 'melvorD:GP',
-			qty: amount
-		});
-	}
-
-	game.gp.remove(amount);
-	update_transfer_inventory_nav();
-	persist_transfer_inventory();
-}
-
-function add_item_to_transfer_inventory(item, qty) {
-	const existing_entry = state.transfer_inventory.find(e => e.id === item.id);
-	if (existing_entry) {
-		existing_entry.qty += qty;
-	} else {
-		if (state.transfer_inventory.length >= TRANSFER_INVENTORY_MAX_LIMIT)
-			return notify_error('MOD_KMM_TRANSFER_INVENTORY_FULL');
-
-		state.transfer_inventory.push({
-			id: item.id,
-			qty: qty
-		});
-	}
-
-	game.bank.removeItemQuantity(item, qty);
-	update_transfer_inventory_nav();
-	persist_transfer_inventory();
-}
-
-function persist_transfer_inventory() {
-	set_character_storage_item('transfer_inventory', state.transfer_inventory);
-}
-
-function load_transfer_inventory() {
-	const stored = get_character_storage_item('transfer_inventory');
-	state.transfer_inventory = stored ?? [];
-	update_transfer_inventory_nav();
-}
-
-async function api_get(endpoint) {
-	const res = await fetch(SERVER_HOST + endpoint, {
-		method: 'GET',
-		headers: {
-			'X-Session-Token': session_token ?? undefined
-		}
-	});
-
-	if (res.status === 200)
-		return res.json();
-
-	return null;
-}
-
-async function api_post(endpoint, payload) {
-	const res = await fetch(SERVER_HOST + endpoint, {
-		method: 'POST',
-		body: JSON.stringify(payload),
-		headers: {
-			'Content-Type': 'application/json',
-			'X-Session-Token': session_token ?? undefined
-		}
-	});
-
-	if (res.status === 200)
-		return res.json();
-
-	return null;
-}
-
-function get_character_storage_item(key) {
-	if (IS_DEV_MODE)
-		return DEV_CHARACTER_STORAGE[key];
-
-	return ctx.characterStorage.getItem(key);
-}
-
-function set_character_storage_item(key, value) {
-	if (IS_DEV_MODE)
-		DEV_CHARACTER_STORAGE[key] = value;
-	else
-		ctx.characterStorage.setItem(key, value);
-}
-
-function set_session_token(token) {
-	session_token = token;
-	state.is_connected = true;
-	log('client session authenticated (%s)', token);
-}
-
-async function get_friends() {
-	const res = await api_get('/api/friends/get');
-	if (res !== null)
-		state.friends = res.friends;
-}
-
-async function get_client_events() {
-	const res = await api_get('/api/events');
-	if (res !== null) {
-		state.events.friend_requests = res.friend_requests;
-
-		for (const trade of res.trades) {
-			// .trade_id, .attending, .state
-			const cache_trade = state.trades.find(e => e.trade_id === trade.trade_id);
-			if (cache_trade) {
-				if (cache_trade.state !== trade.state) {
-					// remove the existing trade from trades
-					state.trades = state.trades.filter(e => e.trade_id !== trade.trade_id);
-
-					setTimeout(() => {
-						state.trades.push({
-							trade_id: cache_trade.trade_id,
-							state: trade.state,
-							attending: trade.attending,
-							data: null
-						});
-					}, 1);
-				}
-			} else {
-				state.trades.push(Object.assign({ data: null }, trade));
-			}
-		}
-
-		for (const trade_id of res.resolved_trades) {
-			if (!state.resolved_trades.some(e => e.trade_id === trade_id))
-				state.resolved_trades.push({ trade_id, data: null });
-		}
-		
-		for (const gift_id of res.gifts) {
-			if (!state.gifts.some(e => e.id === gift_id))
-				state.gifts.push({ id: gift_id, data: null });
-		}
-
-		if (state.is_transfer_page_visible)
-			setTimeout(() => update_transfer_contents(), 1);
-	}
-
-	setTimeout(get_client_events, 60000);
+	if (loadedLangJson !== undefined)
+		await fetch_mod_localization(setLang);
 }
 
 async function start_multiplayer_session() {
@@ -1155,60 +1241,9 @@ async function start_multiplayer_session() {
 
 	is_connecting = false;
 }
+// #endregion
 
-async function load_pets(ctx) {
-	const pets = await ctx.loadData('data/pets.json');
-	
-	ctx.gameData.buildPackage(pkg => {
-		for (const pet of pets) {
-			pet.name = getLangString(pet.name);
-			pet.hint = getLangString(pet.hint);
-
-			pkg.pets.add(pet);
-		}
-	}).add();
-
-	// Providing customDescription to pets does not appear to work, so we hack it in.
-	for (const pet of pets) {
-		const pet_obj = game.pets.getObjectByID('kru_melvor_multiplayer:' + pet.id);
-		pet_obj._customDescription = getLangString(pet.customDescription);
-		skill_pets.set(pet.id, pet_obj);
-	}
-}
-
-export async function setup(ctx) {
-	await patch_localization(ctx);
-	await ctx.loadTemplates('ui/templates.html');
-
-	await load_pets(ctx);
-	await ctx.gameData.addPackage('data.json');
-
-	ctx.onCharacterLoaded(() => {
-		start_multiplayer_session();
-		load_transfer_inventory();
-
-		state.charity_timeout = get_character_storage_item('charity_timeout') ?? 0;
-	});
-
-	sidebar.category('Multiplayer', { before: 'Combat' });
-	
-	ctx.onInterfaceReady(() => {
-		const $button_tray = document.getElementById('header-theme').querySelector('.align-items-right');
-
-		make_template('online-button', $button_tray);
-		make_template('dropdown', $('kru-mm-online-button-container'));
-
-		state.$dropdown_menu = $('kru-mm-online-dropdown');
-
-		const $main_container = $('main-container');
-		make_template('transfer-page', $main_container);
-		make_template('charity-page', $main_container);
-
-		patch_bank();
-		setup_charity_tree();
-	});
-}
-
+// #region COMPONENTS
 class KMMModalComponent extends HTMLElement {
 	constructor() {
 		super();
@@ -1361,3 +1396,4 @@ window.customElements.define('lang-string-f', LangStringFormattedElement);
 window.customElements.define('kmm-modal-component', KMMModalComponent);
 window.customElements.define('kmm-item-icon', KMMItemIcon);
 window.customElements.define('kmm-gp-slider', KMMGPSlider);
+// #endregion
