@@ -228,6 +228,11 @@ function get_campaign_progress() {
 	};
 }
 
+function add_campaign_progress(item_qty: number) {
+	campaign_item_current = Math.min(campaign_item_total, campaign_item_current + item_qty);
+	update_campaign_progress();
+}
+
 load_campaign_state();
 // #endregion
 
@@ -609,6 +614,8 @@ session_post_route('/api/campaign/contribute', async (req, url, client_id, json)
 			'INSERT INTO `campaign_contributions` (`client_id`, `campaign_id`, `item_amount`) VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE `item_amount` = `item_amount` + ?',
 			[client_id, campaign_active_id, contributing_amount, contributing_amount]
 		);
+
+		add_campaign_progress(contributing_amount);
 	}
 
 	return {
