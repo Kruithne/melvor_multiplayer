@@ -257,6 +257,7 @@ const state = ui.createStore({
 		}
 
 		hide_button_spinner($button);
+		this.close_modal();
 	},
 
 	// #endregion
