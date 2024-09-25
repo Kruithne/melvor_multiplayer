@@ -1596,6 +1596,23 @@ class KMMItemSlider extends HTMLElement {
 
 		this.appendChild($value);
 	}
+
+	attributeChangedCallback(name, oldValue, newValue) {
+		const item = game.items.getObjectByID(newValue);
+		const item_owned_qty = game.bank.getQty(item);
+
+		this.slider.sliderMax = item_owned_qty;
+		this.slider.sliderMin = 0;
+
+		this.slider.sliderInstance.update({
+			min: 0,
+			max: item_owned_qty
+		});
+	}
+
+	static get observedAttributes() {
+		return ['data-item-id'];
+	}
 }
 
 window.customElements.define('lang-string-f', LangStringFormattedElement);
