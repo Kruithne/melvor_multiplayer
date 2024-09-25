@@ -591,25 +591,16 @@ session_post_route('/api/campaign/contribute', async (req, url, client_id, json)
 		return 400; // Bad Request
 
 	const max_solo_contrib = campaign_item_total * CAMPAIGN_MAX_SOLO_CONTRIB_FAC;
-	console.log({ item_amount, max_solo_contrib });
-
 	let contributing_amount = Math.min(item_amount, max_solo_contrib);
-	console.log({ contributing_amount });
 
 	const contribution = await db_get_single('SELECT `item_amount` FROM `campaign_contributions` WHERE `client_id` = ? AND `campaign_id` = ?', [client_id, campaign_active_id]) as db_row.campaign_contributions;
 	if (contribution !== null) {
 		const contributing_delta = Math.max(max_solo_contrib - contribution.item_amount, 0);
 		contributing_amount = Math.min(contributing_amount, contributing_delta);
-
-		console.log({ contrib_delta: contributing_delta, contributing_amount });
-	} else {
-		console.log('no existing contribution');
 	}
 
 	const remaining_needed = campaign_item_total - campaign_item_current;
 	contributing_amount = Math.round(Math.min(contributing_amount, remaining_needed));
-
-	console.log({ remaining_needed, contributing_amount });
 
 	if (contributing_amount > 0) {
 		await db_execute(
