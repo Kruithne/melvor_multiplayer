@@ -228,8 +228,10 @@ function get_campaign_progress() {
 	};
 }
 
-function add_campaign_progress(item_qty: number) {
+async function add_campaign_progress(item_qty: number) {
 	campaign_item_current = Math.min(campaign_item_total, campaign_item_current + item_qty);
+	await db_execute('UPDATE `campaign_state` SET `item_current` = ? WHERE `id` = ?', [campaign_item_current, campaign_active_id]);
+
 	update_campaign_progress();
 }
 
@@ -615,7 +617,7 @@ session_post_route('/api/campaign/contribute', async (req, url, client_id, json)
 			[client_id, campaign_active_id, contributing_amount, contributing_amount]
 		);
 
-		add_campaign_progress(contributing_amount);
+		await add_campaign_progress(contributing_amount);
 	}
 
 	return {
