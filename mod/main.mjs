@@ -253,6 +253,8 @@ const state = ui.createStore({
 			game.bank.removeItemQuantity(remove_item, res.item_loss);
 			state.campaign_contribution += res.item_loss;
 			state.campaign_pct = res.campaign_pct;
+
+			update_campaign_nav();
 			notify_item('MOD_KMM_CAMPAIGN_CONTRIBUTED', 'success', remove_item, res.item_loss);
 		} else {
 			notify_error('MOD_KMM_CAMPAIGN_CONTRIBUTE_ERR');
