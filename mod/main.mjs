@@ -248,7 +248,7 @@ const state = ui.createStore({
 		show_button_spinner($button);
 
 		const res = await api_post('/api/campaign/contribute', { item_amount });
-		if (res?.success) {
+		if (res?.success && res?.item_loss > 0) {
 			const remove_item = game.items.getObjectByID(res.item_id);
 			game.bank.removeItemQuantity(remove_item, res.item_loss);
 			state.campaign_contribution += res.item_loss;
