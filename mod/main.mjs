@@ -249,9 +249,10 @@ const state = ui.createStore({
 
 		const res = await api_post('/api/campaign/contribute', { item_amount });
 		if (res?.success) {
-			game.bank.removeItemQuantityByID(res.item_id, res.item_loss);
+			const remove_item = game.items.getObjectByID(res.item_id);
+			game.bank.removeItemQuantity(remove_item, res.item_loss);
 			state.campaign_contribution += res.item_loss;
-			notify('MOD_KMM_CAMPAIGN_CONTRIBUTED');
+			notify('MOD_KMM_CAMPAIGN_CONTRIBUTED', 'success', remove_item.media, res.item_loss);
 		} else {
 			notify_error('MOD_KMM_CAMPAIGN_CONTRIBUTE_ERR');
 		}
@@ -850,8 +851,8 @@ function notify_error(lang_id, icon) {
 	notify(lang_id, 'danger', icon);
 }
 
-function notify(lang_id, theme = undefined, icon = 'assets/multiplayer.svg') {
-	notifyPlayer({ media: ctx.getResourceUrl(icon) }, getLangString(lang_id), theme);
+function notify(lang_id, theme = undefined, icon = 'assets/multiplayer.svg', qty = 1) {
+	notifyPlayer({ media: ctx.getResourceUrl(icon) }, getLangString(lang_id), theme, qty);
 }
 
 function log(message, ...params) {
