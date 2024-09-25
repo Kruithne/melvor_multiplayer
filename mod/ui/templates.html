@@ -131,6 +131,20 @@
 		</button>
 	</div>
 </template>
+<template id="template-kru-multiplayer-campaign-contribute-modal">
+	<div class="form-group kmm-gp-group">
+		<kmm-item-slider :data-item-id="state.campaign_item_id"></kmm-item-slider>
+	</div>
+	<div class="kmm-button-tray">
+		<button type="button" class="btn btn-success" @click="state.contribute_to_campaign($event)">
+			<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+			<lang-string lang-id="MOD_KMM_BUTTON_CONTRIBUTE"></lang-string>
+		</button>
+		<button type="button" class="btn btn-danger" @click="state.close_modal()">
+			<lang-string lang-id="MOD_KMM_BUTTON_CANCEL"></lang-string>
+		</button>
+	</div>
+</template>
 <template id="template-kru-multiplayer-change-icon-modal">
 	<input class="form-control" type="text" v-model="state.icon_search" placeholder="Search for an icon..."/>
 	<div class="kmm-icon-selector" v-if="state.filtered_icons.length > 0">
@@ -263,7 +277,7 @@
 										<img class="skill-icon-xxs ml-1 mr-1" :src="state.campaign_item_icon">
 									</div>
 									<div>
-										<lang-string-f lang-id="MOD_KMM_CAMPAIGN_CONTRIB_AMOUNT" lang-arg-1="1,000,000"></lang-string-f>
+										<lang-string-f lang-id="MOD_KMM_CAMPAIGN_CONTRIB_AMOUNT" :lang-arg-1="numberWithCommas(state.campaign_contribution)"></lang-string-f>
 										<img class="skill-icon-xxs ml-1 mr-1" :src="state.campaign_item_icon">
 									</div>
 									<button type="button" class="btn btn-success m-1" @click="state.show_campaign_contribute_modal()">

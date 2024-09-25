@@ -52,6 +52,7 @@ const state = ui.createStore({
 	profile_icon: 'melvorF:Fire_Acolyte_Wizard_Hat',
 
 	add_gp_value: 0,
+	add_item_value: 0,
 
 	transfer_inventory: [],
 	selected_transfer_item_id: '',
@@ -69,6 +70,7 @@ const state = ui.createStore({
 	campaign_item_id: '',
 	campaign_pct: 0,
 	campaign_item_total: 0,
+	campaign_contribution: 0,
 	campaign_loading: false,
 	campaign_has_data: false,
 
@@ -220,6 +222,41 @@ const state = ui.createStore({
 
 	get_current_campaign_color() {
 		return this.get_campaign_color(this.campaign_id);
+	},
+
+	show_campaign_contribute_modal() {
+		queue_modal('MOD_KMM_CAMPAIGN_CONTRIBUTE', 'campaign-contribute-modal', this.get_current_campaign_svg(), {
+			showConfirmButton: false
+		}, true, false);
+	},
+
+	async contribute_to_campaign(event) {
+		if (!state.campaign_active || !state.campaign_has_data)
+			return notify_error('MOD_KMM_CAMPAIGN_CONTRIBUTE_ERR');
+
+		const item_amount = state.add_item_value;
+		if (item_amount <= 0)
+			return;
+
+		const item = game.items.getObjectByID(state.campaign_item_id);
+		const item_owned_qty = game.bank.getItemQuantity(item);
+
+		if (item_owned_qty < item_amount)
+			return notify_error('MOD_KMM_CAMPAIGN_CONTRIBUTE_AMOUNT_ERR');
+
+		const $button = event.currentTarget;
+		show_button_spinner($button);
+
+		const res = await api_post('/api/campaign/contribute', { item_amount });
+		if (res?.success) {
+			game.bank.removeItemQuantityByID(res.item_id, res.item_loss);
+			state.campaign_contribution += res.item_loss;
+			notify('MOD_KMM_CAMPAIGN_CONTRIBUTED');
+		} else {
+			notify_error('MOD_KMM_CAMPAIGN_CONTRIBUTE_ERR');
+		}
+
+		hide_button_spinner($button);
 	},
 
 	// #endregion
@@ -1521,8 +1558,49 @@ class KMMGPSlider extends HTMLElement {
 	}
 }
 
+class KMMItemSlider extends HTMLElement {
+	constructor() {
+		super();
+
+		const item_id = this.getAttribute('data-item-id');
+		const item = game.items.getObjectByID(item_id);
+		const item_owned_qty = bank.bank.getQty(item);
+
+		state.add_item_value = 0;
+
+		const $input = document.createElement('input');
+		$input.type = 'text';
+
+		this.appendChild($input);
+
+		this.slider = new BankRangeSlider($input);
+
+		this.slider.sliderMax = item_owned_qty;
+		this.slider.sliderMin = 0;
+
+		this.slider.sliderInstance.update({
+			min: 0,
+			max: item_owned_qty
+		});
+
+		const $value = document.createElement('input');
+		$value.classList.add('form-control', 'mt-2');
+		$value.type = 'number';
+		$value.value = 0;
+
+		$value.addEventListener('input', () => this.slider.setSliderPosition($value.value));
+		this.slider.customOnChange = (amount) => {
+			$value.value = amount;
+			state.add_item_value = amount;
+		};
+
+		this.appendChild($value);
+	}
+}
+
 window.customElements.define('lang-string-f', LangStringFormattedElement);
 window.customElements.define('kmm-modal-component', KMMModalComponent);
 window.customElements.define('kmm-item-icon', KMMItemIcon);
 window.customElements.define('kmm-gp-slider', KMMGPSlider);
+window.customElements.define('kmm-item-slider', KMMItemSlider);
 // #endregion

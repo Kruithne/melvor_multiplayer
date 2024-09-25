@@ -564,6 +564,50 @@ session_get_route('/api/campaign/info', async (req, url, client_id) => {
 		} as JsonSerializable;
 	}
 });
+
+session_post_route('/api/campaign/contribute', async (req, url, client_id, json) => {
+	const item_amount = json.item_amount;
+	if (typeof item_amount !== 'number')
+		return 400; // Bad Request
+
+	if (campaign_active_id === 0)
+		return 400; // Bad Request
+
+	const response = { success: true, item_id: campaign_active_item, item_loss: 0 };
+
+	if (item_amount <= 0)
+		return response;
+
+	const max_solo_contrib = campaign_item_total * CAMPAIGN_MAX_SOLO_CONTRIB_FAC;
+	console.log({ item_amount, max_solo_contrib });
+
+	let contributing_amount = Math.min(item_amount, max_solo_contrib);
+	console.log({ contributing_amount });
+
+	const contribution = await db_get_single('SELECT `item_amount` FROM `campaign_contributions` WHERE `client_id` = ? AND `campaign_id` = ?', [client_id, campaign_active_id]) as db_row.campaign_contributions;
+	if (contribution !== null) {
+		const contributing_delta = Math.max(max_solo_contrib - contribution.item_amount, 0);
+		contributing_amount = Math.min(contributing_amount, contributing_delta);
+
+		console.log({ contrib_delta: contributing_delta, contributing_amount });
+	} else {
+		console.log('no existing contribution');
+	}
+
+	const remaining_needed = campaign_item_total - campaign_item_current;
+	contributing_amount = Math.round(Math.min(contributing_amount, remaining_needed));
+
+	console.log({ remaining_needed, contributing_amount });
+
+	response.item_loss = contributing_amount;
+
+	await db_execute(
+		'INSERT INTO `campaign_contributions` (`client_id`, `campaign_id`, `item_amount`) VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE `item_amount` = `item_amount` + ?',
+		[client_id, campaign_active_id, contributing_amount, contributing_amount]
+	);
+
+	return response;
+});
 // #endregion
 
 // #region ROUTES CHARITY

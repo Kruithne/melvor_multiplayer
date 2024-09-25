@@ -76,3 +76,10 @@ export type trade_offers = {
 	attending_id: number;
 	state: number;
 } | null;
+
+export type campaign_contributions = {
+	campaign_id: number;
+	client_id: number;
+	item_amount: number;
+	taken: number;
+} | null;

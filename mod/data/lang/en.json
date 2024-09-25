@@ -104,6 +104,10 @@
 	"MOD_KMM_CAMPAIGN_NEXT": "Next Campaign Starts In %s",
 	"MOD_KMM_CAMPAIGN_PROGRESS": "%s: %s / %s",
 	"MOD_KMM_CAMPAIGN_CONTRIB_AMOUNT": "Your Contribution: %s",
+	"MOD_KMM_CAMPAIGN_CONTRIBUTE": "Contribute to Campaign",
+	"MOD_KMM_CAMPAIGN_CONTRIBUTE_ERR": "Cannot contribute right now",
+	"MOD_KMM_CAMPAIGN_CONTRIBUTE_AMOUNT_ERR": "You haven't got that many!",
+	"MOD_KMM_CAMPAIGN_CONTRIBUTED": "Contribution sent!",
 
 	"MOD_KMM_CAMPAIGN_NAME_JUNGLE": "The Jungle Expedition",
 	"MOD_KMM_CAMPAIGN_NAME_DESERT": "Plunder of the Sands",
