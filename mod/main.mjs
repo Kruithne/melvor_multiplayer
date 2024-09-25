@@ -225,7 +225,7 @@ const state = ui.createStore({
 	},
 
 	show_campaign_contribute_modal() {
-		queue_modal('MOD_KMM_CAMPAIGN_CONTRIBUTE', 'campaign-contribute-modal', this.get_current_campaign_svg(), {
+		queue_modal('MOD_KMM_CAMPAIGN_CONTRIBUTE', 'campaign-contribute-modal', this.campaign_item_icon, {
 			showConfirmButton: false
 		}, true, false);
 	},
