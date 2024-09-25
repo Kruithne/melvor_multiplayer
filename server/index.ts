@@ -580,10 +580,8 @@ session_post_route('/api/campaign/contribute', async (req, url, client_id, json)
 	if (campaign_active_id === 0)
 		return 400; // Bad Request
 
-	const response = { success: true, item_id: campaign_active_item, item_loss: 0 };
-
 	if (item_amount <= 0)
-		return response;
+		return 400; // Bad Request
 
 	const max_solo_contrib = campaign_item_total * CAMPAIGN_MAX_SOLO_CONTRIB_FAC;
 	console.log({ item_amount, max_solo_contrib });
@@ -606,14 +604,16 @@ session_post_route('/api/campaign/contribute', async (req, url, client_id, json)
 
 	console.log({ remaining_needed, contributing_amount });
 
-	response.item_loss = contributing_amount;
-
 	await db_execute(
 		'INSERT INTO `campaign_contributions` (`client_id`, `campaign_id`, `item_amount`) VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE `item_amount` = `item_amount` + ?',
 		[client_id, campaign_active_id, contributing_amount, contributing_amount]
 	);
 
-	return response;
+	return {
+		success: true,
+		item_id: campaign_active_item,
+		contributing_amount
+	};
 });
 // #endregion
 
