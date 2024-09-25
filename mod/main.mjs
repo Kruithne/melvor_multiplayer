@@ -921,6 +921,7 @@ async function update_campaign_info() {
 				state.campaign_id = res.campaign_id;
 				state.campaign_item_id = res.item_id;
 				state.campaign_item_total = res.item_total;
+				state.campaign_contribution = res.contribution;
 			} else {
 				state.campaign_next_timestamp = res.next_campaign;
 			}
@@ -1200,6 +1201,7 @@ async function get_client_events() {
 			state.campaign_id = '';
 			state.campaign_item_id = '';
 			state.campaign_item_total = 0;
+			state.campaign_contribution = 0;
 		}
 
 		state.campaign_pct = res.campaign.pct;

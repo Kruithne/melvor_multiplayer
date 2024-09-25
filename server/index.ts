@@ -551,9 +551,16 @@ session_get_route('/api/campaign/info', async (req, url, client_id) => {
 	// todo: include campaign history in this endpoint.
 
 	if (campaign_active_id > 0) {
+		// todo: get the players contribution to this campaign, if any
+		const contribution = await db_get_single(
+			'SELECT `item_amount` FROM `campaign_contributions` WHERE `client_id` = ? AND `campaign_id` = ?',
+			[client_id, campaign_active_id]
+		) as db_row.campaign_contributions;
+
 		return {
 			active: true,
 			campaign_id: campaign_active_campaign_id,
+			contribution: contribution?.item_amount ?? 0,
 			item_id: campaign_active_item,
 			item_total: campaign_item_total
 		} as JsonSerializable;
