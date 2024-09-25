@@ -239,7 +239,7 @@ const state = ui.createStore({
 			return;
 
 		const item = game.items.getObjectByID(state.campaign_item_id);
-		const item_owned_qty = game.bank.getItemQuantity(item);
+		const item_owned_qty = game.bank.getQty(item);
 
 		if (item_owned_qty < item_amount)
 			return notify_error('MOD_KMM_CAMPAIGN_CONTRIBUTE_AMOUNT_ERR');
