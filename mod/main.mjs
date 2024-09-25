@@ -1564,7 +1564,7 @@ class KMMItemSlider extends HTMLElement {
 
 		const item_id = this.getAttribute('data-item-id');
 		const item = game.items.getObjectByID(item_id);
-		const item_owned_qty = bank.bank.getQty(item);
+		const item_owned_qty = game.bank.getQty(item);
 
 		state.add_item_value = 0;
 
