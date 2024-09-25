@@ -604,10 +604,12 @@ session_post_route('/api/campaign/contribute', async (req, url, client_id, json)
 
 	console.log({ remaining_needed, contributing_amount });
 
-	await db_execute(
-		'INSERT INTO `campaign_contributions` (`client_id`, `campaign_id`, `item_amount`) VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE `item_amount` = `item_amount` + ?',
-		[client_id, campaign_active_id, contributing_amount, contributing_amount]
-	);
+	if (contributing_amount > 0) {
+		await db_execute(
+			'INSERT INTO `campaign_contributions` (`client_id`, `campaign_id`, `item_amount`) VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE `item_amount` = `item_amount` + ?',
+			[client_id, campaign_active_id, contributing_amount, contributing_amount]
+		);
+	}
 
 	return {
 		success: true,
