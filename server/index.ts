@@ -621,7 +621,7 @@ session_post_route('/api/campaign/contribute', async (req, url, client_id, json)
 	return {
 		success: true,
 		item_id: campaign_active_item,
-		contributing_amount,
+		item_loss: contributing_amount,
 		campaign_pct: campaign_current_pct
 	};
 });
