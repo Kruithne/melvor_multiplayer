@@ -612,6 +612,24 @@ session_get_route('/api/campaign/info', async (req, url, client_id) => {
 	}
 });
 
+session_post_route('/api/campaign/claim', async (req, url, client_id, json) => {
+	const campaign_id = json.campaign_id;
+	if (typeof campaign_id !== 'number')
+		return 400; // Bad Request
+
+	const value = json.value;
+	if (typeof value !== 'number')
+		return 400; // Bad Request
+
+	const contribution = await db_get_single('SELECT `taken` FROM `campaign_contributions` WHERE `client_id` = ? AND `campaign_id` = ? LIMIT 1', [client_id, campaign_id]) as db_row.campaign_contributions;
+	if (contribution === null || contribution.taken > 0)
+		return 400; // Bad request
+
+	await db_execute('UPDATE `campaign_contributions` SET `taken` = ? WHERE `client_id` = ? AND `campaign_id` = ?', [value, client_id, campaign_id]);
+
+	return { success: true };
+});
+
 session_post_route('/api/campaign/contribute', async (req, url, client_id, json) => {
 	const item_amount = json.item_amount;
 	if (typeof item_amount !== 'number')

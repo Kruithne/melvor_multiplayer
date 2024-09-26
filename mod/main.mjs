@@ -293,6 +293,23 @@ const state = ui.createStore({
 		this.close_modal();
 	},
 
+	async claim_campaign_reward(event, campaign) {
+		const $button = event.currentTarget;
+		show_button_spinner($button);
+
+		const reward_item = game.items.getObjectByID(campaign.item_id);
+		const reward_value = (reward_item.sellsFor.quantity * campaign.item_amount) * 1.6;
+
+		const res = await api_post('/api/campaign/claim', { campaign_id: campaign.id, value: reward_value });
+		if (res?.success) {
+			game.gp.add(reward_value);
+			campaign.taken = reward_value;
+		} else {
+			notify_error('MOD_KMM_GENERIC_ERR');
+		}
+
+		hide_button_spinner($button);
+	},
 	// #endregion
 
 	// #region CHARITY ACTIONS
