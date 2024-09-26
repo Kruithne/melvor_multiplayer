@@ -989,6 +989,8 @@ function has_pet_by_id(pet_id) {
 
 // #region CHARITY FUNCTIONS
 async function request_charity_tree_contents() {
+	state.charity_update_time = Date.now();
+
 	if (is_updating_charity_tree)
 		return;
 
