@@ -311,7 +311,18 @@
 					<lang-string-f lang-id="MOD_KMM_CAMPAIGN_CONTRIB_AMOUNT" :lang-arg-1="numberWithCommas(campaign.item_amount)"></lang-string-f>
 					<img class="skill-icon-xxs ml-1 mr-1" :src="state.get_item_icon(campaign.item_id)">
 				</div>
-				<button type="button" class="btn btn-success m-1" @click="state.claim_campaign_reward($event, campaign)">
+				<div v-if="campaign.taken > 0">
+					<span class="font-w600">
+						<lang-string lang-id="MOD_KMM_CAMPAIGN_REWARDED"></lang-string>
+						<span>
+							<span class="mr-2">
+								<img class="skill-icon-xxs mr-1" src="assets/media/main/coins.svg">
+								<span class="font-w400 text-success">{{ numberWithCommas(campaign.taken) }}</span>
+							</span>
+						</span>
+					</span>
+				</div>
+				<button type="button" class="btn btn-success m-1" @click="state.claim_campaign_reward($event, campaign)" v-else>
 					<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 					<lang-string lang-id="MOD_KMM_BUTTON_CLAIM_REWARD"></lang-string>
 				</button>
