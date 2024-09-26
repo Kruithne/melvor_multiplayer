@@ -240,3 +240,33 @@
 	height: 40px;
 	border-radius: 5px;
 }
+
+.kmm-campaign-rankings {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	gap: 20px;
+	margin-top: 20px;
+}
+
+.kmm-campaign-rankings > div {
+	display: flex;
+	flex-direction: column;
+	background: rgb(35, 42, 53);
+	border-radius: 4px;
+	padding: 10px;
+	gap: 7px;
+}
+
+.kmm-ranking-medals {
+	display: flex;
+	justify-content: space-evenly;
+}
+
+.kmm-ranking-medals img {
+	height: 20px;
+}
+
+.kmm-ranking-icon {
+	height: 90px;
+}

@@ -292,7 +292,14 @@
 			</div>
 		</div>
 		<div class="kmm-campaign-rankings" v-if="state.campaign_has_data">
-			<div v-for="(value, key) in state.campaign_data">{{ key }}</div>
+			<div v-for="(value, key) in state.campaign_data">
+				<div class="kmm-ranking-medals">
+					 <img :src="state.get_svg('medal_bronze')" :class="{ 'kmm-grayscale': state.get_campaign_ranking(key) < 1 }">
+					 <img :src="state.get_svg('medal_silver')" :class="{ 'kmm-grayscale': state.get_campaign_ranking(key) < 2 }">
+					 <img :src="state.get_svg('medal_gold')" :class="{ 'kmm-grayscale': state.get_campaign_ranking(key) < 3 }">
+				</div>
+				<img class="kmm-ranking-icon" :src="state.get_campaign_svg(key)">
+			</div>
 		</div>
 		<div class="row row-deck gutters-tiny mt-5">
 			<div class="block block-rounded block-link-pop border-top kmm-campaign-border border-4x w-100">

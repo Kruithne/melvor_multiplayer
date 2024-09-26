@@ -76,6 +76,7 @@ const state = ui.createStore({
 	campaign_loading: false,
 	campaign_has_data: false,
 	campaign_history: [],
+	campaign_rankings: {},
 	campaign_update_time: Date.now(),
 
 	events: {
@@ -308,6 +309,10 @@ const state = ui.createStore({
 		}
 
 		hide_button_spinner($button);
+	},
+
+	get_campaign_ranking(campaign_id) {
+		return this.campaign_rankings[campaign_id] ?? 0;
 	},
 	// #endregion
 
@@ -966,6 +971,7 @@ async function update_campaign_info() {
 	if (res !== null) {
 		state.campaign_has_data = true;
 		state.campaign_history = res.history;
+		state.campaign_rankings = res.rankings;
 
 		if (res.active) {
 			state.campaign_id = res.campaign_id;
