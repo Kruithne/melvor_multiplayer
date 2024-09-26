@@ -190,6 +190,10 @@
 	filter: grayscale(1);
 }
 
+.kmm-blackout {
+	filter: brightness(0) saturate(100%);
+}
+
 .kmm-campaign-active-text {
 	display: flex;
 	flex-direction: column;
