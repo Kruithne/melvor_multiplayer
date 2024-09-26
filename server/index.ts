@@ -60,11 +60,12 @@ const CAMPAIGN_MAX_SOLO_CONTRIB_FAC = 0.25;
 const CAMPAIGN_ITEM_MIN = 10;
 const CAMPAIGN_ITEM_MAX = 50;
 const CAMPAIGN_ITEM_SCALE = 1000000;
-const CAMPAIGN_RESTART_TIMER = 1000 * 60 * 60 * 12; // 12 hours
 
 const CAMPAIGN_BASELINE_ADV_MIN = 0.01;
 const CAMPAIGN_BASELINE_ADV_MAX = 0.02;
 const CAMPAIGN_BASELINE_ADV_RATE = 1000 * 60 * 60; // 1 hour
+
+const CAMPAIGN_RESTART_TIMER = 1000 * 60 * 60 * 12; // 12 hours
 // #endregion
 
 // #region GLOBALS
@@ -197,6 +198,8 @@ async function finalize_campaign() {
 	campaign_next_active_timestamp = Date.now() + CAMPAIGN_RESTART_TIMER;
 
 	await db_execute('UPDATE `campaign_state` SET `complete` = 1, `campaign_next` = ?', [campaign_next_active_timestamp]);
+
+	schedule_campaign_restart();
 }
 
 async function load_campaign_state() {
@@ -206,7 +209,7 @@ async function load_campaign_state() {
 
 	if (state.complete === 1) {
 		campaign_next_active_timestamp = state.campaign_next;
-		return check_campaign_timestamp();
+		return schedule_campaign_restart();
 	}
 
 	campaign_active_id = state.id;
@@ -220,9 +223,13 @@ async function load_campaign_state() {
 	log('campaign', 'loaded campaign state: {%s} {%s} {%s}/{%s}', campaign_active_campaign_id, campaign_active_item, campaign_item_current, campaign_item_total);
 }
 
-async function check_campaign_timestamp() {
-	if (Date.now() >= campaign_next_active_timestamp)
+async function schedule_campaign_restart() {
+	const current_time = Date.now();
+	if (current_time >= campaign_next_active_timestamp)
 		return start_new_campaign();
+
+	setTimeout(start_new_campaign, campaign_next_active_timestamp - current_time);
+	log('campaign', 'scheduled campaign restart at {%s}', new Date(campaign_next_active_timestamp).toUTCString());
 }
 
 function get_campaign_progress() {
