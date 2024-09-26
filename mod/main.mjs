@@ -302,8 +302,14 @@ const state = ui.createStore({
 		const $button = event.currentTarget;
 		show_button_spinner($button);
 
+		let reward_mod = 1.6;
+
+		const campaign_pet = game.pets.getObjectByID(campaign.pet);
+		if (game.petManager.unlocked.has(campaign_pet))
+			reward_mod += 0.1;
+
 		const reward_item = game.items.getObjectByID(campaign.item_id);
-		const reward_value = (reward_item.sellsFor.quantity * campaign.item_amount) * 1.6;
+		const reward_value = (reward_item.sellsFor.quantity * campaign.item_amount) * reward_mod;
 
 		const res = await api_post('/api/campaign/claim', { campaign_id: campaign.id, value: reward_value });
 		if (res?.success) {
