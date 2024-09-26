@@ -986,11 +986,26 @@ async function update_campaign_info() {
 		} else {
 			state.campaign_next_timestamp = res.next_campaign;
 		}
+
+		check_campaign_pets();
 	} else {
 		notify_error('MOD_KMM_GENERIC_ERR');
 	}
 
 	state.campaign_loading = false;
+}
+
+function check_campaign_pets() {
+	for (const [campaign_id, ranking] of Object.entries(state.campaign_rankings)) {
+		if (ranking < 4)
+			continue;
+
+		const campaign_data = state.campaign_data[campaign_id];
+		const pet = game.pets.getObjectByID(campaign_data.pet);
+
+		if (!game.petManager.unlocked.has(pet))
+			game.petManager.unlockPetByID(campaign_data.pet);
+	}
 }
 
 async function load_campaign_data(ctx) {
