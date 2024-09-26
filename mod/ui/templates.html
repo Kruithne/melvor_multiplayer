@@ -279,8 +279,9 @@
 									<div>
 										<lang-string-f lang-id="MOD_KMM_CAMPAIGN_CONTRIB_AMOUNT" :lang-arg-1="numberWithCommas(state.campaign_contribution)"></lang-string-f>
 										<img class="skill-icon-xxs ml-1 mr-1" :src="state.campaign_item_icon">
+										<lang-string class="ml-1" lang-id="MOD_KMM_CAMPAIGN_MAX_REACHED" v-if="state.campaign_max_solo_contrib_reached"></lang-string>
 									</div>
-									<button type="button" class="btn btn-success m-1" @click="state.show_campaign_contribute_modal()">
+									<button type="button" class="btn btn-success m-1" @click="state.show_campaign_contribute_modal()" v-if="!state.campaign_max_solo_contrib_reached">
 										<lang-string lang-id="MOD_KMM_BUTTON_CONTRIBUTE"></lang-string>
 									</button>
 								</div>

@@ -108,6 +108,7 @@
 	"MOD_KMM_CAMPAIGN_CONTRIBUTE_ERR": "Cannot contribute right now",
 	"MOD_KMM_CAMPAIGN_CONTRIBUTE_AMOUNT_ERR": "You haven't got that many!",
 	"MOD_KMM_CAMPAIGN_CONTRIBUTED": "Contribution sent!",
+	"MOD_KMM_CAMPAIGN_MAX_REACHED": "(Maximum Reached)",
 
 	"MOD_KMM_CAMPAIGN_NAME_JUNGLE": "The Jungle Expedition",
 	"MOD_KMM_CAMPAIGN_NAME_DESERT": "Plunder of the Sands",

@@ -17,8 +17,11 @@ const DEV_CHARACTER_STORAGE = {
 
 const TRANSFER_INVENTORY_MAX_LIMIT = 32;
 const GIFT_FLAG_RETURNED = 1 << 0;
+
 const CHARITY_TIMEOUT = 1000 * 60 * 60 * 24; // 24 hours
 const CHARITY_CHECK_TIMEOUT = 10 * 1000; // 10 seconds
+
+const CAMPAIGN_MAX_SOLO_CONTRIB_FAC = 0.25;
 // #endregion
 
 // #region GLOBALS
@@ -160,6 +163,14 @@ const state = ui.createStore({
 
 	get campaign_item_icon() {
 		return this.get_item_icon(state.campaign_item_id);
+	},
+
+	get campaign_max_solo_contrib() {
+		return this.campaign_item_total * CAMPAIGN_MAX_SOLO_CONTRIB_FAC;
+	},
+
+	get campaign_max_solo_contrib_reached() {
+		return this.campaign_contribution >= this.campaign_max_solo_contrib;
 	},
 	// #endregion
 
