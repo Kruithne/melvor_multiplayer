@@ -76,6 +76,7 @@ const state = ui.createStore({
 	campaign_contribution: 0,
 	campaign_loading: false,
 	campaign_has_data: false,
+	campaign_history: [],
 
 	events: {
 		friend_requests: []
@@ -923,28 +924,27 @@ async function update_campaign_info() {
 	if (state.campaign_loading || state.campaign_has_data)
 		return;
 
-	if (state.campaign_active) {
-		state.campaign_loading = true;
+	state.campaign_loading = true;
 
-		const res = await api_get('/api/campaign/info');
+	const res = await api_get('/api/campaign/info');
 
-		if (res !== null) {
-			state.campaign_has_data = true;
+	if (res !== null) {
+		state.campaign_has_data = true;
+		state.campaign_history = res.history;
 
-			if (res.active) {
-				state.campaign_id = res.campaign_id;
-				state.campaign_item_id = res.item_id;
-				state.campaign_item_total = res.item_total;
-				state.campaign_contribution = res.contribution;
-			} else {
-				state.campaign_next_timestamp = res.next_campaign;
-			}
+		if (res.active) {
+			state.campaign_id = res.campaign_id;
+			state.campaign_item_id = res.item_id;
+			state.campaign_item_total = res.item_total;
+			state.campaign_contribution = res.contribution;
 		} else {
-			notify_error('MOD_KMM_GENERIC_ERR');
+			state.campaign_next_timestamp = res.next_campaign;
 		}
-
-		state.campaign_loading = false;
+	} else {
+		notify_error('MOD_KMM_GENERIC_ERR');
 	}
+
+	state.campaign_loading = false;
 }
 
 async function load_campaign_data(ctx) {
@@ -1218,8 +1218,15 @@ async function get_client_events() {
 			state.campaign_contribution = 0;
 		}
 
+		const campaign_state_changed = state.campaign_active !== res.campaign_active;
+
 		state.campaign_pct = res.campaign.pct;
 		state.campaign_active = res.campaign.active;
+
+		if (campaign_state_changed) {
+			state.campaign_has_data = false;
+			update_campaign_info();
+		}
 
 		update_campaign_nav();
 

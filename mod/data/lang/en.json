@@ -109,6 +109,7 @@
 	"MOD_KMM_CAMPAIGN_CONTRIBUTE_AMOUNT_ERR": "You haven't got that many!",
 	"MOD_KMM_CAMPAIGN_CONTRIBUTED": "Contribution sent!",
 	"MOD_KMM_CAMPAIGN_MAX_REACHED": "(Maximum Reached)",
+	"MOD_KMM_CAMPAIGN_NO_HISTORY": "You haven't contributed to any past campaigns yet!",
 
 	"MOD_KMM_CAMPAIGN_NAME_JUNGLE": "The Jungle Expedition",
 	"MOD_KMM_CAMPAIGN_NAME_DESERT": "Plunder of the Sands",
@@ -128,6 +129,7 @@
 	"MOD_KMM_CHARITY_WINDOW_INFO": "Once per day, you may take something of your choosing from the tree. Donate items from your bank to the tree to help other players.",
 	"MOD_KMM_CHARITY_PET_INFO": "The Spirit of Charity pet is allowing you to take one extra item per day!",
 	"MOD_KMM_CAMPAIGN_WINDOW_INFO": "Campaigns are a combined effort from all players to reach a goal for a share in the victory and rewards.",
+	"MOD_KMM_CAMPAIGN_HISTORY_INFO": "Below you can claim the rewards from past campaigns you have contributed to.",
 
 	"MOD_KMM_NOTIF_FRIEND_REQ_SENT": "Friend request sent!",
 	"MOD_KMM_NOTIF_FRIEND_REMOVED": "Friend removed",

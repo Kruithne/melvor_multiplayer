@@ -291,6 +291,28 @@
 				</div>
 			</div>
 		</div>
+		<div class="row row-deck gutters-tiny mt-5">
+			<div class="block block-rounded block-link-pop border-top kmm-campaign-border border-4x w-100">
+				<div class="row row-deck gutters-tiny">
+					<div class="p-3 kmm-transfer-info">
+						<img class="skill-icon-xxs mr-1" :src="state.get_svg('campaigns')">
+						<lang-string lang-id="MOD_KMM_CAMPAIGN_HISTORY_INFO"></lang-string>
+					</div>
+				</div>
+			</div>
+		</div>
+		<template v-if="state.campaign_history.length > 0">
+			<div class="block tabbable w-100 kmm-col" v-for="campaign in state.campaign_history">
+				<div class="p-4" v-else>
+					{{ campaign.campaign_id }}
+				</div>
+			</div>
+		</template>
+		<div class="block tabbable w-100 kmm-col" v-else>
+			<div class="p-4" v-else>
+				<lang-string lang-id="MOD_KMM_CAMPAIGN_NO_HISTORY"></lang-string>
+			</div>
+		</div>
 	</div>
 </template>
 <template id="template-kru-multiplayer-charity-page">
