@@ -122,8 +122,27 @@
 	"MOD_KMM_CAMPAIGN_NAME_UNKNOWN": "Into the Unknown",
 
 	"MOD_KMM_PET_NAME_CHARITY": "Spirit of Charity",
+	"MOD_KMM_PET_NAME_CAMPAIGN_JUNGLE": "Enchanted Tiki Mask",
+	"MOD_KMM_PET_NAME_CAMPAIGN_DESERT": "Sun Mote",
+	"MOD_KMM_PET_NAME_CAMPAIGN_SNOW": "Frostbite",
+	"MOD_KMM_PET_NAME_CAMPAIGN_VOLCANIC": "Crusty",
+	"MOD_KMM_PET_NAME_CAMPAIGN_FORSAKEN": "Fallen Spirit",
+	"MOD_KMM_PET_NAME_CAMPAIGN_FOREST": "Mr. Mushnik",
+
+	"MOD_KMM_PET_HINT_CAMPAIGN_JUNGLE": "Campaign - The Jungle Expedition",
+	"MOD_KMM_PET_HINT_CAMPAIGN_DESERT": "Campaign - Plunder of the Sands",
+	"MOD_KMM_PET_HINT_CAMPAIGN_SNOW": "Campaign - The Frozen Frontier",
+	"MOD_KMM_PET_HINT_CAMPAIGN_VOLCANIC": "Campaign - Volcanic Plateau",
+	"MOD_KMM_PET_HINT_CAMPAIGN_FORSAKEN": "Campaign - The Forsaken Battlefront",
+	"MOD_KMM_PET_HINT_CAMPAIGN_FOREST": "Campaign - Woodland Encroachment",
 
 	"MOD_KMM_PET_DESC_CHARITY": "Take 1 extra item per day from The Charitree",
+	"MOD_KMM_PET_DESC_CAMPAIGN_JUNGLE": "+10% GP from Jungle campaigns",
+	"MOD_KMM_PET_DESC_CAMPAIGN_DESERT": "+10% GP from Desert campaigns",
+	"MOD_KMM_PET_DESC_CAMPAIGN_SNOW": "+10% GP from Snow campaigns",
+	"MOD_KMM_PET_DESC_CAMPAIGN_VOLCANIC": "+10% GP from Volcanic campaigns",
+	"MOD_KMM_PET_DESC_CAMPAIGN_FORSAKEN": "+10% GP from Forsaken campaigns",
+	"MOD_KMM_PET_DESC_CAMPAIGN_FOREST": "+10% GP from Forest campaigns",
 
 	"MOD_KMM_TRANSFER_WINDOW_HEADER": "Transfer Inventory",
 	"MOD_KMM_TRANSFER_WINDOW_INFO": "Your transfer inventory contains items you've added from your bank. From here, you can gift these items to another player, start a trade offer, or return them to your bank.",

@@ -209,6 +209,11 @@ const state = ui.createStore({
 		return item?.media ?? 'assets/media/main/question.png';
 	},
 
+	get_pet_icon(id) {
+		const pet = game.pets.getObjectByID(id);
+		return pet?.media ?? 'assets/media/main/question.png';
+	},
+
 	close_modal() {
 		Swal.close();
 	},

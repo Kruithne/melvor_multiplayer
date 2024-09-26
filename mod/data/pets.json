@@ -9,5 +9,71 @@
 		"activeInRaid": false,
 		"hint": "MOD_KMM_CHARITY_NAME",
 		"customDescription": "MOD_KMM_PET_DESC_CHARITY"
+	},
+	{
+		"id": "Multiplayer_Pet_Campaign_Jungle",
+		"media": "assets/pet_tiki_mask.svg",
+		"name": "MOD_KMM_PET_NAME_CAMPAIGN_JUNGLE",
+		"scaleChanceWithMasteryPool": false,
+		"ignoreCompletion": false,
+		"modifiers": {},
+		"activeInRaid": false,
+		"hint": "MOD_KMM_PET_HINT_CAMPAIGN_JUNGLE",
+		"customDescription": "MOD_KMM_PET_DESC_CAMPAIGN_JUNGLE"
+	},
+	{
+		"id": "Multiplayer_Pet_Campaign_Desert",
+		"media": "assets/pet_sun_mote.svg",
+		"name": "MOD_KMM_PET_NAME_CAMPAIGN_DESERT",
+		"scaleChanceWithMasteryPool": false,
+		"ignoreCompletion": false,
+		"modifiers": {},
+		"activeInRaid": false,
+		"hint": "MOD_KMM_PET_HINT_CAMPAIGN_DESERT",
+		"customDescription": "MOD_KMM_PET_DESC_CAMPAIGN_DESERT"
+	},
+	{
+		"id": "Multiplayer_Pet_Campaign_Snow",
+		"media": "assets/pet_snowball.svg",
+		"name": "MOD_KMM_PET_NAME_CAMPAIGN_SNOW",
+		"scaleChanceWithMasteryPool": false,
+		"ignoreCompletion": false,
+		"modifiers": {},
+		"activeInRaid": false,
+		"hint": "MOD_KMM_PET_HINT_CAMPAIGN_SNOW",
+		"customDescription": "MOD_KMM_PET_DESC_CAMPAIGN_SNOW"
+	},
+	{
+		"id": "Multiplayer_Pet_Campaign_Volcanic",
+		"media": "assets/pet_meteor.svg",
+		"name": "MOD_KMM_PET_NAME_CAMPAIGN_VOLCANIC",
+		"scaleChanceWithMasteryPool": false,
+		"ignoreCompletion": false,
+		"modifiers": {},
+		"activeInRaid": false,
+		"hint": "MOD_KMM_PET_HINT_CAMPAIGN_VOLCANIC",
+		"customDescription": "MOD_KMM_PET_DESC_CAMPAIGN_VOLCANIC"
+	},
+	{
+		"id": "Multiplayer_Pet_Campaign_Forsaken",
+		"media": "assets/pet_forsaken.svg",
+		"name": "MOD_KMM_PET_NAME_CAMPAIGN_FORSAKEN",
+		"scaleChanceWithMasteryPool": false,
+		"ignoreCompletion": false,
+		"modifiers": {},
+		"activeInRaid": false,
+		"hint": "MOD_KMM_PET_HINT_CAMPAIGN_FORSAKEN",
+		"customDescription": "MOD_KMM_PET_DESC_CAMPAIGN_FORSAKEN"
+	},
+	{
+		"id": "Multiplayer_Pet_Campaign_Forest",
+		"media": "assets/pet_forest.svg",
+		"name": "MOD_KMM_PET_NAME_CAMPAIGN_FOREST",
+		"scaleChanceWithMasteryPool": false,
+		"ignoreCompletion": false,
+		"modifiers": {},
+		"activeInRaid": false,
+		"hint": "MOD_KMM_PET_HINT_CAMPAIGN_FOREST",
+		"customDescription": "MOD_KMM_PET_DESC_CAMPAIGN_FOREST"
 	}
 ]
