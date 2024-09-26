@@ -33,8 +33,6 @@ let is_connecting = false;
 let is_updating_charity_tree = false;
 let last_charity_check = 0;
 
-let campaign_data = {};
-
 const skill_pets = new Map();
 // #endregion
 
@@ -67,6 +65,7 @@ const state = ui.createStore({
 	charity_bonus_unlocked: false,
 	charity_update_time: Date.now(),
 
+	campaign_data: {},
 	campaign_active: false,
 	campaign_id: '',
 	campaign_next_timestamp: 0,
@@ -230,7 +229,7 @@ const state = ui.createStore({
 
 	// #region CAMPAIGN ACTIONS
 	get_campaign_svg(id) {
-		return this.get_svg(campaign_data[id]?.asset ?? 'campaign_placeholder')
+		return this.get_svg(this.campaign_data[id]?.asset ?? 'campaign_placeholder')
 	},
 
 	get_current_campaign_svg() {
@@ -238,7 +237,7 @@ const state = ui.createStore({
 	},
 
 	get_campaign_title(id) {
-		return getLangString(campaign_data[id]?.name_lang ?? 'MOD_KMM_CAMPAIGN_NAME_UNKNOWN');
+		return getLangString(this.campaign_data[id]?.name_lang ?? 'MOD_KMM_CAMPAIGN_NAME_UNKNOWN');
 	},
 
 	get_current_campaign_title() {
@@ -246,7 +245,7 @@ const state = ui.createStore({
 	},
 
 	get_campaign_color(id) {
-		return campaign_data[id]?.color_code ?? '#acacac';
+		return this.campaign_data[id]?.color_code ?? '#acacac';
 	},
 
 	get_current_campaign_color() {
@@ -984,7 +983,7 @@ async function update_campaign_info() {
 }
 
 async function load_campaign_data(ctx) {
-	campaign_data = await ctx.loadData('data/campaigns.json');
+	state.campaign_data = await ctx.loadData('data/campaigns.json');
 }
 
 function update_campaign_nav() {

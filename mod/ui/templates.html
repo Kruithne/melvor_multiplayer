@@ -291,6 +291,9 @@
 				</div>
 			</div>
 		</div>
+		<div class="kmm-campaign-rankings" v-if="state.campaign_has_data">
+			<div v-for="(value, key) in state.campaign_data">{{ key }}</div>
+		</div>
 		<div class="row row-deck gutters-tiny mt-5">
 			<div class="block block-rounded block-link-pop border-top kmm-campaign-border border-4x w-100">
 				<div class="row row-deck gutters-tiny">

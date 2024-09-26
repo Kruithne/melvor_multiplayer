@@ -584,10 +584,8 @@ function session_post_route(route: string, handler: SessionRequestHandler) {
 
 // #region ROUTES CAMPAIGN
 session_get_route('/api/campaign/info', async (req, url, client_id) => {
-	const history = await db_get_all(
-		'SELECT a.`item_amount`, a.`taken`, b.`id`, b.`campaign_id`, b.`item_id` FROM `campaign_contributions` AS a JOIN `campaign_state` AS b ON a.`campaign_id` = b.`id` WHERE a.`client_id` = ? AND b.`complete` = 1 ORDER BY a.`campaign_id` DESC LIMIT 15',
-		[client_id]
-	);
+	const history = await db_get_all('SELECT a.`item_amount`, a.`taken`, b.`id`, b.`campaign_id`, b.`item_id` FROM `campaign_contributions` AS a JOIN `campaign_state` AS b ON a.`campaign_id` = b.`id` WHERE a.`client_id` = ? AND b.`complete` = 1 ORDER BY a.`campaign_id` DESC LIMIT 15', [client_id]);
+	const rankings = await db_get_all('SELECT b.`campaign_id`, COUNT(*) AS `completed` FROM `campaign_contributions` AS a JOIN `campaign_state` AS b ON a.`campaign_id` = b.`id` GROUP BY b.`campaign_id` WHERE a.`client_id` = ?', [client_id]);
 
 	if (campaign_active_id > 0) {
 		const contribution = await db_get_single(
@@ -597,7 +595,7 @@ session_get_route('/api/campaign/info', async (req, url, client_id) => {
 
 		return {
 			active: true,
-			history,
+			history, rankings,
 			campaign_id: campaign_active_campaign_id,
 			contribution: contribution?.item_amount ?? 0,
 			item_id: campaign_active_item,
@@ -606,7 +604,7 @@ session_get_route('/api/campaign/info', async (req, url, client_id) => {
 	} else {
 		return {
 			active: false,
-			history,
+			history, rankings,
 			next_campaign: campaign_next_active_timestamp
 		} as JsonSerializable;
 	}
