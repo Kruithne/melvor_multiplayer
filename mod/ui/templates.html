@@ -227,7 +227,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="row row-deck gutters-tiny" v-if="state.campaign_loading">
+		<div class="row row-deck gutters-tiny" v-if="state.campaign_loading || !state.campaign_has_data">
 			<div class="block block-rounded block-link-pop w-100">
 				<div class="row row-deck gutters-tiny">
 					<div class="p-3">
@@ -301,14 +301,12 @@
 				</div>
 			</div>
 		</div>
-		<template v-if="state.campaign_history.length > 0">
-			<div class="block tabbable w-100 kmm-col" v-for="campaign in state.campaign_history">
-				<div class="p-4" v-else>
-					{{ campaign.campaign_id }}
-				</div>
+		<div class="block tabbable w-100 kmm-col" v-for="campaign of state.campaign_history">
+			<div class="p-4" v-else>
+				{{ campaign.campaign_id }}
 			</div>
-		</template>
-		<div class="block tabbable w-100 kmm-col" v-else>
+		</div>
+		<div class="block tabbable w-100 kmm-col" v-if="state.campaign_history.length === 0">
 			<div class="p-4" v-else>
 				<lang-string lang-id="MOD_KMM_CAMPAIGN_NO_HISTORY"></lang-string>
 			</div>
