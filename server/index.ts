@@ -61,6 +61,10 @@ const CAMPAIGN_ITEM_MIN = 10;
 const CAMPAIGN_ITEM_MAX = 50;
 const CAMPAIGN_ITEM_SCALE = 1000000;
 const CAMPAIGN_RESTART_TIMER = 1000 * 60 * 60 * 12; // 12 hours
+
+const CAMPAIGN_BASELINE_ADV_MIN = 0.01;
+const CAMPAIGN_BASELINE_ADV_MAX = 0.02;
+const CAMPAIGN_BASELINE_ADV_RATE = 1000 * 60 * 60; // 1 hour
 // #endregion
 
 // #region GLOBALS
@@ -235,7 +239,25 @@ async function add_campaign_progress(item_qty: number) {
 	update_campaign_progress();
 }
 
+function tick_campaign_baseline_advancement() {
+	if (campaign_active_id > 0) {
+		const adv_pct = Math.random() * (CAMPAIGN_BASELINE_ADV_MAX - CAMPAIGN_BASELINE_ADV_MIN) + CAMPAIGN_BASELINE_ADV_MIN;
+		const adv_value = Math.floor(campaign_item_total * adv_pct);
+
+		log('campaign', 'baseline advancement +{%d}', adv_value);
+		add_campaign_progress(adv_value);
+	}
+
+	schedule_campaign_baseline_advancement();
+}
+
+function schedule_campaign_baseline_advancement() {
+	setTimeout(tick_campaign_baseline_advancement, CAMPAIGN_BASELINE_ADV_RATE);
+}
+
 load_campaign_state();
+
+schedule_campaign_baseline_advancement();
 // #endregion
 
 // #region FRIEND CODE
