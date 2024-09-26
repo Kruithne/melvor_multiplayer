@@ -77,6 +77,7 @@ const state = ui.createStore({
 	campaign_loading: false,
 	campaign_has_data: false,
 	campaign_history: [],
+	campaign_update_time: Date.now(),
 
 	events: {
 		friend_requests: []
@@ -172,6 +173,22 @@ const state = ui.createStore({
 
 	get campaign_max_solo_contrib_reached() {
 		return this.campaign_contribution >= this.campaign_max_solo_contrib;
+	},
+
+	get campaign_next_formatted() {
+		const delta = this.campaign_next_timestamp - this.campaign_update_time;
+		const seconds = Math.floor(delta / 1000);
+		
+		if (seconds < 60)
+			return 'less than a minute';
+		
+		const minutes = Math.floor(seconds / 60);
+		const hours = Math.floor(minutes / 60);
+		
+		if (hours > 0)
+			return `${hours} ${hours !== 1 ? 'hours' : 'hour'}`;
+		
+		return `${minutes} ${minutes !== 1 ? 'minutes' : 'minute'}`;
 	},
 	// #endregion
 
@@ -921,6 +938,8 @@ function on_page_toggle(id, callback, visible_only) {
 
 // #region CAMPAIGN FUNCTIONS
 async function update_campaign_info() {
+	state.campaign_update_time = Date.now();
+
 	if (state.campaign_loading || state.campaign_has_data)
 		return;
 

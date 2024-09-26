@@ -228,3 +228,15 @@
 	display: flex;
 	justify-content: space-between;
 }
+
+.kmm-campaign-history {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px;
+}
+
+.kmm-campaign-history-icon {
+	height: 40px;
+	border-radius: 5px;
+}
