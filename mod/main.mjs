@@ -1218,7 +1218,7 @@ async function get_client_events() {
 			state.campaign_contribution = 0;
 		}
 
-		const campaign_state_changed = state.campaign_active !== res.campaign_active;
+		const campaign_state_changed = state.campaign_active !== res.campaign.active;
 
 		state.campaign_pct = res.campaign.pct;
 		state.campaign_active = res.campaign.active;
