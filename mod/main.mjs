@@ -366,8 +366,9 @@ const state = ui.createStore({
 		if (items.length === 0)
 			return notify_error('MOD_KMM_CHARITY_NO_SELECTION');
 
-		for (const item of items) {
-			if (!item.id.startsWith('melvor'))
+		for (const item_entry of items) {
+			const item = game.items.getObjectByID(item_entry.id);
+			if (item.isModded)
 				return notify_error('MOD_KMM_CHARITY_MODDED_ITEM');
 		}
 
