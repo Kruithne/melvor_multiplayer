@@ -1446,7 +1446,7 @@ function patch_bank_market() {
 	$sell_amount_input.addEventListener('input', () => slider.setSliderPosition($sell_amount_input.value));
 
 	$sell_price_input.addEventListener('input', () => {
-		sell_price = $sell_price_input.value;
+		sell_price = parseInt($sell_price_input.value);
 		update_sell_value();
 	});
 
