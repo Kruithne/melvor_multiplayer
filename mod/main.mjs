@@ -974,6 +974,8 @@ function on_page_toggle(id, callback, visible_only) {
 
 // #region MARKET FUNCTIONS
 async function update_market_page() {
+	if (state.market_active_tab === 'search')
+		await update_market_search();
 	// todo: early return if we're already updating
 	// todo: if we're on the "my listings" page, update the data with a throttle timer
 }
