@@ -999,7 +999,7 @@ async function market_create_listing(item, item_qty, item_sell_price) {
 	if (res?.success) {
 		game.bank.removeItemQuantity(item, item_qty);
 		// todo: updating listings
-		notify('MOD_KMM_MARKET_ITEM_LISTED');
+		notify('MOD_KMM_MARKET_ITEM_LISTED', 'success', 'assets/marker.svg', item_qty);
 	} else {
 		notify_error(res?.error_lang ?? 'MOD_KMM_GENERIC_ERR');
 	}
