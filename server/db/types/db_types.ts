@@ -83,3 +83,11 @@ export type campaign_contributions = {
 	item_amount: number;
 	taken: number;
 } | null;
+
+export type market_items = {
+	id: number;
+	item_id: string;
+	qty: number;
+	sold: number;
+	price: number;
+} | null;

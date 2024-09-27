@@ -274,3 +274,27 @@
 .kmm-ranking-icon {
 	height: 90px;
 }
+
+.kmm-market-bg {
+	background-color: #267036 !important;
+}
+
+.kmm-market-border {
+	border-color: #267036 !important;
+}
+
+.kmm-market-border-tab-active {
+	border-color: #25b337 !important;
+}
+
+.kmm-market-tabs {
+	display: flex;
+	justify-content: center;
+	gap: 50px;
+	margin: 10px 0;
+}
+
+.kmm-bank-market-fields {
+	display: flex;
+	gap: 10px;
+}

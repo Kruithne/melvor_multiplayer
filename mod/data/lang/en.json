@@ -50,6 +50,7 @@
 	"MOD_KMM_BUTTON_TAKE_SELECTED": "Take Selected",
 	"MOD_KMM_BUTTON_CONTRIBUTE": "Contribute",
 	"MOD_KMM_BUTTON_CLAIM_REWARD": "Collect Reward",
+	"MOD_KMM_BUTTON_SELL_ON_MARKET": "Create Market Listing",
 
 	"MOD_KMM_MENU_HEADER": "Multiplayer",
 	"MOD_KMM_MENU_HEADER_FRIENDS": "Friends",
@@ -144,6 +145,19 @@
 	"MOD_KMM_PET_DESC_CAMPAIGN_FORSAKEN": "+10% GP from Forsaken campaigns",
 	"MOD_KMM_PET_DESC_CAMPAIGN_FOREST": "+10% GP from Forest campaigns",
 
+	"MOD_KMM_MARKET_TAB_PUBLIC": "Marketplace",
+	"MOD_KMM_MARKET_TAB_OWN": "My Listings",
+	"MOD_KMM_MARKET_TAB_PUBLIC_SUB": "View items for sale from other players",
+	"MOD_KMM_MARKET_TAB_OWN_SUB": "View items you're selling on the market",
+	"MOD_KMM_MARKET_BANK_HEADER": "Sell on Market (Multiplayer)",
+	"MOD_KMM_MARKET_BANK_QTY": "Quantity to Sell:",
+	"MOD_KMM_MARKET_BANK_PPI": "Price Per Item:",
+	"MOD_KMM_MARKET_CANNOT_SELL_NOTHING": "You can't sell nothing!",
+	"MOD_KMM_MARKET_CANNOT_SELL_FREE": "Cannot sell for free! Consider donating to The Charitree!",
+	"MOD_KMM_MARKET_NOT_ENOUGH_ITEM": "You don't have enough!",
+	"MOD_KMM_MARKET_ITEM_LISTED": "Your item has been listed on the market!",
+	"MOD_KMM_MARKET_CANNOT_SELL_MODDED": "Items from mods cannot be sold on the market.",
+
 	"MOD_KMM_TRANSFER_WINDOW_HEADER": "Transfer Inventory",
 	"MOD_KMM_TRANSFER_WINDOW_INFO": "Your transfer inventory contains items you've added from your bank. From here, you can gift these items to another player, start a trade offer, or return them to your bank.",
 	"MOD_KMM_EXCHANGE_WINDOW_INFO": "Below you will find trade offers between you and other players, as well as gifts other players have sent to you.",
@@ -151,6 +165,7 @@
 	"MOD_KMM_CHARITY_PET_INFO": "The Spirit of Charity pet is allowing you to take one extra item per day!",
 	"MOD_KMM_CAMPAIGN_WINDOW_INFO": "Campaigns are a combined effort from all players to reach a goal for a share in the victory and rewards.",
 	"MOD_KMM_CAMPAIGN_HISTORY_INFO": "Below you can claim the rewards from past campaigns you have contributed to.",
+	"MOD_KMM_MARKET_WINDOW_INFO": "The Marketplace is a place where players can buy and sell items directly. Items can be sold on the market from your bank.",
 
 	"MOD_KMM_NOTIF_FRIEND_REQ_SENT": "Friend request sent!",
 	"MOD_KMM_NOTIF_FRIEND_REMOVED": "Friend removed",

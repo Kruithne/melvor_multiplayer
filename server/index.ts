@@ -166,6 +166,16 @@ setTimeout(sweep_client_session_cache, CACHE_SESSION_LIFETIME);
 setTimeout(sweep_data_caches, CACHE_RESET_INTERVAL);
 // #endregion
 
+// #region MARKET
+async function market_list_item(client_id: number, item_id: string, item_qty: number, item_sell_price: number) {
+	const existing = await db_get_single('SELECT `id` FROM `market_items` WHERE `client_id` = ? AND `item_id` = ? AND `price` = ?', [client_id, item_id, item_sell_price]) as db_row.market_items;
+	if (existing !== null)
+		await db_execute('UPDATE `market_items` SET `qty` = `qty` + ? WHERE `id` = ?', [item_qty, existing.id]);
+	else
+		await db_execute('INSERT INTO `market_items` (`client_id`, `item_id`, `qty`, `price`) VALUES(?, ?, ?, ?)', [client_id, item_id, item_qty, item_sell_price]);	
+}
+// #endregion
+
 // #region CAMPAIGN
 async function start_new_campaign() {
 	const campaign_data = array_random(AVAILABLE_CAMPAIGNS) as CampaignData;
@@ -580,6 +590,33 @@ function session_get_route(route: string, handler: SessionRequestHandler) {
 function session_post_route(route: string, handler: SessionRequestHandler) {
 	server.route(route, validate_session_request(handler, true), 'POST');
 }
+// #endregion
+
+// #region ROUTES MARKET
+session_post_route('/api/market/sell', async (req, url, client_id, json) => {
+	const item_qty = json.item_qty;
+	const item_sell_price = json.item_sell_price;
+
+	if (typeof item_qty !== 'number' || typeof item_sell_price !== 'number')
+		return 400; // Bad Request
+
+	if (item_qty <= 0)
+		return { error_lang: 'MOD_KMM_MARKET_CANNOT_SELL_NOTHING' };
+
+	if (item_sell_price <= 0)
+		return { error_lang: 'MOD_KMM_MARKET_CANNOT_SELL_FREE' };
+
+	const item_id = json.item_id;
+	if (typeof item_id !== 'string')
+		return 400; // Bad Request
+
+	if (!item_id.startsWith('melvor'))
+		return { error_lang: 'MOD_KMM_MARKET_CANNOT_SELL_MODDED' };
+
+	market_list_item(client_id, item_id, item_qty, item_sell_price);
+
+	return { success: true } as JsonSerializable;
+});
 // #endregion
 
 // #region ROUTES CAMPAIGN

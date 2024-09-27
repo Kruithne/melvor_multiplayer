@@ -79,6 +79,8 @@ const state = ui.createStore({
 	campaign_rankings: {},
 	campaign_update_time: Date.now(),
 
+	market_active_tab: 'search',
+
 	events: {
 		friend_requests: []
 	},
@@ -969,6 +971,42 @@ function on_page_toggle(id, callback, visible_only) {
 }
 // #endregion
 
+// #region MARKET FUNCTIONS
+async function update_market_page() {
+	// todo: early return if we're already updating
+	// todo: if we're on the "my listings" page, update the data with a throttle timer
+}
+
+async function market_create_listing(item, item_qty, item_sell_price) {
+	if (item_qty <= 0)
+		return notify_error('MOD_KMM_MARKET_CANNOT_SELL_NOTHING');
+
+	if (item_sell_price <= 0)
+		return notify_error('MOD_KMM_MARKET_CANNOT_SELL_FREE');
+
+	if (game.bank.getQty(item) < item_qty)
+		return notify_error('MOD_KMM_MARKET_NOT_ENOUGH_ITEM');
+
+	if (item.isModded)
+		return notify_error('MOD_KMM_MARKET_CANNOT_SELL_MODDED');
+
+	const res = await api_post('/api/market/sell', {
+		item_id: item.id,
+		item_qty,
+		item_sell_price
+	});
+
+	if (res?.success) {
+		game.bank.removeItemQuantity(item, item_qty);
+		// todo: updating listings
+		notify('MOD_KMM_MARKET_ITEM_LISTED');
+	} else {
+		notify_error(res?.error_lang ?? 'MOD_KMM_GENERIC_ERR');
+	}
+}
+
+// #endregion
+
 // #region CAMPAIGN FUNCTIONS
 async function update_campaign_info() {
 	state.campaign_update_time = Date.now();
@@ -1339,14 +1377,15 @@ export async function setup(ctx) {
 		state.$dropdown_menu = $('kru-mm-online-dropdown');
 
 		const $main_container = $('main-container');
-		make_template('transfer-page', $main_container);
-		make_template('charity-page', $main_container);
-		make_template('campaign-page', $main_container);
+		for (const page of ['transfer', 'charity', 'campaign', 'market'])
+			make_template(page + '-page', $main_container);
 
 		patch_bank();
+		patch_bank_market();
 		
 		on_page_toggle('kru-multiplayer-charity-page', () => request_charity_tree_contents(), true);
 		on_page_toggle('kru-multiplayer-campaign-page', () => update_campaign_info(), true);
+		on_page_toggle('kru-multiplayer-market-page', () => update_market_page(), true);
 	});
 }
 
@@ -1358,6 +1397,72 @@ function setup_icons() {
 			return {id: item.id, search_name: item.name.toLowerCase(), media: item.media };
 		});
 	}
+}
+
+function patch_bank_market() {
+	const $bank_item_menu = document.querySelector('bank-selected-item-menu');
+	const $gutter = $bank_item_menu.querySelector('.gutters-tiny');
+
+	make_template('bank-market-container', $gutter);
+
+	const $slider_element = document.getElementById('kmm-market-slider');
+	const slider = new BankRangeSlider($slider_element);
+
+	let selected_bank_item = null;
+	let sell_price = 1;
+
+	const $sell_value = document.getElementById('kmm-market-sell-value');
+	function update_sell_value() {
+		const amount = slider.quantity;
+		const sell_total = amount * sell_price;
+
+		$sell_value.textContent = selected_bank_item.item.sellsFor.currency.formatAmount(numberWithCommas(sell_total));
+	}
+
+	const $sell_amount_input = document.getElementById('kmm-market-sell-amount');
+	const $sell_price_input = document.getElementById('kmm-market-sell-price');
+
+	function update_bank_item(orig_func, ...args) {
+		orig_func.call(this, ...args);
+
+		selected_bank_item = args[0];
+		sell_price = game.bank.getItemSalePrice(selected_bank_item.item);
+		$sell_price_input.value = sell_price;
+
+		slider.setSliderRange(selected_bank_item);
+		update_sell_value();
+	}
+
+	const orig_update_item_quantity = $bank_item_menu.updateItemQuantity;
+	$bank_item_menu.updateItemQuantity = function(...args) {
+		update_bank_item.call(this, orig_update_item_quantity, ...args);
+	}
+
+	const orig_set_item = $bank_item_menu.setItem;
+	$bank_item_menu.setItem = function(...args) {
+		update_bank_item.call(this, orig_set_item, ...args);
+	}
+
+	$sell_amount_input.addEventListener('input', () => slider.setSliderPosition($sell_amount_input.value));
+
+	$sell_price_input.addEventListener('input', () => {
+		sell_price = $sell_price_input.value;
+		update_sell_value();
+	});
+
+	slider.customOnChange = (amount) => {
+		$sell_amount_input.value = amount;
+		update_sell_value();
+	};
+
+	const $market_sell_button = document.getElementById('kmm-market-sell-button');
+	const $market_sell_button_spinner = $market_sell_button.querySelector('.spinner-border');
+
+	$market_sell_button.addEventListener('click', async () => {
+		show_button_spinner($market_sell_button_spinner);
+		await market_create_listing(selected_bank_item.item, slider.quantity, sell_price);
+		hide_button_spinner($market_sell_button_spinner);
+	});
 }
 
 function patch_bank() {

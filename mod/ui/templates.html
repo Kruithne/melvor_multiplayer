@@ -165,6 +165,50 @@
 		</button>
 	</div>
 </template>
+<template id="template-kru-multiplayer-bank-market-container">
+	<div class="col-12">
+		<div class="block block-rounded-double bg-combat-inner-dark">
+		<div class="block-header block-header-default bg-dark-bank-block-header px-3 py-1">
+			<h5 class="font-size-sm font-w600 mb-0">
+				<img class="skill-icon-xs mr-1" :src="state.get_svg('market')">
+				<lang-string lang-id="MOD_KMM_MARKET_BANK_HEADER"></lang-string>
+			</h5>
+		</div>
+		<div class="col-12 pt-2">
+			<div class="form-group">
+				<input type="text" id="kmm-market-slider">
+			</div>
+			<div class="row no-gutters p-2">
+				<div class="kmm-bank-market-fields">
+					<div>
+						<lang-string lang-id="MOD_KMM_MARKET_BANK_QTY"></lang-string>
+						<input type="number" min="0" class="form-control m-1" id="kmm-market-sell-amount" placeholder="Sell X">
+					</div>
+					<div>
+						<img class="skill-icon-xxs ml-1 mr-1" src="assets/media/main/coins.svg">
+						<lang-string lang-id="MOD_KMM_MARKET_BANK_PPI"></lang-string>
+						<input type="number" min="0" class="form-control m-1" id="kmm-market-sell-price" placeholder="Sell Price">
+					</div>
+				</div>
+				<div class="col-12">
+					<div class="dropdown-divider"></div>
+				</div>
+				<div class="col-12 text-center">
+					<button role="button" class="btn btn-danger m-1 w-75" id="kmm-market-sell-button">
+						<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+						<lang-string lang-id="MOD_KMM_BUTTON_SELL_ON_MARKET"></lang-string>
+					</button><br>
+				</div>
+			</div>
+		</div>
+		<div class="block-header block-header-default bg-dark-bank-block-header px-3 py-1 text-center">
+			<h5 class="font-w600 font-size-sm text-combat-smoke m-1 w-100">
+				<img class="skill-icon-xxs ml-1 mr-1" src="assets/media/main/coins.svg">
+				<span id="kmm-market-sell-value"></span>
+			</h5>
+		</div>
+	</div>
+</template>
 <template id="template-kru-multiplayer-bank-container">
 	<div class="col-12">
 		<div class="block block-rounded-double bg-combat-inner-dark">
@@ -214,6 +258,62 @@
 			<img class="skill-icon-xs m-1" src="assets/media/main/coins.svg">
 		</a>
 	</li>
+</template>
+<template id="template-kru-multiplayer-market-page">
+	<div class="content d-none" id="kru-multiplayer-market-page">
+		<div class="row row-deck gutters-tiny">
+			<div class="block block-rounded block-link-pop border-top kmm-market-border border-4x w-100">
+				<div class="row row-deck gutters-tiny">
+					<div class="p-3 kmm-transfer-info">
+						<img class="skill-icon-xxs mr-1" :src="state.get_svg('transfer_bag')">
+						<lang-string lang-id="MOD_KMM_MARKET_WINDOW_INFO"></lang-string>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row row-deck gutters-tiny kmm-market-tabs">
+			<div>
+				<a class="block block-content block-rounded block-link-pop border-top border-4x pointer-enabled p-2 pr-5" :class="state.market_active_tab == 'search' ? 'kmm-market-border-tab-active' : 'border-combat'" @click="state.market_active_tab = 'search'">
+					<div class="media d-flex align-items-center push">
+						<div class="mr-2">
+							<img class="bank-img p-2" :src="state.get_svg('market')">
+						</div>
+						<div class="media-body">
+							<div class="font-w600">
+								<lang-string lang-id="MOD_KMM_MARKET_TAB_PUBLIC"></lang-string>
+							</div>
+							<div class="font-size-sm">
+								<lang-string lang-id="MOD_KMM_MARKET_TAB_PUBLIC_SUB"></lang-string>
+							</div>
+						</div>
+					</div>
+				</a>
+			</div>
+			<div>
+				<a class="block block-content block-rounded block-link-pop border-top border-4x pointer-enabled p-2 pr-5" :class="state.market_active_tab == 'listing' ? 'kmm-market-border-tab-active' : 'border-combat'" @click="state.market_active_tab = 'listing'">
+					<div class="media d-flex align-items-center push">
+						<div class="mr-2">
+							<img class="bank-img p-2" :src="state.get_svg('market_listing')">
+						</div>
+						<div class="media-body">
+							<div class="font-w600">
+								<lang-string lang-id="MOD_KMM_MARKET_TAB_OWN"></lang-string>
+							</div>
+							<div class="font-size-sm">
+								<lang-string lang-id="MOD_KMM_MARKET_TAB_OWN_SUB"></lang-string>
+							</div>
+						</div>
+					</div>
+				</a>
+			</div>
+		</div>
+		<div class="block block-rounded w-100 p-3" v-if="state.market_active_tab == 'search'">
+			This is the search page.
+		</div>
+		<div class="block block-rounded w-100 p-3" v-if="state.market_active_tab == 'listing'">
+			This is the listing page.
+		</div>
+	</div>
 </template>
 <template id="template-kru-multiplayer-campaign-page">
 	<div class="content d-none" id="kru-multiplayer-campaign-page">
