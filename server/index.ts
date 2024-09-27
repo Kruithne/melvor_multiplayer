@@ -66,6 +66,8 @@ const CAMPAIGN_BASELINE_ADV_MAX = 0.02;
 const CAMPAIGN_BASELINE_ADV_RATE = 1000 * 60 * 60; // 1 hour
 
 const CAMPAIGN_RESTART_TIMER = 1000 * 60 * 60 * 12; // 12 hours
+
+const MARKET_ITEMS_PER_PAGE = 30;
 // #endregion
 
 // #region GLOBALS
@@ -616,6 +618,18 @@ session_post_route('/api/market/sell', async (req, url, client_id, json) => {
 	market_list_item(client_id, item_id, item_qty, item_sell_price);
 
 	return { success: true } as JsonSerializable;
+});
+
+session_post_route('/api/market/search', async (req, url, client_id, json) => {
+	// todo: support item_id filter
+	// todo: support page index
+
+	const items = await db_get_all('SELECT * FROM `market_items` ORDER BY ID DESC LIMIT ?', [MARKET_ITEMS_PER_PAGE]);
+
+	return {
+		success: true,
+		items
+	};
 });
 // #endregion
 

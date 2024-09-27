@@ -80,6 +80,7 @@ const state = ui.createStore({
 	campaign_update_time: Date.now(),
 
 	market_active_tab: 'search',
+	market_results: [],
 
 	events: {
 		friend_requests: []
@@ -1005,6 +1006,11 @@ async function market_create_listing(item, item_qty, item_sell_price) {
 	}
 }
 
+async function update_market_search() {
+	const res = await api_post('/api/market/search', {});
+	if (res?.success)
+		state.market_results = res.items;
+}
 // #endregion
 
 // #region CAMPAIGN FUNCTIONS

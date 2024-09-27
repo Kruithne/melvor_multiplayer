@@ -307,8 +307,12 @@
 				</a>
 			</div>
 		</div>
-		<div class="block block-rounded w-100 p-3" v-if="state.market_active_tab == 'search'">
-			This is the search page.
+		<div v-if="state.market_active_tab == 'search'">
+			<div id="kmm-market-search-results">
+				<div class="block block-rounded w-100 p-3" v-for="item in state.market_results">
+					{{ item.item_id }}
+				</div>
+			</div>
 		</div>
 		<div class="block block-rounded w-100 p-3" v-if="state.market_active_tab == 'listing'">
 			This is the listing page.
