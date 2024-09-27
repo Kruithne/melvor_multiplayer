@@ -1456,12 +1456,10 @@ function patch_bank_market() {
 	};
 
 	const $market_sell_button = document.getElementById('kmm-market-sell-button');
-	const $market_sell_button_spinner = $market_sell_button.querySelector('.spinner-border');
-
 	$market_sell_button.addEventListener('click', async () => {
-		show_button_spinner($market_sell_button_spinner);
+		show_button_spinner($market_sell_button);
 		await market_create_listing(selected_bank_item.item, slider.quantity, sell_price);
-		hide_button_spinner($market_sell_button_spinner);
+		hide_button_spinner($market_sell_button);
 	});
 }
 
