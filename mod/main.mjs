@@ -1162,7 +1162,7 @@ async function update_market_search() {
 	state.market_search_loading = true;
 
 	const data = {
-		page: this.market_current_page
+		page: state.market_current_page
 	};
 
 	if (state.market_filter_item !== null)
