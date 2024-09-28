@@ -84,7 +84,7 @@ const state = ui.createStore({
 	market_active_tab: 'search',
 	market_results: [],
 	market_buy_item: null,
-	market_filter_item: 'melvorD:Ruby',
+	market_filter_item: null,
 	market_filter_search: '',
 	market_filter_items: [],
 
