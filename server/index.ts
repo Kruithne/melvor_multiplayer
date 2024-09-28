@@ -707,7 +707,7 @@ session_post_route('/api/market/buy', async (req, url, client_id, json) => {
 		item_id: lot.item_id,
 		item_qty: final_qty,
 		gp_loss: final_cost,
-		new_item_qty: Math.max(lot.qty - final_qty, 0)
+		new_item_qty: Math.max(lot.available - final_qty, 0)
 	} as JsonSerializable;
 });
 
