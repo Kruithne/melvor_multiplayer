@@ -86,6 +86,7 @@ export type campaign_contributions = {
 
 export type market_items = {
 	id: number;
+	client_id: number;
 	item_id: string;
 	qty: number;
 	sold: number;
