@@ -323,3 +323,8 @@
 	height: 45px;
 	border-radius: 5px;
 }
+
+.kmm-market-item-col {
+	display: flex;
+	align-items: center;
+}
