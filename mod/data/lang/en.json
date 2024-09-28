@@ -51,6 +51,8 @@
 	"MOD_KMM_BUTTON_CONTRIBUTE": "Contribute",
 	"MOD_KMM_BUTTON_CLAIM_REWARD": "Collect Reward",
 	"MOD_KMM_BUTTON_SELL_ON_MARKET": "Create Market Listing",
+	"MOD_KMM_BUTTON_MARKET_BUY": "Buy",
+	"MOD_KMM_BUTTON_MARKET_PURCHASE": "Purchase for ",
 
 	"MOD_KMM_MENU_HEADER": "Multiplayer",
 	"MOD_KMM_MENU_HEADER_FRIENDS": "Friends",
@@ -160,6 +162,7 @@
 	"MOD_KMM_MARKET_SOLD_BY": "Sold By",
 	"MOD_KMM_MARKET_AVAILABLE": "Available: %s",
 	"MOD_KMM_MARKET_PRICE": "Price: %s",
+	"MOD_KMM_BUY_MODAL_TITLE": "Buy Item",
 
 	"MOD_KMM_TRANSFER_WINDOW_HEADER": "Transfer Inventory",
 	"MOD_KMM_TRANSFER_WINDOW_INFO": "Your transfer inventory contains items you've added from your bank. From here, you can gift these items to another player, start a trade offer, or return them to your bank.",

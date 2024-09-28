@@ -145,6 +145,22 @@
 		</button>
 	</div>
 </template>
+<template id="template-kru-multiplayer-market-buy-modal">
+	<div class="form-group kmm-gp-group">
+		<kmm-item-slider :data-item-id="state.market_buy_item.item_id" :data-max="state.market_buy_item.available"></kmm-item-slider>
+	</div>
+	<div class="kmm-button-tray">
+		<button type="button" class="btn btn-success" @click="state.buy_market_item($event)">
+			<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
+			<lang-string lang-id="MOD_KMM_BUTTON_MARKET_PURCHASE"></lang-string>
+			<img class="skill-icon-xxs ml-1 mr-1" src="assets/media/main/coins.svg">
+			<span>{{ state.market_buy_price_formatted }}</span>
+		</button>
+		<button type="button" class="btn btn-danger" @click="state.close_modal()">
+			<lang-string lang-id="MOD_KMM_BUTTON_CANCEL"></lang-string>
+		</button>
+	</div>
+</template>
 <template id="template-kru-multiplayer-change-icon-modal">
 	<input class="form-control" type="text" v-model="state.icon_search" placeholder="Search for an icon..."/>
 	<div class="kmm-icon-selector" v-if="state.filtered_icons.length > 0">
@@ -325,6 +341,11 @@
 					<div class="kmm-market-item-col">
 						<lang-string-f class="text-success" lang-id="MOD_KMM_MARKET_PRICE" :lang-arg-1="numberWithCommas(item.price)"></lang-string-f>
 						<img class="skill-icon-xxs mr-1" src="assets/media/main/coins.svg">
+					</div>
+					<div class="kmm-market-item-col">
+						<button type="button" class="btn btn-success m-1" @click="state.show_market_buy_modal(item)">
+							<lang-string lang-id="MOD_KMM_BUTTON_MARKET_BUY"></lang-string>
+						</button>
 					</div>
 				</div>
 			</div>

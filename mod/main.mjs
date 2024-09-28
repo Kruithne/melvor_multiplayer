@@ -53,7 +53,7 @@ const state = ui.createStore({
 	profile_icon: 'melvorF:Fire_Acolyte_Wizard_Hat',
 
 	add_gp_value: 0,
-	add_item_value: 0,
+	item_slider_value: 0,
 
 	transfer_inventory: [],
 	selected_transfer_item_id: '',
@@ -81,6 +81,7 @@ const state = ui.createStore({
 
 	market_active_tab: 'search',
 	market_results: [],
+	market_buy_item: null,
 
 	events: {
 		friend_requests: []
@@ -193,6 +194,13 @@ const state = ui.createStore({
 		
 		return `${minutes} ${minutes !== 1 ? 'minutes' : 'minute'}`;
 	},
+
+	get market_buy_price_formatted() {
+		if (this.market_buy_item)
+			return formatNumber(this.market_buy_item.price * this.item_slider_value) + ' GP';
+
+		return '0 GP';
+	},
 	// #endregion
 
 	// #region COMMON ACTIONS
@@ -241,6 +249,15 @@ const state = ui.createStore({
 	},
 	// #endregion
 
+	// #region MARKET ACTIONS
+	show_market_buy_modal(item) {
+		this.market_buy_item = item;
+		queue_modal('MOD_KMM_BUY_MODAL_TITLE', 'market-buy-modal', this.get_item_icon(item.item_id), {
+			showConfirmButton: false
+		}, true, false);
+	},
+	// #endregion
+
 	// #region CAMPAIGN ACTIONS
 	get_campaign_svg(id) {
 		return this.get_svg(this.campaign_data[id]?.asset ?? 'campaign_placeholder')
@@ -276,7 +293,7 @@ const state = ui.createStore({
 		if (!state.campaign_active || !state.campaign_has_data)
 			return notify_error('MOD_KMM_CAMPAIGN_CONTRIBUTE_ERR');
 
-		const item_amount = state.add_item_value;
+		const item_amount = state.item_slider_value;
 		if (item_amount <= 0)
 			return;
 
@@ -1777,11 +1794,8 @@ class KMMItemSlider extends HTMLElement {
 	constructor() {
 		super();
 
-		const item_id = this.getAttribute('data-item-id');
-		const item = game.items.getObjectByID(item_id);
-		const item_owned_qty = game.bank.getQty(item);
-
-		state.add_item_value = 0;
+		const max = this.getMax();
+		state.item_slider_value = 0;
 
 		const $input = document.createElement('input');
 		$input.type = 'text';
@@ -1790,12 +1804,12 @@ class KMMItemSlider extends HTMLElement {
 
 		this.slider = new BankRangeSlider($input);
 
-		this.slider.sliderMax = item_owned_qty;
+		this.slider.sliderMax = max;
 		this.slider.sliderMin = 0;
 
 		this.slider.sliderInstance.update({
 			min: 0,
-			max: item_owned_qty
+			max
 		});
 
 		const $value = document.createElement('input');
@@ -1806,27 +1820,31 @@ class KMMItemSlider extends HTMLElement {
 		$value.addEventListener('input', () => this.slider.setSliderPosition($value.value));
 		this.slider.customOnChange = (amount) => {
 			$value.value = amount;
-			state.add_item_value = amount;
+			state.item_slider_value = amount;
 		};
 
 		this.appendChild($value);
 	}
 
-	attributeChangedCallback(name, oldValue, newValue) {
-		const item = game.items.getObjectByID(newValue);
-		const item_owned_qty = game.bank.getQty(item);
+	getMax() {
+		const item_id = this.getAttribute('data-item-id');
+		return parseInt(this.getAttribute('data-max') ?? game.bank.getQty(game.items.getObjectByID(item_id)));	
+	}
 
-		this.slider.sliderMax = item_owned_qty;
+	attributeChangedCallback(name, oldValue, newValue) {
+		const max = this.getMax();
+
+		this.slider.sliderMax = max;
 		this.slider.sliderMin = 0;
 
 		this.slider.sliderInstance.update({
 			min: 0,
-			max: item_owned_qty
+			max: max
 		});
 	}
 
 	static get observedAttributes() {
-		return ['data-item-id'];
+		return ['data-item-id', 'data-max'];
 	}
 }
 
