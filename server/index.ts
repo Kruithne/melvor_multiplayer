@@ -681,12 +681,42 @@ session_post_route('/api/market/sell', async (req, url, client_id, json) => {
 	return { success: true } as JsonSerializable;
 });
 
+session_post_route('/api/market/buy', async (req, url, client_id, json) => {
+	const lot_id = json.id;
+	if (typeof lot_id !== 'number')
+		return 400; // Bad Request
+
+	const buy_qty = json.qty;
+	if (typeof buy_qty !== 'number' || buy_qty <= 0)
+		return 400; // Bad Request
+
+	const lot = await db_get_single('SELECT * FROM `market_items` WHERE `id` = ? LIMIT 1', [lot_id]) as db_row.market_items;
+	if (lot === null || lot.available <= 0)
+		return { error_lang: 'MOD_KMM_MARKET_BUY_ERROR_INVALID' };
+
+	if (lot.client_id === client_id)
+		return { error_lang: 'MOD_KMM_MARKET_BUY_ERROR_SELF' };
+
+	const final_qty = Math.min(lot.available, buy_qty);
+	const final_cost = final_qty * lot.price;
+
+	await db_execute('UPDATE `market_items` SET `available` = `available` - ? WHERE `id` = ? LIMIT 1', [final_qty, lot_id]);
+
+	return {
+		success: true,
+		item_id: lot.item_id,
+		item_qty: final_qty,
+		gp_loss: final_cost,
+		new_item_qty: Math.max(lot.qty - final_qty, 0)
+	} as JsonSerializable;
+});
+
 session_post_route('/api/market/search', async (req, url, client_id, json) => {
 	// todo: support item_id filter
 	// todo: support page index
 
 	const result = await db_get_all(
-		'SELECT * FROM `market_items` WHERE `client_id` != ? ORDER BY `id` DESC LIMIT ' + MARKET_ITEMS_PER_PAGE,
+		'SELECT * FROM `market_items` WHERE `client_id` != ? AND `available` > 0 ORDER BY `id` DESC LIMIT ' + MARKET_ITEMS_PER_PAGE,
 		[client_id]
 	);
 
@@ -697,7 +727,7 @@ session_post_route('/api/market/search', async (req, url, client_id, json) => {
 		items[i] = {
 			id: row.id,
 			item_id: row.item_id,
-			available: row.qty - row.sold,
+			available: row.available,
 			price: row.price,
 			seller: await get_client_display(row.client_id)
 		};

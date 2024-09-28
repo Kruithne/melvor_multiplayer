@@ -13,3 +13,6 @@ CREATE INDEX `idx_item_id` ON `market_items` (`item_id`);
 CREATE INDEX `idx_price` ON `market_items` (`price`);
 CREATE INDEX `idx_client_id` ON `market_items` (`client_id`);
 CREATE INDEX `idx_item_id_price` ON `market_items` (`item_id`, `price`);
+
+-- [3] rename `sold` to `available` and remove the default
+ALTER TABLE `market_items` CHANGE `sold` `available` BIGINT UNSIGNED NOT NULL;

@@ -258,6 +258,35 @@ const state = ui.createStore({
 			showConfirmButton: false
 		}, false, false);
 	},
+
+	async buy_market_item(event) {
+		const $button = event.currentTarget;
+
+		if (!state.market_buy_item)
+			return notify_error('KMM_GENERIC_ERROR');
+
+		if (state.item_slider_value <= 0)
+			return notify_error('MOD_KMM_MARKET_BUY_NOTHING');
+
+		show_button_spinner($button);
+
+		const res = await api_post('/api/market/buy', {
+			id: state.market_buy_item.id,
+			qty: state.item_slider_value
+		});
+
+		if (res?.success) {
+			add_bank_item(res.item_id, res.item_qty);
+			game.gp.remove(res.gp_loss);
+
+			state.market_buy_item.available = res.new_item_qty;
+		} else {
+			notify_error(res?.error_lang ?? 'MOD_KMM_MARKET_BUY_ERROR');
+		}
+
+		hide_button_spinner($button);
+		this.close_modal();
+	},
 	// #endregion
 
 	// #region CAMPAIGN ACTIONS

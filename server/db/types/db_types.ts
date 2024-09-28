@@ -89,6 +89,6 @@ export type market_items = {
 	client_id: number;
 	item_id: string;
 	qty: number;
-	sold: number;
+	available: number;
 	price: number;
 };
