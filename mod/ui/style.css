@@ -312,8 +312,8 @@
 	border-radius: 0.25rem;
 	width: 100%;
 	padding: 10px;
-	display: flex;
-	justify-content: space-between;
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
 }
 
 .kmm-market-item-icon {
