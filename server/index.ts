@@ -180,9 +180,9 @@ setTimeout(sweep_data_caches, CACHE_RESET_INTERVAL);
 async function market_list_item(client_id: number, item_id: string, item_qty: number, item_sell_price: number) {
 	const existing = await db_get_single('SELECT `id` FROM `market_items` WHERE `client_id` = ? AND `item_id` = ? AND `price` = ?', [client_id, item_id, item_sell_price]) as db_row.market_items;
 	if (existing !== null)
-		await db_execute('UPDATE `market_items` SET `qty` = `qty` + ? WHERE `id` = ?', [item_qty, existing.id]);
+		await db_execute('UPDATE `market_items` SET `qty` = `qty` + ?, `available` = `available` + ? WHERE `id` = ?', [item_qty, item_qty, existing.id]);
 	else
-		await db_execute('INSERT INTO `market_items` (`client_id`, `item_id`, `qty`, `price`) VALUES(?, ?, ?, ?)', [client_id, item_id, item_qty, item_sell_price]);	
+		await db_execute('INSERT INTO `market_items` (`client_id`, `item_id`, `qty`, `price`, `available`) VALUES(?, ?, ?, ?, ?)', [client_id, item_id, item_qty, item_sell_price, item_qty]);	
 }
 // #endregion
 
