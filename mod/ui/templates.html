@@ -310,7 +310,7 @@
 		<div v-if="state.market_active_tab == 'search'">
 			<div id="kmm-market-search-results">
 				<div class="kmm-market-search-result" v-for="item in state.market_results">
-					{{ item.item_id }}
+					{{ state.get_item_name(item.item_id) }}
 				</div>
 			</div>
 		</div>
