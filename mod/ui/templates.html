@@ -310,7 +310,10 @@
 		<div v-if="state.market_active_tab == 'search'">
 			<div id="kmm-market-search-results">
 				<div class="kmm-market-search-result" v-for="item in state.market_results">
-					{{ state.get_item_name(item.item_id) }}
+					<div>
+						<img class="kmm-market-item-icon mr-2" :src="state.get_item_icon(item.item_id)">
+						<span>{{ state.get_item_name(item.item_id) }}</span>
+					</div>
 				</div>
 			</div>
 		</div>

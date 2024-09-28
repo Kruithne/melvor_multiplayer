@@ -311,5 +311,15 @@
 	box-shadow: 0 1px 2px rgb(33 34 35/50%),0 1px 2px rgb(26 26 27/50%)!important;
 	border-radius: 0.25rem;
 	width: 100%;
-	padding: 20px;
+	padding: 10px;
+	display: flex;
+	justify-content: space-between;
+}
+
+.kmm-market-item-icon {
+	background-color: #323942;
+	padding: 7px;
+	width: 45px;
+	height: 45px;
+	border-radius: 5px;
 }
