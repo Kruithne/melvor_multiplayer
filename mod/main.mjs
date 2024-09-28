@@ -252,9 +252,11 @@ const state = ui.createStore({
 	// #region MARKET ACTIONS
 	show_market_buy_modal(item) {
 		this.market_buy_item = item;
-		queue_modal('MOD_KMM_BUY_MODAL_TITLE', 'market-buy-modal', this.get_item_icon(item.item_id), {
+
+		const item_name = this.get_item_name(item.item_id);
+		queue_modal(getLangString('MOD_KMM_MARKET_BUY_MODAL_TITLE') + item_name, 'market-buy-modal', this.get_item_icon(item.item_id), {
 			showConfirmButton: false
-		}, true, false);
+		}, false, false);
 	},
 	// #endregion
 
