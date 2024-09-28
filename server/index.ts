@@ -726,9 +726,11 @@ session_post_route('/api/market/search', async (req, url, client_id, json) => {
 	}
 
 	const result = await db_get_all(
-		'SELECT * FROM `market_items` WHERE `client_id` != ? AND `available` > 0' + item_filter + ' ORDER BY `id` DESC LIMIT ' + MARKET_ITEMS_PER_PAGE,
+		'SELECT *, COUNT(*) OVER() as `total_items` FROM `market_items` WHERE `client_id` != ? AND `available` > 0' + item_filter + ' ORDER BY `id` DESC LIMIT ' + MARKET_ITEMS_PER_PAGE,
 		query_parameters
 	);
+
+	const total_items = result[0]?.total_items ?? 0;
 
 	const items = Array(result.length);
 	for (let i = 0; i < result.length; i++) {
@@ -745,6 +747,7 @@ session_post_route('/api/market/search', async (req, url, client_id, json) => {
 
 	return {
 		success: true,
+		total_items,
 		items
 	};
 });
