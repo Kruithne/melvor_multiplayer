@@ -167,6 +167,7 @@
 	"MOD_KMM_MARKET_BUY_ERROR": "Cannot buy that right now",
 	"MOD_KMM_MARKET_BUY_ERROR_INVALID": "That item is no longer for sale",
 	"MOD_KMM_MARKET_BUY_ERROR_SELF": "You can't buy your own items",
+	"MOD_KMM_MARKET_BUY_ERROR_UNKNOWN": "You cannot buy that item",
 
 	"MOD_KMM_TRANSFER_WINDOW_HEADER": "Transfer Inventory",
 	"MOD_KMM_TRANSFER_WINDOW_INFO": "Your transfer inventory contains items you've added from your bank. From here, you can gift these items to another player, start a trade offer, or return them to your bank.",

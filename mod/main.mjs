@@ -268,6 +268,10 @@ const state = ui.createStore({
 		if (state.item_slider_value <= 0)
 			return notify_error('MOD_KMM_MARKET_BUY_NOTHING');
 
+		const item = game.items.getObjectByID(state.market_buy_item.item_id);
+		if (!item)
+			return notify_error('MOD_KMM_MARKET_BUY_ERROR_UNKNOWN');
+
 		show_button_spinner($button);
 
 		const res = await api_post('/api/market/buy', {
