@@ -41,10 +41,16 @@ type TransferItem = {
 	id: string;
 	qty: number;
 }
+
+type ClientDisplayInfo = {
+	display_name: string;
+	icon_id: string;
+}
 // #endregion
 
 // #region CONSTANTS
 const DEFAULT_USER_ICON_ID = 'melvorF:Fire_Acolyte_Wizard_Hat';
+const DEFAULT_USER_DISPLAY_NAME = 'Unknown Idler';
 const MAX_TRANSFER_ITEM_COUNT = 32;
 
 // maximum cache life is X * 2, minimum is X.
@@ -78,6 +84,7 @@ const client_session_cache = new Map<string, CachedSession>();
 const friend_request_cache = new Map<number, FriendRequest[]>();
 const gift_cache = new Map<number, number[]>();
 const display_name_cache = new Map<number, string>();
+const display_icon_cache = new Map<number, string>();
 
 const trade_cache = new Map<number, ActiveTrade>(); // trade_id to ActiveTrade
 const trade_player_cache = new Map<number, number[]>(); // client_id to trade_id[]
@@ -146,6 +153,7 @@ function sweep_data_caches() {
 	friend_request_cache.clear();
 	gift_cache.clear();
 	display_name_cache.clear();
+	display_icon_cache.clear();
 
 	trade_cache.clear();
 	trade_player_cache.clear();
@@ -325,7 +333,47 @@ function validate_display_name(display_name: unknown): string {
 		if (trimmed.length > 0 && trimmed.length <= 20)
 			return trimmed;
 	}
-	return 'Unknown Idler';
+	return DEFAULT_USER_DISPLAY_NAME;
+}
+
+async function get_client_display(client_id: number): Promise<ClientDisplayInfo> {
+	const result = { display_name: DEFAULT_USER_DISPLAY_NAME, icon_id: DEFAULT_USER_ICON_ID };
+
+	const cached_display_name = display_name_cache.get(client_id);
+	if (cached_display_name !== undefined)
+		result.display_name = cached_display_name;
+
+	const cached_display_icon = display_icon_cache.get(client_id);
+	if (cached_display_icon !== undefined)
+		result.icon_id = cached_display_icon;
+
+	if (cached_display_name === undefined || cached_display_icon === undefined) {
+		const client = await db_get_single('SELECT `display_name`, `icon_id` FROM `clients` WHERE `id` = ? LIMIT 1', [client_id]) as db_row.clients;
+
+		if (client !== null) {
+			display_name_cache.set(client_id, client.display_name);
+			display_icon_cache.set(client_id, client.icon_id);
+
+			result.display_name = client.display_name;
+			result.icon_id = client.icon_id;
+		}
+	}
+
+	return result;
+}
+
+async function get_client_display_icon(client_id: number): Promise<string> {
+	const cached = display_icon_cache.get(client_id);
+	if (cached !== undefined)
+		return cached;
+
+	const client = await db_get_single('SELECT `icon_id` FROM `clients` WHERE `id` = ? LIMIT 1', [client_id]) as db_row.clients;
+	if (client !== null) {
+		display_icon_cache.set(client_id, client.icon_id);
+		return client.icon_id;
+	}
+
+	return DEFAULT_USER_ICON_ID;
 }
 
 async function get_client_display_name(client_id: number): Promise<string> {
@@ -333,13 +381,13 @@ async function get_client_display_name(client_id: number): Promise<string> {
 	if (cached !== undefined)
 		return cached;
 
-	const client = await db_get_single('SELECT `display_name` FROM `clients` WHERE `id` = ?', [client_id]) as db_row.clients;
+	const client = await db_get_single('SELECT `display_name` FROM `clients` WHERE `id` = ? LIMIT 1', [client_id]) as db_row.clients;
 	if (client !== null) {
 		display_name_cache.set(client_id, client.display_name);
 		return client.display_name;
 	}
 
-	return 'Unknown Idler';
+	return DEFAULT_USER_DISPLAY_NAME;
 }
 // #endregion
 
