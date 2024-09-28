@@ -348,7 +348,7 @@
 					<lang-string lang-id="MOD_KMM_MARKET_SEARCH" class="mr-1"></lang-string>
 				</div>
 			</template>
-			<div id="kmm-market-search-results" v-if="state.market_results.length > 0">
+			<div id="kmm-market-search-results" v-if="state.market_results.length > 0 && !state.market_search_loading">
 				<div class="kmm-market-search-result" v-for="item in state.market_results">
 					<div class="kmm-market-item-col">
 						<img class="kmm-market-item-icon mr-3" :src="state.get_item_icon(item.item_id)">
