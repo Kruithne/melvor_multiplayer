@@ -720,9 +720,10 @@ session_post_route('/api/market/search', async (req, url, client_id, json) => {
 		query_parameters.push(json.item_id);
 	}
 
+	const sort = json.sort === 0 ? 'DESC' : 'ASC';
 	const page_offset = typeof json.page === 'number' ? ' OFFSET ' + (json.page - 1) * MARKET_ITEMS_PER_PAGE : '';
 	const result = await db_get_all(
-		'SELECT *, COUNT(*) OVER() as `total_items` FROM `market_items` WHERE `client_id` != ? AND `available` > 0' + item_filter + ' ORDER BY `id` DESC LIMIT ' + MARKET_ITEMS_PER_PAGE + page_offset,
+		'SELECT *, COUNT(*) OVER() as `total_items` FROM `market_items` WHERE `client_id` != ? AND `available` > 0' + item_filter + ' ORDER BY `price` ' + sort + ' LIMIT ' + MARKET_ITEMS_PER_PAGE + page_offset,
 		query_parameters
 	);
 

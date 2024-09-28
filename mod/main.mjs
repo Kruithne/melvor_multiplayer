@@ -91,6 +91,7 @@ const state = ui.createStore({
 	market_filter_search: '',
 	market_filter_items: [],
 	market_search_loading: false,
+	market_sort_direction: 1,
 
 	market_total_items: 0,
 	market_current_page: 1,
@@ -378,6 +379,10 @@ const state = ui.createStore({
 
 		if (this.market_current_page !== before)
 			update_market_search();
+	},
+
+	toggle_market_sort() {
+		state.market_sort_direction = state.market_sort_direction ^ 1;
 	},
 	// #endregion
 
@@ -1162,7 +1167,8 @@ async function update_market_search() {
 	state.market_search_loading = true;
 
 	const data = {
-		page: state.market_current_page
+		page: state.market_current_page,
+		sort: state.market_sort_direction
 	};
 
 	if (state.market_filter_item !== null)

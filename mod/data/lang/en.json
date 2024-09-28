@@ -57,6 +57,8 @@
 	"MOD_KMM_BUTTON_PAGE_PREV": "« Previous",
 	"MOD_KMM_BUTTON_PAGE_FIRST": "« First",
 	"MOD_KMM_BUTTON_PAGE_LAST": "Last »",
+	"MOD_KMM_BUTTON_MARKET_SORT_ASC": "Price Sort: Low to High",
+	"MOD_KMM_BUTTON_MARKET_SORT_DESC": "Price Sort: High to Low",
 
 	"MOD_KMM_MENU_HEADER": "Multiplayer",
 	"MOD_KMM_MENU_HEADER_FRIENDS": "Friends",
