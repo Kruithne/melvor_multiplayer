@@ -1104,7 +1104,12 @@ async function market_create_listing(item, item_qty, item_sell_price) {
 }
 
 async function update_market_search() {
-	const res = await api_post('/api/market/search', {});
+	const data = {};
+
+	if (state.market_filter_item !== null)
+		data.item_id = state.market_filter_item;
+
+	const res = await api_post('/api/market/search', data);
 	if (res?.success)
 		state.market_results = res.items;
 }

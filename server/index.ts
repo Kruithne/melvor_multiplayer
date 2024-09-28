@@ -712,12 +712,22 @@ session_post_route('/api/market/buy', async (req, url, client_id, json) => {
 });
 
 session_post_route('/api/market/search', async (req, url, client_id, json) => {
-	// todo: support item_id filter
 	// todo: support page index
 
+	const query_parameters: Array<unknown> = [client_id];
+
+	let item_filter = '';
+	if (json.item_id !== undefined) {
+		if (typeof json.item_id !== 'string')
+			return 400; // Bad Request
+
+		item_filter = ' AND `item_id` = ?'
+		query_parameters.push(json.item_id);
+	}
+
 	const result = await db_get_all(
-		'SELECT * FROM `market_items` WHERE `client_id` != ? AND `available` > 0 ORDER BY `id` DESC LIMIT ' + MARKET_ITEMS_PER_PAGE,
-		[client_id]
+		'SELECT * FROM `market_items` WHERE `client_id` != ? AND `available` > 0' + item_filter + ' ORDER BY `id` DESC LIMIT ' + MARKET_ITEMS_PER_PAGE,
+		query_parameters
 	);
 
 	const items = Array(result.length);
