@@ -685,7 +685,23 @@ session_post_route('/api/market/search', async (req, url, client_id, json) => {
 	// todo: support item_id filter
 	// todo: support page index
 
-	const items = await db_get_all('SELECT * FROM `market_items` ORDER BY `id` DESC LIMIT ' + MARKET_ITEMS_PER_PAGE, []);
+	const result = await db_get_all(
+		'SELECT * FROM `market_items` ORDER BY `id` DESC LIMIT ' + MARKET_ITEMS_PER_PAGE,
+		[]
+	);
+
+	const items = Array(result.length);
+	for (let i = 0; i < result.length; i++) {
+		const row = result[i] as db_row.market_items;
+
+		items[i] = {
+			id: row.id,
+			item_id: row.item_id,
+			available: row.qty - row.sold,
+			price: row.price,
+			seller: await get_client_display(row.client_id)
+		};
+	}
 
 	return {
 		success: true,

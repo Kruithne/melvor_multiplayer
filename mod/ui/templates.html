@@ -314,6 +314,11 @@
 						<img class="kmm-market-item-icon mr-2" :src="state.get_item_icon(item.item_id)">
 						<span>{{ state.get_item_name(item.item_id) }}</span>
 					</div>
+					<div>
+						<lang-string lang-id="MOD_KMM_MARKET_SOLD_BY"></lang-string>
+						<img class="skill-icon-xs" :src="state.get_item_icon(item.seller.icon_id)"/>
+						<span>{{ item.seller.display_name }}</span>
+					</div>
 				</div>
 			</div>
 		</div>
