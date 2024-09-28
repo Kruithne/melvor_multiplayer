@@ -686,8 +686,8 @@ session_post_route('/api/market/search', async (req, url, client_id, json) => {
 	// todo: support page index
 
 	const result = await db_get_all(
-		'SELECT * FROM `market_items` ORDER BY `id` DESC LIMIT ' + MARKET_ITEMS_PER_PAGE,
-		[]
+		'SELECT * FROM `market_items` WHERE `client_id` != ? ORDER BY `id` DESC LIMIT ' + MARKET_ITEMS_PER_PAGE,
+		[client_id]
 	);
 
 	const items = Array(result.length);
