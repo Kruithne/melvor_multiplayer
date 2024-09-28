@@ -263,7 +263,7 @@ async function get_campaign_history(client_id: number) {
 }
 
 async function get_campaign_rankings(client_id: number) {
-	const rankings_raw = await db_get_all('SELECT b.`campaign_id`, COUNT(*) AS `completed` FROM `campaign_contributions` AS a JOIN `campaign_state` AS b ON a.`campaign_id` = b.`id` WHERE a.`client_id` = ? GROUP BY b.`campaign_id`', [client_id]);
+	const rankings_raw = await db_get_all('SELECT b.`campaign_id`, COUNT(*) AS `completed` FROM `campaign_contributions` AS a JOIN `campaign_state` AS b ON a.`campaign_id` = b.`id` WHERE a.`client_id` = ? AND b.`complete` = 1 GROUP BY b.`campaign_id`', [client_id]);
 	const rankings = {} as Record<string, number>;
 	for (const row of rankings_raw)
 		rankings[row.campaign_id] = row.completed;
