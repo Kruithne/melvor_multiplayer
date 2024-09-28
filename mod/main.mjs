@@ -22,6 +22,8 @@ const CHARITY_TIMEOUT = 1000 * 60 * 60 * 24; // 24 hours
 const CHARITY_CHECK_TIMEOUT = 10 * 1000; // 10 seconds
 
 const CAMPAIGN_MAX_SOLO_CONTRIB_FAC = 0.25;
+
+const MARKET_ITEMS_PER_PAGE = 30;
 // #endregion
 
 // #region GLOBALS
@@ -34,6 +36,7 @@ let is_updating_charity_tree = false;
 let last_charity_check = 0;
 
 let has_sorted_market_filter_items = false;
+let has_done_first_market_search = false;
 
 const skill_pets = new Map();
 // #endregion
@@ -88,6 +91,9 @@ const state = ui.createStore({
 	market_filter_search: '',
 	market_filter_items: [],
 	market_search_loading: false,
+
+	market_total_items: 0,
+	market_current_page: 1,
 
 	events: {
 		friend_requests: []
@@ -218,6 +224,10 @@ const state = ui.createStore({
 
 		return this.market_filter_items.filter(item => item.name_lower.includes(this.market_filter_search_sanitized));
 	},
+
+	get market_page_count() {
+		return Math.ceil(this.market_total_items / MARKET_ITEMS_PER_PAGE);
+	},
 	// #endregion
 
 	// #region COMMON ACTIONS
@@ -269,7 +279,7 @@ const state = ui.createStore({
 	// #region MARKET ACTIONS
 	clear_market_filter() {
 		this.market_filter_item = null;
-		update_market_search();
+		state.market_page_first();
 	},
 
 	choose_market_filter() {
@@ -285,7 +295,7 @@ const state = ui.createStore({
 	select_market_filter_item(item_id) {
 		state.market_filter_item = item_id;
 		state.market_active_tab = 'search';
-		update_market_search();
+		state.market_page_first();
 	},
 
 	show_market_buy_modal(item) {
@@ -328,6 +338,46 @@ const state = ui.createStore({
 
 		hide_button_spinner($button);
 		this.close_modal();
+	},
+
+	market_page(page) {
+		const before = this.market_current_page;
+		this.market_current_page = page;
+
+		if (this.market_current_page !== before)
+			update_market_search();
+	},
+
+	market_page_first() {
+		const before = this.market_current_page;
+		this.market_current_page = 1;
+
+		if (this.market_current_page !== before)
+			update_market_search();
+	},
+
+	market_page_prev() {
+		const before = this.market_current_page;
+		this.market_current_page = Math.max(this.market_current_page - 1, 1);
+
+		if (this.market_current_page !== before)
+			update_market_search();
+	},
+
+	market_page_next() {
+		const before = this.market_current_page;
+		this.market_current_page = Math.min(this.market_current_page + 1, this.market_page_count);
+
+		if (this.market_current_page !== before)
+			update_market_search();
+	},
+
+	market_page_last() {
+		const before = this.market_current_page;
+		this.market_current_page = this.market_page_count;
+
+		if (this.market_current_page !== before)
+			update_market_search();
 	},
 	// #endregion
 
@@ -1069,10 +1119,12 @@ function on_page_toggle(id, callback, visible_only) {
 
 // #region MARKET FUNCTIONS
 async function update_market_page() {
-	if (state.market_active_tab === 'search')
-		await update_market_search();
-	// todo: early return if we're already updating
-	// todo: if we're on the "my listings" page, update the data with a throttle timer
+	if (state.market_active_tab === 'search') {
+		if (!has_done_first_market_search) {
+			has_done_first_market_search = true;
+			await update_market_search();
+		}
+	}
 }
 
 async function market_create_listing(item, item_qty, item_sell_price) {
@@ -1106,17 +1158,21 @@ async function market_create_listing(item, item_qty, item_sell_price) {
 async function update_market_search() {
 	if (state.market_search_loading)
 		return;
-	
+
 	state.market_search_loading = true;
 
-	const data = {};
+	const data = {
+		page: this.market_current_page
+	};
 
 	if (state.market_filter_item !== null)
 		data.item_id = state.market_filter_item;
 
 	const res = await api_post('/api/market/search', data);
-	if (res?.success)
+	if (res?.success) {
+		state.market_total_items = res.total_items;
 		state.market_results = res.items;
+	}
 
 	state.market_search_loading = false;
 }

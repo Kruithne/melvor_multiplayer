@@ -379,6 +379,23 @@
 			<div class="p-4 block" v-else>
 				<lang-string lang-id="MOD_KMM_MARKET_NO_RESULTS"></lang-string>
 			</div>
+			<div id="kmm-market-pagation">
+				<button type="button" class="btn btn-info m-1" @click="state.market_page_first()">
+					<lang-string lang-id="MOD_KMM_BUTTON_PAGE_FIRST"></lang-string>
+				</button>
+				<button type="button" class="btn btn-info m-1 mr-5" @click="state.market_page_prev()">
+					<lang-string lang-id="MOD_KMM_BUTTON_PAGE_PREV"></lang-string>
+				</button>
+				<button type="button" class="btn btn-info m-1" v-for="page in state.market_page_count" @click="state.market_page(page)">
+					{{ page }}
+				</button>
+				<button type="button" class="btn btn-info m-1 ml-5" @click="state.market_page_next()">
+					<lang-string lang-id="MOD_KMM_BUTTON_PAGE_NEXT"></lang-string>
+				</button>
+				<button type="button" class="btn btn-info m-1" @click="state.market_page_last()">
+					<lang-string lang-id="MOD_KMM_BUTTON_PAGE_LAST"></lang-string>
+				</button>
+			</div>
 		</div>
 		<div class="block block-rounded w-100 p-3" v-if="state.market_active_tab == 'listing'">
 			This is the listing page.

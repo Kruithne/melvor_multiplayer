@@ -397,3 +397,9 @@
 	align-items: center;
 	cursor: pointer;
 }
+
+#kmm-market-pagation {
+	display: flex;
+	justify-content: center;
+	margin-top: 20px;
+}

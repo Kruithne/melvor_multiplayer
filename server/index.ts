@@ -712,8 +712,6 @@ session_post_route('/api/market/buy', async (req, url, client_id, json) => {
 });
 
 session_post_route('/api/market/search', async (req, url, client_id, json) => {
-	// todo: support page index
-
 	const query_parameters: Array<unknown> = [client_id];
 
 	let item_filter = '';
@@ -722,8 +720,9 @@ session_post_route('/api/market/search', async (req, url, client_id, json) => {
 		query_parameters.push(json.item_id);
 	}
 
+	const page_offset = typeof json.page === 'number' ? ' OFFSET ' + (json.page - 1) * MARKET_ITEMS_PER_PAGE : '';
 	const result = await db_get_all(
-		'SELECT *, COUNT(*) OVER() as `total_items` FROM `market_items` WHERE `client_id` != ? AND `available` > 0' + item_filter + ' ORDER BY `id` DESC LIMIT ' + MARKET_ITEMS_PER_PAGE,
+		'SELECT *, COUNT(*) OVER() as `total_items` FROM `market_items` WHERE `client_id` != ? AND `available` > 0' + item_filter + ' ORDER BY `id` DESC LIMIT ' + MARKET_ITEMS_PER_PAGE + page_offset,
 		query_parameters
 	);
 

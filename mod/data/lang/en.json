@@ -53,6 +53,10 @@
 	"MOD_KMM_BUTTON_SELL_ON_MARKET": "Create Market Listing",
 	"MOD_KMM_BUTTON_MARKET_BUY": "Buy",
 	"MOD_KMM_BUTTON_MARKET_PURCHASE": "Purchase for ",
+	"MOD_KMM_BUTTON_PAGE_NEXT": "Next »",
+	"MOD_KMM_BUTTON_PAGE_PREV": "« Previous",
+	"MOD_KMM_BUTTON_PAGE_FIRST": "« First",
+	"MOD_KMM_BUTTON_PAGE_LAST": "Last »",
 
 	"MOD_KMM_MENU_HEADER": "Multiplayer",
 	"MOD_KMM_MENU_HEADER_FRIENDS": "Friends",
