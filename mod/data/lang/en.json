@@ -171,6 +171,7 @@
 	"MOD_KMM_MARKET_SEARCH_ACTIVE": "Searching For:",
 	"MOD_KMM_MARKET_SEARCH": "Click here to search for an item...",
 	"MOD_KMM_MARKET_NO_RESULTS": "No items found!",
+	"MOD_KMM_MARKET_LOADING": "Retrieving items...",
 
 	"MOD_KMM_TRANSFER_WINDOW_HEADER": "Transfer Inventory",
 	"MOD_KMM_TRANSFER_WINDOW_INFO": "Your transfer inventory contains items you've added from your bank. From here, you can gift these items to another player, start a trade offer, or return them to your bank.",

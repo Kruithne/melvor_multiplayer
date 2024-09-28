@@ -87,6 +87,7 @@ const state = ui.createStore({
 	market_filter_item: null,
 	market_filter_search: '',
 	market_filter_items: [],
+	market_search_loading: false,
 
 	events: {
 		friend_requests: []
@@ -1103,6 +1104,8 @@ async function market_create_listing(item, item_qty, item_sell_price) {
 }
 
 async function update_market_search() {
+	state.market_search_loading = true;
+
 	const data = {};
 
 	if (state.market_filter_item !== null)
@@ -1111,6 +1114,8 @@ async function update_market_search() {
 	const res = await api_post('/api/market/search', data);
 	if (res?.success)
 		state.market_results = res.items;
+
+	state.market_search_loading = false;
 }
 
 function load_market_filter_items() {
