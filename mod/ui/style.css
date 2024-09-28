@@ -332,3 +332,68 @@
 .kmm-float-r {
 	float: right;
 }
+
+.kmm-market-filter {
+	background-color: #232a35!important;
+	border-radius: 5px;
+	padding: 15px;
+	margin-bottom: 10px;
+	border-color: orange !important;
+	color: #f5f5f5!important;
+	display: inline-block;
+	position: relative;
+	padding-right: 45px;
+}
+
+.kmm-market-filter-item {
+	background-color: #323942;
+	border-radius: 3px;
+	display: inline-flex;
+	align-items: center;
+	padding: 5px;
+	padding-right: 10px;
+}
+
+.kmm-market-filter-clear {
+	background-color: #ff4545;
+	position: absolute;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	width: 25px;
+	justify-content: center;
+	font-weight: bold;
+	border-bottom-right-radius: 5px;
+	cursor: pointer;
+}
+
+#kmm-market-filter-input {
+	border: 0;
+	background-color: #232a35!important;
+	margin-bottom: 10px;
+	border-radius: 5px;
+	border-color: orange !important;
+	color: #f5f5f5!important;
+	width: 500px;
+	padding: 20px;
+}
+
+#kmm-market-filter-items {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 5px;
+	justify-content: center;
+}
+
+#kmm-market-filter-items > div {
+	width: 250px;
+	background-color: #232a35!important;
+	border-radius: 5px;
+	padding: 10px;
+	color: #f5f5f5 !important;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+}

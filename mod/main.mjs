@@ -33,6 +33,8 @@ let is_connecting = false;
 let is_updating_charity_tree = false;
 let last_charity_check = 0;
 
+let has_sorted_market_filter_items = false;
+
 const skill_pets = new Map();
 // #endregion
 
@@ -82,6 +84,9 @@ const state = ui.createStore({
 	market_active_tab: 'search',
 	market_results: [],
 	market_buy_item: null,
+	market_filter_item: 'melvorD:Ruby',
+	market_filter_search: '',
+	market_filter_items: [],
 
 	events: {
 		friend_requests: []
@@ -201,6 +206,17 @@ const state = ui.createStore({
 
 		return '0 GP';
 	},
+
+	get market_filter_search_sanitized() {
+		return this.market_filter_search.trim().toLowerCase();
+	},
+
+	get market_filter_items_filtered() {
+		if (this.market_filter_search_sanitized.length === 0)
+			return this.market_filter_items;
+
+		return this.market_filter_items.filter(item => item.name_lower.includes(this.market_filter_search_sanitized));
+	},
 	// #endregion
 
 	// #region COMMON ACTIONS
@@ -250,6 +266,28 @@ const state = ui.createStore({
 	// #endregion
 
 	// #region MARKET ACTIONS
+	clear_market_filter() {
+		this.market_filter_item = null;
+		// todo: trigger an item listing update.
+	},
+
+	choose_market_filter() {
+		this.market_active_tab = 'filter';
+		this.market_filter_search = '';
+
+		if (!has_sorted_market_filter_items)
+			load_market_filter_items();
+
+		setTimeout(() => $('kmm-market-filter-input').focus(), 1);
+	},
+
+	select_market_filter_item(item_id) {
+		state.market_filter_item = item_id;
+		state.market_active_tab = 'search';
+		
+		// todo: trigger an item listing update.
+	},
+
 	show_market_buy_modal(item) {
 		this.market_buy_item = item;
 
@@ -1069,6 +1107,27 @@ async function update_market_search() {
 	const res = await api_post('/api/market/search', {});
 	if (res?.success)
 		state.market_results = res.items;
+}
+
+function load_market_filter_items() {
+	state.market_filter_items = [...game.items.registeredObjects].map(e => e[1]).filter(item => {
+		if (item.category === '')
+			return false;
+
+		if (item.isModded)
+			return false;
+
+		return true;
+	}).map(item => {
+		return {
+			id: item.id,
+			name: item.name,
+			name_lower: item.name.toLowerCase(),
+			media: item.media,
+		}
+	});
+
+	has_sorted_market_filter_items = true;
 }
 // #endregion
 

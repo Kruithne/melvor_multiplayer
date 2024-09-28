@@ -323,7 +323,31 @@
 				</a>
 			</div>
 		</div>
+		<div v-if="state.market_active_tab == 'filter'">
+			<input type="text" id="kmm-market-filter-input" v-model="state.market_filter_search" placeholder="Search for items..." class="border-top border-4x">
+			<div id="kmm-market-filter-items">
+				<div v-for="item in state.market_filter_items_filtered" @click="state.select_market_filter_item(item.id)">
+					<img class="kmm-market-item-icon mr-3" :src="item.media">
+					<span>{{ item.name }}</span>
+				</div>
+			</div>
+		</div>
 		<div v-if="state.market_active_tab == 'search'">
+			<template v-if="state.market_filter_item != null">
+				<div class="kmm-market-filter border-top border-4x">
+					<lang-string lang-id="MOD_KMM_MARKET_SEARCH_ACTIVE" class="mr-1"></lang-string>
+					<div class="kmm-market-filter-item">
+						<img class="skill-icon-xxs mr-2" :src="state.get_item_icon(state.market_filter_item)">
+						<span>{{ state.get_item_name(state.market_filter_item) }}</span>
+					</div>
+					<div class="kmm-market-filter-clear" @click="state.clear_market_filter()">X</div>
+				</div>	
+			</template>
+			<template v-else>
+				<div class="kmm-market-filter border-top border-4x pointer-enabled" @click="state.choose_market_filter()">
+					<lang-string lang-id="MOD_KMM_MARKET_SEARCH" class="mr-1"></lang-string>
+				</div>
+			</template>
 			<div id="kmm-market-search-results">
 				<div class="kmm-market-search-result" v-for="item in state.market_results">
 					<div class="kmm-market-item-col">
