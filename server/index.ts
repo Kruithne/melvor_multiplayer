@@ -717,10 +717,7 @@ session_post_route('/api/market/search', async (req, url, client_id, json) => {
 	const query_parameters: Array<unknown> = [client_id];
 
 	let item_filter = '';
-	if (json.item_id !== undefined) {
-		if (typeof json.item_id !== 'string')
-			return 400; // Bad Request
-
+	if (typeof json.item_id === 'string') {
 		item_filter = ' AND `item_id` = ?'
 		query_parameters.push(json.item_id);
 	}
