@@ -383,6 +383,7 @@ const state = ui.createStore({
 
 	toggle_market_sort() {
 		state.market_sort_direction = state.market_sort_direction ^ 1;
+		update_market_search();
 	},
 	// #endregion
 
