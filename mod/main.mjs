@@ -1104,6 +1104,9 @@ async function market_create_listing(item, item_qty, item_sell_price) {
 }
 
 async function update_market_search() {
+	if (state.market_search_loading)
+		return;
+	
 	state.market_search_loading = true;
 
 	const data = {};
