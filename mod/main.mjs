@@ -268,7 +268,7 @@ const state = ui.createStore({
 	// #region MARKET ACTIONS
 	clear_market_filter() {
 		this.market_filter_item = null;
-		// todo: trigger an item listing update.
+		update_market_search();
 	},
 
 	choose_market_filter() {
@@ -284,8 +284,7 @@ const state = ui.createStore({
 	select_market_filter_item(item_id) {
 		state.market_filter_item = item_id;
 		state.market_active_tab = 'search';
-		
-		// todo: trigger an item listing update.
+		update_market_search();
 	},
 
 	show_market_buy_modal(item) {
