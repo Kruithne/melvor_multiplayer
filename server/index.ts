@@ -258,6 +258,19 @@ async function add_campaign_progress(item_qty: number) {
 	update_campaign_progress();
 }
 
+async function get_campaign_history(client_id: number) {
+	return await db_get_all('SELECT a.`item_amount`, a.`taken`, b.`id`, b.`campaign_id`, b.`item_id` FROM `campaign_contributions` AS a JOIN `campaign_state` AS b ON a.`campaign_id` = b.`id` WHERE a.`client_id` = ? AND b.`complete` = 1 ORDER BY a.`campaign_id` DESC LIMIT 15', [client_id]);
+}
+
+async function get_campaign_rankings(client_id: number) {
+	const rankings_raw = await db_get_all('SELECT b.`campaign_id`, COUNT(*) AS `completed` FROM `campaign_contributions` AS a JOIN `campaign_state` AS b ON a.`campaign_id` = b.`id` WHERE a.`client_id` = ? GROUP BY b.`campaign_id`', [client_id]);
+	const rankings = {} as Record<string, number>;
+	for (const row of rankings_raw)
+		rankings[row.campaign_id] = row.completed;
+
+	return rankings;
+}
+
 function tick_campaign_baseline_advancement() {
 	if (campaign_active_id > 0) {
 		const adv_pct = Math.random() * (CAMPAIGN_BASELINE_ADV_MAX - CAMPAIGN_BASELINE_ADV_MIN) + CAMPAIGN_BASELINE_ADV_MIN;
@@ -635,12 +648,8 @@ session_post_route('/api/market/search', async (req, url, client_id, json) => {
 
 // #region ROUTES CAMPAIGN
 session_get_route('/api/campaign/info', async (req, url, client_id) => {
-	const history = await db_get_all('SELECT a.`item_amount`, a.`taken`, b.`id`, b.`campaign_id`, b.`item_id` FROM `campaign_contributions` AS a JOIN `campaign_state` AS b ON a.`campaign_id` = b.`id` WHERE a.`client_id` = ? AND b.`complete` = 1 ORDER BY a.`campaign_id` DESC LIMIT 15', [client_id]);
-	const rankings_raw = await db_get_all('SELECT b.`campaign_id`, COUNT(*) AS `completed` FROM `campaign_contributions` AS a JOIN `campaign_state` AS b ON a.`campaign_id` = b.`id` WHERE a.`client_id` = ? GROUP BY b.`campaign_id`', [client_id]);
-
-	const rankings = {} as Record<string, number>;
-	for (const row of rankings_raw)
-		rankings[row.campaign_id] = row.completed;
+	const rankings = await get_campaign_rankings(client_id);
+	const history = await get_campaign_history(client_id);
 
 	if (campaign_active_id > 0) {
 		const contribution = await db_get_single(
