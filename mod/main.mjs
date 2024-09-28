@@ -1179,6 +1179,9 @@ async function update_market_search() {
 	if (res?.success) {
 		state.market_total_items = res.total_items;
 		state.market_results = res.items;
+	} else {
+		state.market_results = [];
+		state.market_total_items = 0;
 	}
 
 	state.market_search_loading = false;
