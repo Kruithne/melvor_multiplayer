@@ -314,7 +314,7 @@ const state = ui.createStore({
 		const $button = event.currentTarget;
 
 		if (!state.market_buy_item)
-			return notify_error('KMM_GENERIC_ERROR');
+			return notify_error('MOD_KMM_GENERIC_ERR');
 
 		if (state.item_slider_value <= 0)
 			return notify_error('MOD_KMM_MARKET_BUY_NOTHING');
