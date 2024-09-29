@@ -739,7 +739,7 @@ session_post_route('/api/market/payout', async (req, url, client_id, json) => {
 	if (typeof lot_id !== 'number')
 		return 400; // Bad Request
 
-	const lot = await db_get_single('SELECT * FROM `market_items` WHERE `id` = ? LIMIT 1', [client_id]) as db_row.market_items;
+	const lot = await db_get_single('SELECT * FROM `market_items` WHERE `id` = ? LIMIT 1', [lot_id]) as db_row.market_items;
 	if (lot?.client_id !== client_id)
 		return 400; // Bad Request
 
