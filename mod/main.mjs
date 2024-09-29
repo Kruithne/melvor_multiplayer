@@ -397,34 +397,17 @@ const state = ui.createStore({
 		update_market_listings();
 	},
 
-	async claim_market_payout(event, item) {
+	async resolve_market_listing(event, item, cancel) {
 		const $button = event.currentTarget;
 		show_button_spinner($button);
 
-		const res = await api_post('/api/market/payout', { id: item.id });
+		const res = await api_post('/api/market/' + (cancel ? 'cancel' : 'payout'), { id: item.id });
 		if (res?.success) {
 			if (res.payout > 0)
 				game.gp.add(res.payout);
 
-			if (res.ended)
+			if (cancel || res.ended)
 				state.market_listings = state.market_listings.filter(listing => listing.id !== item.id);
-		} else {
-			notify_error('MOD_KMM_GENERIC_ERR');
-		}
-
-		hide_button_spinner($button);
-	},
-
-	async cancel_market_item(event, item) {
-		const $button = event.currentTarget;
-		show_button_spinner($button);
-
-		const res = await api_post('/api/market/cancel', { id: item.id });
-		if (res?.success) {
-			if (res.payout > 0)
-				game.gp.add(res.payout);
-
-			state.market_listings = state.market_listings.filter(listing => listing.id !== item.id);
 		} else {
 			notify_error('MOD_KMM_GENERIC_ERR');
 		}
