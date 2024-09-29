@@ -318,6 +318,9 @@ const state = ui.createStore({
 	async buy_market_item(event) {
 		const $button = event.currentTarget;
 
+		if (is_button_spinning($button))
+			return;
+
 		if (!state.market_buy_item)
 			return notify_error('MOD_KMM_GENERIC_ERR');
 
@@ -405,7 +408,7 @@ const state = ui.createStore({
 	async resolve_market_listing(event, item, cancel) {
 		const $button = event.currentTarget;
 
-		if ($button.classList.contains('disabled'))
+		if ($button.classList.contains('disabled') || is_button_spinning($button))
 			return;
 
 		show_button_spinner($button);
@@ -475,6 +478,9 @@ const state = ui.createStore({
 			return notify_error('MOD_KMM_CAMPAIGN_CONTRIBUTE_AMOUNT_ERR');
 
 		const $button = event.currentTarget;
+		if (is_button_spinning($button))
+			return;
+
 		show_button_spinner($button);
 
 		const res = await api_post('/api/campaign/contribute', { item_amount });
@@ -496,6 +502,9 @@ const state = ui.createStore({
 
 	async claim_campaign_reward(event, campaign) {
 		const $button = event.currentTarget;
+		if (is_button_spinning($button))
+			return;
+
 		show_button_spinner($button);
 
 		let reward_mod = 1.6;
@@ -530,6 +539,9 @@ const state = ui.createStore({
 			return notify_error('MOD_KMM_CHARITY_INVALID_ITEM');
 
 		const $button = event.currentTarget;
+		if (is_button_spinning($button))
+			return;
+
 		show_button_spinner($button);
 
 		const res = await api_post('/api/charity/take', {
@@ -569,6 +581,9 @@ const state = ui.createStore({
 		}
 
 		const $button = event.currentTarget;
+		if (is_button_spinning($button))
+			return;
+
 		show_button_spinner($button);
 
 		const res = await api_post('/api/charity/donate', { items });
@@ -650,6 +665,9 @@ const state = ui.createStore({
 			return;
 
 		const $button = event.currentTarget;
+		if (is_button_spinning($button))
+			return;
+
 		show_button_spinner($button);
 
 		const res = await api_post('/api/trade/counter', {
@@ -689,6 +707,9 @@ const state = ui.createStore({
 			return;
 
 		const $button = event.currentTarget;
+		if (is_button_spinning($button))
+			return;
+
 		show_button_spinner($button);
 
 		const res = await api_post('/api/trade/resolve', { trade_id });
@@ -712,6 +733,9 @@ const state = ui.createStore({
 			return;
 
 		const $button = event.currentTarget;
+		if (is_button_spinning($button))
+			return;
+
 		show_button_spinner($button);
 
 		const res = await api_post('/api/trade/decline', { trade_id });
@@ -731,6 +755,9 @@ const state = ui.createStore({
 			return;
 
 		const $button = event.currentTarget;
+		if (is_button_spinning($button))
+			return;
+
 		show_button_spinner($button);
 
 		const res = await api_post('/api/trade/accept', { trade_id });
@@ -754,6 +781,9 @@ const state = ui.createStore({
 			return;
 
 		const $button = event.currentTarget;
+		if (is_button_spinning($button))
+			return;
+
 		show_button_spinner($button);
 
 		const res = await api_post('/api/trade/cancel', { trade_id });
@@ -782,6 +812,9 @@ const state = ui.createStore({
 
 	async resolve_gift(event, gift_id, accept) {
 		const $button = event.currentTarget;
+
+		if (is_button_spinning($button))
+			return;
 
 		const gift = this.gifts.find(g => g.id === gift_id);
 		if (gift === undefined)
@@ -829,6 +862,9 @@ const state = ui.createStore({
 
 	async confirm_gift(event) {
 		const $button = event.currentTarget;
+
+		if (is_button_spinning($button))
+			return;
 
 		show_button_spinner($button);
 		const friend_id = state.gifting_friend.friend_id;
@@ -916,12 +952,17 @@ const state = ui.createStore({
 	},
 
 	async confirm_icon_pick(event) {
-		show_button_spinner(event.currentTarget);
+		const $button = event.currentTarget;
+		if (is_button_spinning($button))
+			return;
+
+		show_button_spinner($button);
 
 		const res = await api_post('/api/client/set_icon', { icon_id: this.picked_icon });
 		if (res?.success)
 			this.profile_icon = this.picked_icon;
 
+		hide_button_spinner($button);
 		this.close_modal();
 	},
 
@@ -940,6 +981,9 @@ const state = ui.createStore({
 	// #region FRIEND REQ ACTIONS
 	async accept_friend_request(event, request) {
 		const $button = event.currentTarget;
+		if (is_button_spinning($button))
+			return;
+
 		show_button_spinner($button);
 
 		const res = await api_post('/api/friends/accept', {
@@ -960,6 +1004,9 @@ const state = ui.createStore({
 
 	async ignore_friend_request(event, request) {
 		const $button = event.currentTarget;
+		if (is_button_spinning($button))
+			return;
+
 		show_button_spinner($button);
 
 		const res = await api_post('/api/friends/ignore', {
@@ -993,7 +1040,11 @@ const state = ui.createStore({
 	},
 
 	async remove_friend($event) {
-		show_button_spinner($event.currentTarget);
+		const $button = event.currentTarget;
+		if (is_button_spinning($button))
+			return;
+
+		show_button_spinner($button);
 		const friend_id = state.removing_friend.friend_id;
 
 		const res = await api_post('/api/friends/remove', { friend_id });
@@ -1003,6 +1054,7 @@ const state = ui.createStore({
 			notify('MOD_KMM_NOTIF_FRIEND_REMOVED');
 		}
 
+		hide_button_spinner($button);
 		state.close_modal();
 	},
 
@@ -1030,6 +1082,8 @@ const state = ui.createStore({
 
 	async add_friend(event) {
 		const $button = event.currentTarget;
+		if (is_button_spinning($button))
+			return;
 
 		hide_modal_error();
 		show_button_spinner($button);
@@ -1100,6 +1154,14 @@ function hide_button_spinner(element) {
 
 	const $spinner = element.querySelector('[role="status"]');
 	$spinner.classList.add('d-none');
+}
+
+function is_button_spinning(element) {
+	if (typeof element === 'string')
+		element = $(element);
+
+	const $spinner = element.querySelector('[role="status"]');
+	return !$spinner.classList.contains('d-none');
 }
 
 function modal_component(template_id) {
@@ -1721,6 +1783,9 @@ function patch_bank_market() {
 
 	const $market_sell_button = document.getElementById('kmm-market-sell-button');
 	$market_sell_button.addEventListener('click', async () => {
+		if (is_button_spinning($market_sell_button))
+			return;
+
 		show_button_spinner($market_sell_button);
 		await market_create_listing(selected_bank_item.item, slider.quantity, sell_price);
 		hide_button_spinner($market_sell_button);
