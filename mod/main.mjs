@@ -86,11 +86,13 @@ const state = ui.createStore({
 
 	market_active_tab: 'search',
 	market_results: [],
+	market_listings: [],
 	market_buy_item: null,
 	market_filter_item: null,
 	market_filter_search: '',
 	market_filter_items: [],
 	market_search_loading: false,
+	market_listings_loading: false,
 	market_sort_direction: 1,
 
 	market_total_items: 0,
@@ -1130,6 +1132,8 @@ async function update_market_page() {
 			has_done_first_market_search = true;
 			await update_market_search();
 		}
+	} else if (state.market_active_tab === 'listing') {
+		await update_market_listings();
 	}
 }
 
@@ -1159,6 +1163,17 @@ async function market_create_listing(item, item_qty, item_sell_price) {
 	} else {
 		notify_error(res?.error_lang ?? 'MOD_KMM_GENERIC_ERR');
 	}
+}
+
+async function update_market_listings() {
+	if (state.market_listings_loading)
+		return;
+
+	state.market_listings_loading = true;
+
+	const res = await api_get('/api/market/listings');
+	state.market_listings = res?.items ?? [];
+	state.market_listings_loading = false;
 }
 
 async function update_market_search() {

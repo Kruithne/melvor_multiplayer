@@ -711,6 +711,29 @@ session_post_route('/api/market/buy', async (req, url, client_id, json) => {
 	} as JsonSerializable;
 });
 
+session_get_route('/api/market/listings', async (req, url, client_id) => {
+	const results = await db_get_all('SELECT * FROM `market_items` WHERE `client_id` = ?', [client_id]);
+	const items = Array(results.length);
+
+	for (let i = 0; i < results.length; i++) {
+		const row = results[i] as db_row.market_items;
+
+		items[i] = {
+			id: row.id,
+			item_id: row.item_id,
+			available: row.available,
+			qty: row.qty,
+			price: row.price,
+			payout: row.payout
+		};
+	}
+
+	return {
+		success: true,
+		items
+	};
+});
+
 session_post_route('/api/market/search', async (req, url, client_id, json) => {
 	const query_parameters: Array<unknown> = [client_id];
 

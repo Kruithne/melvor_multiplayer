@@ -91,4 +91,5 @@ export type market_items = {
 	qty: number;
 	available: number;
 	price: number;
+	payout: number;
 };

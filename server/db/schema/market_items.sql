@@ -16,3 +16,6 @@ CREATE INDEX `idx_item_id_price` ON `market_items` (`item_id`, `price`);
 
 -- [3] rename `sold` to `available` and remove the default
 ALTER TABLE `market_items` CHANGE `sold` `available` BIGINT UNSIGNED NOT NULL;
+
+-- [4] add `payout` column
+ALTER TABLE `market_items` ADD `payout` BIGINT UNSIGNED NOT NULL DEFAULT 0;
