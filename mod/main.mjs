@@ -94,6 +94,7 @@ const state = ui.createStore({
 	market_search_loading: false,
 	market_listings_loading: false,
 	market_sort_direction: 1,
+	market_completed: [],
 
 	market_total_items: 0,
 	market_current_page: 1,
@@ -142,7 +143,11 @@ const state = ui.createStore({
 	},
 
 	get num_notifications() {
-		return this.num_friend_requests + this.num_transfer_offers;
+		return this.num_friend_requests + this.num_transfer_offers + this.num_market_sold_items;
+	},
+
+	get num_market_sold_items() {
+		return this.market_completed.length;
 	},
 
 	get num_attending_trades() {
@@ -412,8 +417,10 @@ const state = ui.createStore({
 				item.payout += res.payout;
 			}
 
-			if (cancel || res.ended)
+			if (cancel || res.ended) {
 				state.market_listings = state.market_listings.filter(listing => listing.id !== item.id);
+				state.market_completed = state.market_complete.filter(listing => listing !== item.id);
+			}
 		} else {
 			notify_error('MOD_KMM_GENERIC_ERR');
 		}
@@ -870,6 +877,12 @@ const state = ui.createStore({
 	open_transfer_data_page() {
 		state.hide_online_dropdown();
 		changePage(game.pages.getObjectByID('kru_melvor_multiplayer:Transfer_Items'));
+	},
+
+	open_market_page(tab_id) {
+		state.hide_online_dropdown();
+		changePage(game.pages.getObjectByID('kru_melvor_multiplayer:Multiplayer_Market'));
+		state.market_active_tab = tab_id;
 	},
 
 	async add_gp_to_transfer() {
@@ -1535,6 +1548,7 @@ async function get_client_events() {
 	const res = await api_get('/api/events');
 	if (res !== null) {
 		state.events.friend_requests = res.friend_requests;
+		state.market_completed = res.market_completed;
 
 		for (const trade of res.trades) {
 			// .trade_id, .attending, .state

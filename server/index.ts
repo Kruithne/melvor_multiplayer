@@ -85,6 +85,7 @@ const friend_request_cache = new Map<number, FriendRequest[]>();
 const gift_cache = new Map<number, number[]>();
 const display_name_cache = new Map<number, string>();
 const display_icon_cache = new Map<number, string>();
+const market_completed_cached = new Map<number, number[]>();
 
 const trade_cache = new Map<number, ActiveTrade>(); // trade_id to ActiveTrade
 const trade_player_cache = new Map<number, number[]>(); // client_id to trade_id[]
@@ -154,6 +155,7 @@ function sweep_data_caches() {
 	gift_cache.clear();
 	display_name_cache.clear();
 	display_icon_cache.clear();
+	market_completed_cached.clear();
 
 	trade_cache.clear();
 	trade_player_cache.clear();
@@ -179,10 +181,24 @@ setTimeout(sweep_data_caches, CACHE_RESET_INTERVAL);
 // #region MARKET
 async function market_list_item(client_id: number, item_id: string, item_qty: number, item_sell_price: number) {
 	const existing = await db_get_single('SELECT `id` FROM `market_items` WHERE `client_id` = ? AND `item_id` = ? AND `price` = ?', [client_id, item_id, item_sell_price]) as db_row.market_items;
-	if (existing !== null)
+	if (existing !== null) {
 		await db_execute('UPDATE `market_items` SET `qty` = `qty` + ?, `available` = `available` + ? WHERE `id` = ?', [item_qty, item_qty, existing.id]);
-	else
+		remove_player_cache_entry(market_completed_cached, client_id, existing.id);
+	} else {
 		await db_execute('INSERT INTO `market_items` (`client_id`, `item_id`, `qty`, `price`, `available`) VALUES(?, ?, ?, ?, ?)', [client_id, item_id, item_qty, item_sell_price, item_qty]);	
+	}
+}
+
+async function get_market_completed(client_id: number) {
+	const cached = market_completed_cached.get(client_id);
+	if (cached)
+		return cached;
+
+	const results = await db_get_all('SELECT `id` FROM `market_items` WHERE `client_id` = ? WHERE `available` = 0', [client_id]) as db_row.market_items[];
+	const completed = results.map(row => row.id);
+
+	market_completed_cached.set(client_id, completed);
+	return completed;
 }
 // #endregion
 
@@ -700,6 +716,9 @@ session_post_route('/api/market/buy', async (req, url, client_id, json) => {
 	const final_qty = Math.min(lot.available, buy_qty);
 	const final_cost = final_qty * lot.price;
 
+	if (lot.available - final_qty <= 0)
+		market_completed_cached.get(lot.client_id)?.push(lot.id);
+
 	await db_execute('UPDATE `market_items` SET `available` = `available` - ? WHERE `id` = ? LIMIT 1', [final_qty, lot_id]);
 
 	return {
@@ -750,6 +769,7 @@ session_post_route('/api/market/payout', async (req, url, client_id, json) => {
 	if (lot.available === 0) {
 		ended = true;
 		await db_execute('DELETE FROM `market_items` WHERE `id` = ? LIMIT 1', [lot.id]);
+		remove_player_cache_entry(market_completed_cached, client_id, lot.id);
 	} else {
 		await db_execute('UPDATE `market_items` SET `payout` = `payout` + ? WHERE `id` = ? LIMIT 1', [payout_available, lot.id]);
 	}
@@ -770,6 +790,7 @@ session_post_route('/api/market/cancel', async (req, url, client_id, json) => {
 	const payout_available = lot_profit - lot.payout;
 
 	await db_execute('DELETE FROM `market_items` WHERE `id` = ? LIMIT 1', [lot.id]);
+	remove_player_cache_entry(market_completed_cached, client_id, lot.id);
 
 	return { success: true, payout: payout_available };
 });
@@ -1353,7 +1374,8 @@ session_get_route('/api/events', async (req, url, client_id) => {
 		gifts: await get_client_gifts(client_id),
 		trades: trade_meta,
 		resolved_trades: await get_client_resolved_trades(client_id),
-		campaign: get_campaign_progress()
+		campaign: get_campaign_progress(),
+		market_completed: await get_market_completed(client_id)
 	};
 });
 
