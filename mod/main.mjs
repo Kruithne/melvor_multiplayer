@@ -415,8 +415,21 @@ const state = ui.createStore({
 		hide_button_spinner($button);
 	},
 
-	cancel_market_item(event, item) {
-		// todo: implement
+	async cancel_market_item(event, item) {
+		const $button = event.currentTarget;
+		show_button_spinner($button);
+
+		const res = await api_post('/api/market/cancel', { id: item.id });
+		if (res?.success) {
+			if (res.payout > 0)
+				game.gp.add(res.payout);
+
+			state.market_listings = state.market_listings.filter(listing => listing.id !== item.id);
+		} else {
+			notify_error('MOD_KMM_GENERIC_ERR');
+		}
+
+		hide_button_spinner($button);
 	},
 	// #endregion
 

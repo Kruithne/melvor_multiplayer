@@ -757,6 +757,23 @@ session_post_route('/api/market/payout', async (req, url, client_id, json) => {
 	return { success: true, payout: payout_available, ended };
 });
 
+session_post_route('/api/market/cancel', async (req, url, client_id, json) => {
+	const lot_id = json.id;
+	if (typeof lot_id !== 'number')
+		return 400; // Bad Request
+
+	const lot = await db_get_single('SELECT * FROM `market_items` WHERE `id` = ? LIMIT 1', [lot_id]) as db_row.market_items;
+	if (lot?.client_id !== client_id)
+		return 400; // Bad Request
+
+	const lot_profit = (lot.qty - lot.available) * lot.price;
+	const payout_available = lot_profit - lot.payout;
+
+	await db_execute('DELETE FROM `market_items` WHERE `id` = ? LIMIT 1', [lot.id]);
+
+	return { success: true, payout: payout_available };
+});
+
 session_post_route('/api/market/search', async (req, url, client_id, json) => {
 	const query_parameters: Array<unknown> = [client_id];
 
