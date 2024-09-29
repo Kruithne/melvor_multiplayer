@@ -603,7 +603,7 @@
 				</div>
 			</div>
 			<div class="block tabbable w-100 kmm-col">
-				<template v-if="state.charity_tree_inventory.length > 0">
+				<template v-if="state.charity_tree_inventory.length > 0 && !state.charity_tree_loading">
 					<div class="block-content">
 						<div class="pb-4 row">
 							<kmm-item-icon v-for="item of state.charity_tree_inventory" class="bank-item pointer-enabled m-2" :data-item-id="item.id" :key="item.id">
@@ -623,6 +623,9 @@
 						</button>
 					</div>
 				</template>
+				<div class="p-4" v-else-if="state.charity_tree_loading">
+					<lang-string lang-id="MOD_KMM_CHARITY_LOADING"></lang-string>
+				</div>
 				<div class="p-4" v-else>
 					<lang-string lang-id="MOD_KMM_CHARITY_NO_ITEMS"></lang-string>
 				</div>

@@ -32,7 +32,6 @@ const ctx = mod.getContext(import.meta);
 let session_token = null;
 let is_connecting = false;
 
-let is_updating_charity_tree = false;
 let last_charity_check = 0;
 
 let has_sorted_market_filter_items = false;
@@ -69,6 +68,7 @@ const state = ui.createStore({
 	charity_bonus_timeout: 0,
 	charity_bonus_unlocked: false,
 	charity_update_time: Date.now(),
+	charity_tree_loading: false,
 
 	campaign_data: {},
 	campaign_active: false,
@@ -1422,7 +1422,7 @@ function has_pet_by_id(pet_id) {
 async function request_charity_tree_contents() {
 	state.charity_update_time = Date.now();
 
-	if (is_updating_charity_tree)
+	if (state.charity_tree_loading)
 		return;
 
 	const current_time = Date.now();
@@ -1430,13 +1430,13 @@ async function request_charity_tree_contents() {
 		return;
 
 	last_charity_check = current_time;
-	is_updating_charity_tree = true;
+	state.charity_tree_loading = true;
 
 	const res = await api_get('/api/charity/contents');
 	if (res !== null)
 		state.charity_tree_inventory = res.items;
 
-	is_updating_charity_tree = false;
+	state.charity_tree_loading = false;
 }
 // #endregion
 

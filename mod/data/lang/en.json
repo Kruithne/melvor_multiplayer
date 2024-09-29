@@ -104,6 +104,7 @@
 	"MOD_KMM_TRANSFER_HEADER_AWAY": "%s's Offer",
 
 	"MOD_KMM_CHARITY_NO_ITEMS": "Sorry, nothing has been donated yet. Consider donating something yourself!",
+	"MOD_KMM_CHARITY_LOADING": "Retrieving donations...",
 	"MOD_KMM_CHARITY_INVALID_ITEM": "No item selected!",
 	"MOD_KMM_CHARITY_TAKEN": "Sorry, that item was already taken!",
 	"MOD_KMM_CHARITY_TIMEOUT": "You need to wait before taking another item.",
