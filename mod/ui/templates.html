@@ -728,8 +728,9 @@
 							<div class="col-6 col-lg-3">
 								<span class="font-w400 font-size-sm mb-0">
 									<span class="font-w600">
-										<lang-string-f lang-id="MOD_KMM_TRANSFER_GIFT_SENDER" :lang-arg-1="gift.data.sender_name" v-if="!state.is_returned_gift(gift)"></lang-string-f>
-										<lang-string-f lang-id="MOD_KMM_TRANSFER_GIFT_RETURN_SENDER" :lang-arg-1="gift.data.sender_name" v-else></lang-string-f>
+										<img class="skill-icon-xs" :src="state.get_item_icon(gift.data.sender.icon_id)"/>
+										<lang-string-f lang-id="MOD_KMM_TRANSFER_GIFT_SENDER" :lang-arg-1="gift.data.sender.display_name" v-if="!state.is_returned_gift(gift)"></lang-string-f>
+										<lang-string-f lang-id="MOD_KMM_TRANSFER_GIFT_RETURN_SENDER" :lang-arg-1="gift.data.sender.display_name" v-else></lang-string-f>
 									</span>
 								</span>
 							</div>
@@ -785,8 +786,9 @@
 							<div class="col-6 col-lg-3">
 								<span class="font-w400 font-size-sm mb-0">
 									<span class="font-w600">
-										<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_DECLINED" :lang-arg-1="trade.data.other_player" v-if="trade.data.declined"></lang-string-f>
-										<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_COMPLETE" :lang-arg-1="trade.data.other_player" v-else></lang-string-f>
+										<img class="skill-icon-xs" :src="state.get_item_icon(trade.data.other_player.icon_id)"/>
+										<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_DECLINED" :lang-arg-1="trade.data.other_player.display_name" v-if="trade.data.declined"></lang-string-f>
+										<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_COMPLETE" :lang-arg-1="trade.data.other_player.display_name" v-else></lang-string-f>
 									</span>
 								</span>
 							</div>
@@ -837,8 +839,9 @@
 							<div class="col-6 col-lg-3">
 								<span class="font-w400 font-size-sm mb-0">
 									<span class="font-w600">
-										<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_FROM" :lang-arg-1="trade.data.other_player" v-if="trade.attending"></lang-string-f>
-										<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_SENT" :lang-arg-1="trade.data.other_player" v-else></lang-string-f>
+										<img class="skill-icon-xs" :src="state.get_item_icon(trade.data.other_player.icon_id)"/>
+										<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_FROM" :lang-arg-1="trade.data.other_player.display_name" v-if="trade.attending"></lang-string-f>
+										<lang-string-f lang-id="MOD_KMM_TRANSFER_TRADE_SENT" :lang-arg-1="trade.data.other_player.display_name" v-else></lang-string-f>
 									</span>
 								</span>
 							</div>
@@ -889,7 +892,8 @@
 							<div class="kmm-dual-trade-panel">
 								<div class="kmm-dual-trade-header">
 									<h5>
-										<lang-string-f lang-id="MOD_KMM_TRANSFER_HEADER_AWAY" :lang-arg-1="trade.data.other_player"></lang-string-f>
+										<img class="skill-icon-xs" :src="state.get_item_icon(trade.data.other_player.icon_id)"/>
+										<lang-string-f lang-id="MOD_KMM_TRANSFER_HEADER_AWAY" :lang-arg-1="trade.data.other_player.display_name"></lang-string-f>
 									</h5>
 									<span class="font-w600">
 										<lang-string lang-id="MOD_KMM_TRANSFER_VALUE"></lang-string>

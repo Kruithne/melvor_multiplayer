@@ -997,7 +997,7 @@ session_post_route('/api/transfers/get_contents', async (req, url, client_id, js
 
 		gift_results[gift_id] = {
 			items: await get_gift_items(gift_id) ?? [],
-			sender_name: await get_client_display_name(gift.sender_id),
+			sender: await get_client_display(gift.sender_id),
 			flags: gift.flags
 		};
 	}
@@ -1021,7 +1021,7 @@ session_post_route('/api/transfers/get_contents', async (req, url, client_id, js
 
 		trade_results[trade_id] = {
 			items: await get_trade_items(trade_id) ?? [],
-			other_player: await get_client_display_name(other_player_id)
+			other_player: await get_client_display(other_player_id)
 		};
 	}
 
@@ -1042,7 +1042,7 @@ session_post_route('/api/transfers/get_contents', async (req, url, client_id, js
 		resolved_trade_results[trade_id] = {
 			items: await get_trade_items(trade_id) ?? [],
 			declined: trade_offer.declined === 1,
-			other_player: await get_client_display_name(trade_offer.sender_id)
+			other_player: await get_client_display(trade_offer.sender_id)
 		};
 	}
 
