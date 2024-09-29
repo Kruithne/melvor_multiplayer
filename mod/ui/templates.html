@@ -401,7 +401,7 @@
 				</button>
 			</div>
 		</div>
-		<div class="block block-rounded w-100 p-3" v-if="state.market_active_tab == 'listing'">
+		<div v-if="state.market_active_tab == 'listing'">
 			<div id="kmm-market-search-results" v-if="state.market_listings.length > 0 && !state.market_listings_loading">
 				<div class="kmm-market-search-result" v-for="item in state.market_listings">
 					<div class="kmm-market-item-col">
