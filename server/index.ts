@@ -438,7 +438,7 @@ async function create_friend_request(client_id: number, friend_id: number) {
 	const request_id = await db_insert('INSERT INTO `friend_requests` (`client_id`, `friend_id`) VALUES(?, ?)', [client_id, friend_id]);
 
 	friend_request_cache.get(client_id)?.push({
-		display_name: await get_client_display_name(friend_id),
+		friend: await get_client_display(friend_id),
 		request_id,
 	});
 }
