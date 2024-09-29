@@ -419,7 +419,7 @@ const state = ui.createStore({
 
 			if (cancel || res.ended) {
 				state.market_listings = state.market_listings.filter(listing => listing.id !== item.id);
-				state.market_completed = state.market_complete.filter(listing => listing !== item.id);
+				state.market_completed = state.market_completed.filter(listing => listing !== item.id);
 			}
 		} else {
 			notify_error('MOD_KMM_GENERIC_ERR');
