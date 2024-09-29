@@ -570,7 +570,7 @@
 						</span>
 					</span>
 				</div>
-				<button type="button" class="btn btn-success m-1" @click="state.claim_campaign_reward($event, campaign)" v-else>
+				<button type="button" class="btn btn-success m-1" @click="state.claim_campaign_reward($event, campaign)" :key="campaign.id" v-else>
 					<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 					<lang-string lang-id="MOD_KMM_BUTTON_CLAIM_REWARD"></lang-string>
 				</button>
@@ -762,12 +762,12 @@
 						</div>
 					</div>
 					<div class="p-3 kmm-transfer-buttons">
-						<button type="button" class="btn btn-success m-1" @click="state.resolve_gift($event, gift.id, true)">
+						<button type="button" class="btn btn-success m-1" @click="state.resolve_gift($event, gift.id, true)" :key="gift.id">
 							<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 							<lang-string lang-id="MOD_KMM_BUTTON_TAKE_ITEMS" v-if="state.is_returned_gift(gift)"></lang-string>
 							<lang-string lang-id="MOD_KMM_BUTTON_ACCEPT_GIFT" v-else></lang-string>
 						</button>
-						<button type="button" class="btn btn-danger m-1" @click="state.resolve_gift($event, gift.id, false)" v-if="!state.is_returned_gift(gift)">
+						<button type="button" class="btn btn-danger m-1" @click="state.resolve_gift($event, gift.id, false)" v-if="!state.is_returned_gift(gift)" :key="gift.id">
 							<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 							<lang-string lang-id="MOD_KMM_BUTTON_DECLINE_GIFT"></lang-string>
 						</button>
@@ -820,7 +820,7 @@
 						</div>
 					</div>
 					<div class="p-3 kmm-transfer-buttons">
-						<button type="button" class="btn btn-success m-1" @click="state.resolve_trade($event, trade.trade_id)">
+						<button type="button" class="btn btn-success m-1" @click="state.resolve_trade($event, trade.trade_id)" :key="trade.trade_id">
 							<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 							<lang-string lang-id="MOD_KMM_BUTTON_TAKE_ITEMS"></lang-string>
 						</button>
@@ -931,21 +931,21 @@
 					</div>
 					<div class="p-3 kmm-transfer-buttons">
 						<template v-if="trade.attending">
-							<button v-if="trade.state === 0" type="button" class="btn btn-success m-1" @click="state.counter_trade($event, trade.trade_id)">
+							<button v-if="trade.state === 0" type="button" class="btn btn-success m-1" @click="state.counter_trade($event, trade.trade_id)" :key="trade.trade_id">
 								<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 								<lang-string-f lang-id="MOD_KMM_BUTTON_COUNTER_TRADE" :lang-arg-1="state.transfer_inventory.length"></lang-string-f>
 							</button>
-							<button v-else-if="trade.state === 1" type="button" class="btn btn-success m-1" @click="state.accept_trade($event, trade.trade_id)">
+							<button v-else-if="trade.state === 1" type="button" class="btn btn-success m-1" @click="state.accept_trade($event, trade.trade_id)" :key="trade.trade_id">
 								<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 								<lang-string lang-id="MOD_KMM_BUTTON_ACCEPT_TRADE"></lang-string>
 							</button>
-							<button type="button" class="btn btn-danger m-1" @click="state.decline_trade($event, trade.trade_id)">
+							<button type="button" class="btn btn-danger m-1" @click="state.decline_trade($event, trade.trade_id)" :key="trade.trade_id">
 								<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 								<lang-string lang-id="MOD_KMM_BUTTON_DECLINE_TRADE"></lang-string>
 							</button>
 						</template>
 						<template v-else>
-							<button type="button" class="btn btn-danger m-1" @click="state.cancel_trade($event, trade.trade_id)">
+							<button type="button" class="btn btn-danger m-1" @click="state.cancel_trade($event, trade.trade_id)" :key="trade.trade_id">
 								<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 								<lang-string lang-id="MOD_KMM_BUTTON_CANCEL_TRADE"></lang-string>
 							</button>
