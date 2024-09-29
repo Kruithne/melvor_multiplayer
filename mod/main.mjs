@@ -403,8 +403,10 @@ const state = ui.createStore({
 
 		const res = await api_post('/api/market/' + (cancel ? 'cancel' : 'payout'), { id: item.id });
 		if (res?.success) {
-			if (res.payout > 0)
+			if (res.payout > 0) {
 				game.gp.add(res.payout);
+				item.payout += res.payout;
+			}
 
 			if (cancel || res.ended)
 				state.market_listings = state.market_listings.filter(listing => listing.id !== item.id);
