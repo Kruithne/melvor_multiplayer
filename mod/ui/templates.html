@@ -432,11 +432,11 @@
 						<img class="skill-icon-xxs ml-2" src="assets/media/main/coins.svg">
 					</div>
 					<div class="kmm-market-item-col">
-						<button type="button" class="btn btn-success m-1" @click="state.resolve_market_listing($event, item, false)" :class="{ disabled: ((item.price * (item.qty - item.available)) - item.payout) == 0 }">
+						<button type="button" class="btn btn-success m-1" @click="state.resolve_market_listing($event, item, false)" :class="{ disabled: ((item.price * (item.qty - item.available)) - item.payout) == 0 }" :key="item.id">
 							<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 							<lang-string lang-id="MOD_KMM_BUTTON_MARKET_CLAIM_PAYOUT"></lang-string>
 						</button>
-						<button type="button" class="btn btn-danger m-1" @click="state.resolve_market_listing($event, item, true)">
+						<button type="button" class="btn btn-danger m-1" @click="state.resolve_market_listing($event, item, true)" :key="item.id">
 							<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 							<lang-string lang-id="MOD_KMM_BUTTON_MARKET_CANCEL"></lang-string>
 						</button>
