@@ -282,7 +282,7 @@ const state = ui.createStore({
 	// #region MARKET ACTIONS
 	clear_market_filter() {
 		this.market_filter_item = null;
-		state.market_page_first();
+		state.market_page_first(true);
 	},
 
 	choose_market_filter() {
@@ -298,7 +298,7 @@ const state = ui.createStore({
 	select_market_filter_item(item_id) {
 		state.market_filter_item = item_id;
 		state.market_active_tab = 'search';
-		state.market_page_first();
+		state.market_page_first(true);
 	},
 
 	show_market_buy_modal(item) {
@@ -351,11 +351,11 @@ const state = ui.createStore({
 			update_market_search();
 	},
 
-	market_page_first() {
+	market_page_first(force_reload = false) {
 		const before = this.market_current_page;
 		this.market_current_page = 1;
 
-		if (this.market_current_page !== before)
+		if (force_reload || this.market_current_page !== before)
 			update_market_search();
 	},
 
