@@ -194,7 +194,7 @@ async function get_market_completed(client_id: number) {
 	if (cached)
 		return cached;
 
-	const results = await db_get_all('SELECT `id` FROM `market_items` WHERE `client_id` = ? WHERE `available` = 0', [client_id]) as db_row.market_items[];
+	const results = await db_get_all('SELECT `id` FROM `market_items` WHERE `client_id` = ? AND `available` = 0', [client_id]) as db_row.market_items[];
 	const completed = results.map(row => row.id);
 
 	market_completed_cached.set(client_id, completed);
