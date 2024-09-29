@@ -2,7 +2,7 @@
 const SERVER_HOST = 'https://melvormultiplayer.net';
 const LOG_PREFIX = '[multiplayer] ';
 
-const IS_DEV_MODE = true;
+const IS_DEV_MODE = false;
 const DEV_CHARACTER_STORAGE = {
 	client_identifier: '04fcad4c-7df5-43c3-a70e-299cd618a0ab',
 	client_key: 'f88596d3-e2b2-4a50-9754-6b05f1a15bac',
