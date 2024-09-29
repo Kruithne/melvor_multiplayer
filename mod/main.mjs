@@ -121,9 +121,13 @@ const state = ui.createStore({
 		let total_value = 0;
 
 		for (const entry of this.transfer_inventory) {
-			const item = game.items.getObjectByID(entry.id);
-			if (item?.sellsFor.currency === game.gp)
-				total_value += game.bank.getItemSalePrice(item, entry.qty);
+			if (entry.id === 'melvorD:GP') {
+				total_value += entry.qty;
+		 	} else {
+				const item = game.items.getObjectByID(entry.id);
+				if (item?.sellsFor.currency === game.gp)
+					total_value += game.bank.getItemSalePrice(item, entry.qty);
+			}
 		}
 
 		return total_value;
@@ -643,9 +647,13 @@ const state = ui.createStore({
 		let total_value = 0;
 
 		for (const entry of items) {
-			const item = game.items.getObjectByID(entry.item_id);
-			if (item?.sellsFor.currency === game.gp)
-				total_value += game.bank.getItemSalePrice(item, entry.qty);
+			if (entry.item_id === 'melvorD:GP') {
+				total_value += entry.qty;
+			} else {
+				const item = game.items.getObjectByID(entry.item_id);
+				if (item?.sellsFor.currency === game.gp)
+					total_value += game.bank.getItemSalePrice(item, entry.qty);
+			}
 		}
 
 		return game.gp.formatAmount(numberWithCommas(total_value));
@@ -902,9 +910,13 @@ const state = ui.createStore({
 		let total_value = 0;
 
 		for (const entry of transfer.data.items) {
-			const item = game.items.getObjectByID(entry.item_id);
-			if (item?.sellsFor.currency === game.gp)
-				total_value += game.bank.getItemSalePrice(item, entry.qty);
+			if (entry.item_id === 'melvorD:GP') {
+				total_value += entry.qty;
+			} else {
+				const item = game.items.getObjectByID(entry.item_id);
+				if (item?.sellsFor.currency === game.gp)
+					total_value += game.bank.getItemSalePrice(item, entry.qty);
+			}
 		}
 
 		return game.gp.formatAmount(numberWithCommas(total_value));
