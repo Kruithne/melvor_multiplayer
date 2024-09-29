@@ -1069,6 +1069,8 @@ session_post_route('/api/trade/resolve', async (req, url, client_id, json) => {
 	await db_execute('DELETE FROM `resolved_trade_offers` WHERE `client_id` = ?', [client_id]);
 	await db_execute('DELETE FROM `trade_items` WHERE `trade_id` = ?', [trade_id]);
 
+	remove_player_cache_entry(resolved_trade_cache, client_id, trade_id);
+
 	return { success: true };
 });
 
