@@ -399,6 +399,10 @@ const state = ui.createStore({
 
 	async resolve_market_listing(event, item, cancel) {
 		const $button = event.currentTarget;
+
+		if ($button.classList.contains('disabled'))
+			return;
+
 		show_button_spinner($button);
 
 		const res = await api_post('/api/market/' + (cancel ? 'cancel' : 'payout'), { id: item.id });
