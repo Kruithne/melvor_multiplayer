@@ -289,7 +289,7 @@
 		</div>
 		<div class="row row-deck gutters-tiny kmm-market-tabs">
 			<div>
-				<a class="block block-content block-rounded block-link-pop border-top border-4x pointer-enabled p-2 pr-5" :class="state.market_active_tab == 'search' ? 'kmm-market-border-tab-active' : 'border-combat'" @click="state.market_active_tab = 'search'">
+				<a class="block block-content block-rounded block-link-pop border-top border-4x pointer-enabled p-2 pr-5" :class="state.market_active_tab == 'search' ? 'kmm-market-border-tab-active' : 'border-combat'" @click="state.open_market_tab()">
 					<div class="media d-flex align-items-center push">
 						<div class="mr-2">
 							<img class="bank-img p-2" :src="state.get_svg('market')">
@@ -306,7 +306,7 @@
 				</a>
 			</div>
 			<div>
-				<a class="block block-content block-rounded block-link-pop border-top border-4x pointer-enabled p-2 pr-5" :class="state.market_active_tab == 'listing' ? 'kmm-market-border-tab-active' : 'border-combat'" @click="state.market_active_tab = 'listing'">
+				<a class="block block-content block-rounded block-link-pop border-top border-4x pointer-enabled p-2 pr-5" :class="state.market_active_tab == 'listing' ? 'kmm-market-border-tab-active' : 'border-combat'" @click="state.open_listing_tab()">
 					<div class="media d-flex align-items-center push">
 						<div class="mr-2">
 							<img class="bank-img p-2" :src="state.get_svg('market_listing')">

@@ -387,6 +387,15 @@ const state = ui.createStore({
 		state.market_sort_direction = state.market_sort_direction ^ 1;
 		update_market_search();
 	},
+
+	open_market_tab() {
+		this.market_active_tab = 'search';
+	},
+
+	open_listing_tab() {
+		this.market_active_tab = 'listing';
+		update_market_listings();
+	},
 	// #endregion
 
 	// #region CAMPAIGN ACTIONS
