@@ -137,6 +137,8 @@ function validate_item_array(items: unknown, allow_modded = true) {
 		if (item.qty <= 0)
 			return false;
 
+		item.qty = item.qty | 0; // truncate fp
+
 		if (!allow_modded && !item.id.startsWith('melvor'))
 			return false;
 	}
@@ -692,7 +694,7 @@ session_post_route('/api/market/sell', async (req, url, client_id, json) => {
 	if (!item_id.startsWith('melvor'))
 		return { error_lang: 'MOD_KMM_MARKET_CANNOT_SELL_MODDED' };
 
-	market_list_item(client_id, item_id, item_qty, item_sell_price);
+	market_list_item(client_id, item_id, item_qty | 0, item_sell_price);
 
 	return { success: true } as JsonSerializable;
 });
@@ -713,7 +715,7 @@ session_post_route('/api/market/buy', async (req, url, client_id, json) => {
 	if (lot.client_id === client_id)
 		return { error_lang: 'MOD_KMM_MARKET_BUY_ERROR_SELF' };
 
-	const final_qty = Math.min(lot.available, buy_qty);
+	const final_qty = Math.min(lot.available, buy_qty | 0);
 	const final_cost = final_qty * lot.price;
 
 	if (lot.available - final_qty <= 0)
@@ -892,7 +894,7 @@ session_post_route('/api/campaign/contribute', async (req, url, client_id, json)
 		return 400; // Bad Request
 
 	const max_solo_contrib = campaign_item_total * CAMPAIGN_MAX_SOLO_CONTRIB_FAC;
-	let contributing_amount = Math.min(item_amount, max_solo_contrib);
+	let contributing_amount = Math.min(item_amount | 0, max_solo_contrib);
 
 	const contribution = await db_get_single('SELECT `item_amount` FROM `campaign_contributions` WHERE `client_id` = ? AND `campaign_id` = ?', [client_id, campaign_active_id]) as db_row.campaign_contributions;
 	if (contribution !== null) {
