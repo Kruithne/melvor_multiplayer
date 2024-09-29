@@ -372,7 +372,7 @@
 						<span>{{ item.seller.display_name }}</span>
 					</div>
 					<div class="kmm-market-item-col">
-						<lang-string-f lang-id="MOD_KMM_MARKET_AVAILABLE" :lang-arg-1="item.available"></lang-string-f>
+						<lang-string-f lang-id="MOD_KMM_MARKET_AVAILABLE" :lang-arg-1="numberWithCommas(item.available)"></lang-string-f>
 					</div>
 					<div class="kmm-market-item-col">
 						<lang-string-f class="text-success" lang-id="MOD_KMM_MARKET_PRICE" :lang-arg-1="numberWithCommas(item.price)"></lang-string-f>
