@@ -84,7 +84,8 @@
 <template id="template-kru-multiplayer-friend-request-modal">
 	<div class="kmm-friend-requests" v-if="state.events.friend_requests.length > 0">
 		<div v-for="request in state.events.friend_requests" class="kmm-friend-request-bubble">
-			<span class="mr-2">{{ request.display_name }}</span>
+			<img class="skill-icon-xs" :src="state.get_item_icon(request.friend.icon_id)"/>
+			<span class="mr-2">{{ request.friend.display_name }}</span>
 			<button type="button" class="btn btn-success" @click="state.accept_friend_request($event, request)">
 				<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 				<lang-string lang-id="MOD_KMM_BUTTON_ACCEPT_FRIEND"></lang-string>

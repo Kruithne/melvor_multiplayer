@@ -29,7 +29,7 @@ type ActiveTrade = {
 }
 
 type FriendRequest = {
-	display_name: string;
+	friend: ClientDisplayInfo,
 	request_id: number;
 }
 
@@ -420,7 +420,7 @@ async function get_friend_requests(client_id: number): Promise<FriendRequest[]> 
 
 	for (const row of result) {
 		requests.push({
-			display_name: await get_client_display_name(row?.friend_id as number),
+			friend: await get_client_display(row?.friend_id as number),
 			request_id: row?.request_id ?? -1
 		});
 	}
