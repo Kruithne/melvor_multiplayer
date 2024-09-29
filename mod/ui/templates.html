@@ -403,26 +403,34 @@
 		</div>
 		<div v-if="state.market_active_tab == 'listing'">
 			<div id="kmm-market-search-results" v-if="state.market_listings.length > 0 && !state.market_listings_loading">
-				<div class="kmm-market-search-result" v-for="item in state.market_listings">
+				<div class="kmm-market-search-result kmm-market-listing-result" v-for="item in state.market_listings">
 					<div class="kmm-market-item-col">
 						<img class="kmm-market-item-icon mr-3" :src="state.get_item_icon(item.item_id)">
 						<span>{{ state.get_item_name(item.item_id) }}</span>
 					</div>
 					<div class="kmm-market-item-col">
+						<div class="kmm-market-item-bar">
+							<div class="kmm-market-item-bar-fill" :style="{ width: (((item.qty - item.available) / item.qty) * 100) + '%'  }" :class="{ complete: item.available == 0 }"></div>
+						</div>
+					</div>
+					<div class="kmm-market-item-col">
 						<lang-string-f lang-id="MOD_KMM_MARKET_SOLD" :lang-arg-1="item.qty - item.available" :lang-arg-2="item.qty"></lang-string-f>
 					</div>
 					<div class="kmm-market-item-col">
-						Progress Bar
-					</div>
-					<div class="kmm-market-item-col">
-						<lang-string-f class="text-success" lang-id="MOD_KMM_MARKET_PRICE" :lang-arg-1="numberWithCommas(item.price)"></lang-string-f>
+						<lang-string-f lang-id="MOD_KMM_MARKET_PRICE" :lang-arg-1="numberWithCommas(item.price)"></lang-string-f>
 						<img class="skill-icon-xxs ml-2" src="assets/media/main/coins.svg">
 					</div>
 					<div class="kmm-market-item-col">
-						<button type="button" class="btn btn-success m-1" @click="state.claim_market_payout(item)">
+						<lang-string-f class="text-success" lang-id="MOD_KMM_MARKET_PROFIT" :lang-arg-1="numberWithCommas((item.price * (item.qty - item.available)) - item.payout)"></lang-string-f>
+						<img class="skill-icon-xxs ml-2" src="assets/media/main/coins.svg">
+					</div>
+					<div class="kmm-market-item-col">
+						<button type="button" class="btn btn-success m-1" @click="state.claim_market_payout(item)" v-if="((item.price * (item.qty - item.available)) - item.payout) > 0">
+							<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 							<lang-string lang-id="MOD_KMM_BUTTON_MARKET_CLAIM_PAYOUT"></lang-string>
 						</button>
 						<button type="button" class="btn btn-danger m-1" @click="state.cancel_market_item(item)">
+							<div class="spinner-border spinner-border-sm text-primary mr-2 d-none" role="status"></div>
 							<lang-string lang-id="MOD_KMM_BUTTON_MARKET_CANCEL"></lang-string>
 						</button>
 					</div>

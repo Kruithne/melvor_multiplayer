@@ -396,6 +396,14 @@ const state = ui.createStore({
 		this.market_active_tab = 'listing';
 		update_market_listings();
 	},
+
+	claim_market_payout(event) {
+		// todo: implement
+	},
+
+	cancel_market_item(event) {
+		// todo: implement
+	},
 	// #endregion
 
 	// #region CAMPAIGN ACTIONS

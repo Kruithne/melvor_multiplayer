@@ -316,6 +316,10 @@
 	grid-template-columns: 1fr 1fr 1fr 1fr auto;
 }
 
+.kmm-market-listing-result {
+	grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
+}
+
 .kmm-market-item-icon {
 	background-color: #323942;
 	padding: 7px;
@@ -402,4 +406,32 @@
 	display: flex;
 	justify-content: center;
 	margin-top: 20px;
+}
+
+.kmm-market-item-bar {
+	height: 20px;
+	border: 1px solid #777777;
+	background: rgba(0, 0, 0, 0.306);
+	border-radius: 5px;
+	width: 100%;
+	margin: 0 20px;
+}
+
+.kmm-market-item-bar-fill {
+	height: 100%;
+	position: relative;
+	background: orange;
+}
+
+.kmm-market-item-bar-fill.complete {
+	background: green;
+}
+
+.kmm-market-item-bar-fill::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	height: 50%;
+	width: 100%;
+	background: rgba(0, 0, 0, 0.14);
 }

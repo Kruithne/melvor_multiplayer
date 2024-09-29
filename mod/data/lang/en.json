@@ -171,6 +171,7 @@
 	"MOD_KMM_MARKET_AVAILABLE": "Available: %s",
 	"MOD_KMM_MARKET_SOLD": "Sold %s / %s",
 	"MOD_KMM_MARKET_PRICE": "Price: %s",
+	"MOD_KMM_MARKET_PROFIT": "Unclaimed Profit: %s",
 	"MOD_KMM_MARKET_BUY_MODAL_TITLE": "Buy ",
 	"MOD_KMM_MARKET_BUY_NOTHING": "You need to at least buy one!",
 	"MOD_KMM_MARKET_BUY_ERROR": "Cannot buy that right now",
