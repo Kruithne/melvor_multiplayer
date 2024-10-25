@@ -490,8 +490,10 @@ async function send_gift(client_id: number, recipient_id: number, items: Transfe
 
 	gift_cache.get(recipient_id)?.push(gift_id);
 
-	for (const item of items)
-		await db_execute('INSERT INTO `gift_items` (`gift_id`, `item_id`, `qty`) VALUES(?, ?, ?)', [gift_id, item.id, item.qty]);
+	for (const item of items) {
+		if (item.qty >= 0)
+			await db_execute('INSERT INTO `gift_items` (`gift_id`, `item_id`, `qty`) VALUES(?, ?, ?)', [gift_id, item.id, item.qty]);
+	}
 }
 
 async function get_gift(gift_id: number) {
