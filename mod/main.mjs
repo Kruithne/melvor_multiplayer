@@ -335,6 +335,9 @@ const state = ui.createStore({
 		if (!item)
 			return notify_error('MOD_KMM_MARKET_BUY_ERROR_UNKNOWN');
 
+		if (game.gp.amount < state.item_slider_value * state.market_buy_item.price)
+			return notify_error('MOD_KMM_MARKET_INSUFFICIENT_GP');
+
 		show_button_spinner($button);
 
 		const res = await api_post('/api/market/buy', {
