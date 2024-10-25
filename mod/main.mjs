@@ -1576,6 +1576,7 @@ function persist_transfer_inventory() {
 function clear_transfer_inventory() {
 	state.transfer_inventory = [];
 	persist_transfer_inventory();
+	update_transfer_inventory_nav();
 }
 
 function load_transfer_inventory() {
