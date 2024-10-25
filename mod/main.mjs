@@ -597,7 +597,7 @@ const state = ui.createStore({
 		if (res?.success) {
 			const donation_value = state.transfer_inventory_value_raw;
 
-			state.transfer_inventory = [];
+			clear_transfer_inventory();
 			last_charity_check = 0;
 
 			notify('MOD_KMM_CHARITY_DONATED');
@@ -634,7 +634,7 @@ const state = ui.createStore({
 		});
 
 		if (res?.success) {
-			state.transfer_inventory = [];
+			clear_transfer_inventory();
 
 			state.trades.push({
 				trade_id: res.trade_id,
@@ -689,7 +689,7 @@ const state = ui.createStore({
 		hide_button_spinner($button);
 
 		if (res?.success) {
-			state.transfer_inventory = [];
+			clear_transfer_inventory();
 
 			state.trades = state.trades.filter(t => t.trade_id !== trade_id);
 
@@ -898,7 +898,7 @@ const state = ui.createStore({
 
 		hide_button_spinner($button);
 
-		state.transfer_inventory = [];
+		clear_transfer_inventory();
 
 		notify('MOD_KMM_NOTIF_GIFT_SENT');
 		state.close_modal();
@@ -1503,7 +1503,7 @@ function return_all_transfer_inventory() {
 	for (const entry of state.transfer_inventory)
 		add_bank_item(entry.id, entry.qty);
 
-	state.transfer_inventory = [];
+	clear_transfer_inventory();
 	update_transfer_inventory_nav();
 }
 
@@ -1571,6 +1571,11 @@ function add_item_to_transfer_inventory(item, qty) {
 
 function persist_transfer_inventory() {
 	set_character_storage_item('transfer_inventory', state.transfer_inventory);
+}
+
+function clear_transfer_inventory() {
+	state.transfer_inventory = [];
+	persist_transfer_inventory();
 }
 
 function load_transfer_inventory() {
