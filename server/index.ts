@@ -926,7 +926,7 @@ session_post_route('/api/campaign/contribute', async (req, url, client_id, json)
 // #region ROUTES CHARITY
 session_get_route('/api/charity/contents', async (req, url, client_id) => {
 	return {
-		items: await db_get_all('SELECT `item_id` as `id`, `qty` FROM `charity_items` LIMIT 78')
+		items: await db_get_all('SELECT `item_id` as `id`, `qty` FROM `charity_items` LIMIT 156')
 	};
 });
 
