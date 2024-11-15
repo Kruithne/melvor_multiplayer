@@ -1281,7 +1281,7 @@ async function market_create_listing(item, item_qty, item_sell_price) {
 
 	if (res?.success) {
 		game.bank.removeItemQuantity(item, item_qty);
-		notify('MOD_KMM_MARKET_ITEM_LISTED', 'success', 'assets/marker.svg', item_qty);
+		notify('MOD_KMM_MARKET_ITEM_LISTED', 'success', 'assets/market.svg', item_qty);
 
 		if (state.market_active_tab === 'listing')
 			update_market_listings();
