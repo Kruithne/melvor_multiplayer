@@ -607,8 +607,8 @@
 				<template v-if="state.charity_tree_inventory.length > 0 && !state.charity_tree_loading">
 					<div class="block-content">
 						<div class="pb-4 row">
-							<kmm-item-icon v-for="item of state.charity_tree_inventory" class="bank-item pointer-enabled m-2" :data-item-id="item.id" :key="item.id">
-								<a role="button" @click="state.selected_charity_item_id = item.id">
+							<kmm-item-icon v-for="item of state.charity_tree_inventory" class="bank-item pointer-enabled m-2" :data-item-id="item.id" :key="item.id" @click="state.selected_charity_item_id = item.id">
+								<a role="button">
 									<img class="bank-img p-3" :src="state.get_item_icon(item.id)" :class="{ 'border border-4x border-success': state.selected_charity_item_id === item.id }">
 									<div class="font-size-sm text-white text-center in-bank">
 										<small class="badge-pill bg-secondary">{{ formatNumber(item.qty) }}</small>
