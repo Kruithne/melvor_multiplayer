@@ -3,7 +3,12 @@
 	"type": "module",
 	"module": "index.ts",
 	"spooder": {
-		"auto_restart": 0,
+		"auto_restart": {
+			"enabled": true,
+			"max_attempts": -1,
+			"backoff_max": 300000,
+			"backoff_grace": 30000 
+		},
 		"run": "bun run index.ts",
 		"update": [
 			"git reset --hard",
@@ -12,6 +17,7 @@
 			"bun install"
 		],
 		"canary": {
+			"enabled": true,
 			"account": "kruithne",
 			"repository": "kruithne/melvor_multiplayer",
 			"crash_console_history": 64,
